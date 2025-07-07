@@ -3,8 +3,11 @@ let cameraPos;
 let zoomSize;
 let isPanning;
 let panStart = {};
+let isDragging;
+let dragOffset;
 let rings = [];
 let mousePos = {};
+let selectRing;
 
 function Start()
 {
@@ -22,9 +25,13 @@ function Start()
     zoomSize = 1;
     cameraPos = {x: 0, y: 0};
     isPanning = false;
-    panStart = {x: 0, y:0};
+    panStart = {x: 0, y: 0};
+    isDragging = false;
+    dragOffset = {x: 0, y: 0};
     
-    let mousePos= {x: 0, y: 0};
+    mousePos = {x: 0, y: 0};
+    
+    selectRing = null;
     
     rings.push(new MagicRing({x: 0, y: 0}));
     rings.push(new MagicRing({x: 100, y: 100}));
@@ -33,30 +40,40 @@ function Start()
 function Update()
 {
     let [width, height] = GetScreenSize();
-    if (CheckMouseDown())
+    mousePos = {
+        x: (GetMouseX() - width/2)/zoomSize + cameraPos.x,
+        y: (GetMouseY() - height/2)/zoomSize + cameraPos.y
+    };
+
+    if (CheckMouseDown() || CheckTouchStart())
     {
-        StartPan(GetMousePos());
+        selectRing = CheckMouseOnRing();
+        if (selectRing)
+        {
+            StartDragRing(selectRing, mousePos);
+        } else {
+            StartPan(GetMousePos());
+        }
     }
-    if (CheckMouse() )
+    if (CheckMouse() || CheckTouch())
     {
-        Pan(GetMousePos());
+        if (isDragging)
+        {
+            DragRing(selectRing, mousePos);
+        } else if (isPanning) {
+            Pan(GetMousePos());
+        }
     }
-    if (CheckMouseUp() )
+    if (CheckMouseUp() || CheckTouchEnded())
     {
-        EndPan();
+        if (isDragging)
+        {
+            EndDragRing();
+        } else if (isPanning){
+            EndPan();
+        }
     }
-    if (CheckTouchStart())
-    {
-        StartPan(GetMousePos());
-    }
-    if (CheckTouch())
-    {
-        Pan(GetMousePos());
-    }
-    if (CheckTouchEnded())
-    {
-        EndPan();
-    }
+
     if (CheckKeyDown(Key.I))
     {
         ZoomIn();
@@ -65,11 +82,10 @@ function Update()
     {
         ZoomOut();
     }
-    mousePos = {
-        x: (GetMouseX() - width/2)/zoomSize + cameraPos.x,
-        y: (GetMouseY() - height/2)/zoomSize + cameraPos.y
-    };
-    
+    if (CheckKeyDown(Key.F))
+    {
+        ToggleFullScreen();
+    }
 }
 
 function Draw()
@@ -103,6 +119,17 @@ function OnResize()
     let [width, height] = GetScreenSize();
 }
 
+function CheckMouseOnRing()
+{
+    let hitRing;
+    for (const ring of rings)
+    {
+        hitRing = ring.CheckPosIsOn(mousePos);
+        if (hitRing) break;
+    }
+    return hitRing;
+}
+
 function DrawGrid()
 {
     let [width, height] = GetScreenSize();
@@ -133,6 +160,26 @@ function ZoomOut()
     if (zoomSize < 0.1) zoomSize = 0.1;
 }
 
+function StartDragRing(ring, pos)
+{
+    isDragging = true;
+    dragOffset.x = ring.pos.x - pos.x;
+    dragOffset.y = ring.pos.y - pos.y;    
+}
+
+function DragRing(ring, pos)
+{
+    if (!isDragging) return;
+    ring.pos.x = pos.x + dragOffset.x;
+    ring.pos.y = pos.y + dragOffset.y;
+}
+
+function EndDragRing()
+{
+    if (!isDragging) return;
+    isDragging = false;
+}
+
 function StartPan(mousePos)
 {
     isPanning = true;
@@ -154,6 +201,7 @@ function Pan(mousePos)
 
 function EndPan()
 {
+    if (!isPanning) return;
     isPanning = false;
     SetMouseCursor('grab');
     console.log("panEnd");
