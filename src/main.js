@@ -45,6 +45,18 @@ function Update()
     {
         EndPan();
     }
+    if (CheckTouchStart())
+    {
+        StartPan(GetMousePos());
+    }
+    if (CheckTouch())
+    {
+        Pan(GetMousePos());
+    }
+    if (CheckTouchEnded())
+    {
+        EndPan();
+    }
     if (CheckKeyDown(Key.I))
     {
         ZoomIn();
@@ -126,7 +138,7 @@ function StartPan(mousePos)
     isPanning = true;
     panStart = mousePos;
     SetMouseCursor('grabbing');
-    console.log("hello");
+    console.log("panStart");
 }
 
 function Pan(mousePos)
@@ -137,12 +149,14 @@ function Pan(mousePos)
     cameraPos.x -= dx / zoomSize;
     cameraPos.y -= dy / zoomSize;
     panStart = mousePos;
+    console.log("pan");
 }
 
 function EndPan()
 {
     isPanning = false;
     SetMouseCursor('grab');
+    console.log("panEnd");
 }
 
 
