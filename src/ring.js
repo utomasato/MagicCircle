@@ -5,7 +5,7 @@ class MagicRing
         this.x = pos.x;
         this.y = pos.y;
         this.radius = 30;
-        this.color = color(150, 150, 150);
+        this.color = color(0, 0, 0, 128);
     }
 
     Draw() 
