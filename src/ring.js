@@ -6,6 +6,8 @@ class MagicRing
         this.radius = 30;
         this.rotate = 0;
         this.color = color(0, 0, 0, 128);
+        this.items = [];
+        this.items 
     }
 
     Draw() 

@@ -9,28 +9,29 @@ let isAddRing;
 let rings = [];
 let mousePos = {};
 let selectRing;
-let btn;
+let buttons = [];
 
 function Start()
 {
     let [width, height] = GetScreenSize();
     // タイトルの設定
-    SetTitle("nm-canvas");
+    SetTitle("MagicEditor");
     SetMouseCursor('grab');       // つかめる
     
     config.bgColor = color(255, 255, 255);
     config.gridColor = color(128, 128, 128, 128);
     config.gridWidth = 100;
     config.menuHeight = 100;
-    config.nemuBgColor = color(55, 55, 55, 200);
+    config.menuBgColor = color(55, 55, 55, 200);
     config.sigilColor = color(0, 0, 0);
     config.sigilSize = 10;
     config.sigilLineWidth = 0.04;
-
     
-    btn = createButton('+');
-    btn.position(10, 10);
-    btn.mousePressed(ZoomIn);
+    buttons = [
+        {x: -10, y: 10, w: 80, h:80, c:color(255, 200, 200), anchor: {x:1,y:0}, pivot:{x:1,y:0}, pressed: function(){ZoomOut();}},
+        {x: -100, y: 10, w: 80, h:80, c:color(255, 200, 200), anchor: {x:1,y:0}, pivot:{x:1,y:0}, pressed: function(){ZoomIn();}},
+        {x: 10, y: 10, w: 80, h:80, c:color(255, 200, 200), anchor: {x:0,y:0}, pivot:{x:0,y:0}, pressed: function(){isAddRing = true;}},
+    ];
     
     zoomSize = 1;
     cameraPos = {x: 0, y: 0};
@@ -61,10 +62,10 @@ function Update()
     if (CheckMouseDown() || CheckTouchStart())
     {
         const ClickObj = CheckMouseObject();
+        CheckButtons();
         switch (ClickObj[0])
         {
             case "menu":
-                isAddRing = true;
                 break;
             case "ring":
                 selectRing = ClickObj[1];
@@ -73,6 +74,7 @@ function Update()
             default :
                 StartPan(GetMousePos());
         }
+        
     }
     // クリック・タッチ 中
     else if (CheckMouse() || CheckTouch())
@@ -140,7 +142,8 @@ function Draw()
     PopTransform();
     
     // メニュー表示
-    FillRect(0, 0, width, config.menuHeight, config.nemuBgColor);
+    FillRect(0, 0, width, config.menuHeight, config.menuBgColor);
+    DrawButtons();
 
     // FPS表示
     DrawText(12, "FPS: " + GetFPSText(), width - 10, height - 10, color(0, 0, 0), RIGHT);
@@ -210,6 +213,34 @@ function CheckMouseOnMenu()
         return true;
     }
     return false;
+}
+
+// ---------------------------------------------
+// ボタン
+// ---------------------------------------------
+function DrawButtons()
+{
+    let [width, height] = GetScreenSize();
+    buttons.forEach (btn =>
+    {
+        const x = width * btn.anchor.x + btn.x - btn.w * btn.pivot.x;
+        const y = height * btn.anchor.y + btn.y - btn.h * btn.pivot.y;
+        FillRect(x, y, btn.w, btn.h, btn.c);
+    })
+}
+//{x: 10, y: 10, w: 80, h:80, c:color(255, 200, 200), anchor: {x:0,y:0}, pivot:{x:0,y:0}, pressed: function(){isAddRing = true;}}
+
+function CheckButtons()
+{
+    buttons.forEach (btn =>
+    {
+        const x = width * btn.anchor.x + btn.x - btn.w * btn.pivot.x;
+        const y = height * btn.anchor.y + btn.y - btn.h * btn.pivot.y;
+        if (x < GetMouseX() && GetMouseX() < x + btn.w && y < GetMouseY() && GetMouseY() < y + btn.h)
+        {
+            btn.pressed();
+        }
+    });
 }
 
 
