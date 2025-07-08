@@ -23,6 +23,11 @@ class MagicRing
     
     CheckPosIsOn(pos)
     {
-        return this.CheckDistance(pos) < this.radius ? this : null;
+        const distance = this.CheckDistance(pos)
+        if (distance < this.radius)
+        {
+            return this;
+        }
+        return null;
     }
 }

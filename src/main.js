@@ -5,9 +5,11 @@ let isPanning;
 let panStart = {};
 let isDragging;
 let dragOffset;
+let isAddRing;
 let rings = [];
 let mousePos = {};
 let selectRing;
+let btn;
 
 function Start()
 {
@@ -16,11 +18,19 @@ function Start()
     SetTitle("nm-canvas");
     SetMouseCursor('grab');       // つかめる
     
-    config.sigilColor = color(0,0,0);
+    config.bgColor = color(255, 255, 255);
+    config.gridColor = color(128, 128, 128, 128);
+    config.gridWidth = 100;
+    config.menuHeight = 100;
+    config.nemuBgColor = color(55, 55, 55, 200);
+    config.sigilColor = color(0, 0, 0);
     config.sigilSize = 10;
     config.sigilLineWidth = 0.04;
-    config.gridColor = color(128,128,128,128);
-    config.gridWidth = 100;
+
+    
+    btn = createButton('+');
+    btn.position(10, 10);
+    btn.mousePressed(ZoomIn);
     
     zoomSize = 1;
     cameraPos = {x: 0, y: 0};
@@ -28,11 +38,13 @@ function Start()
     panStart = {x: 0, y: 0};
     isDragging = false;
     dragOffset = {x: 0, y: 0};
+    isAddRing = false;
     
     mousePos = {x: 0, y: 0};
     
     selectRing = null;
     
+    //test
     rings.push(new MagicRing({x: 0, y: 0}));
     rings.push(new MagicRing({x: 100, y: 100}));
 }
@@ -44,34 +56,56 @@ function Update()
         x: (GetMouseX() - width/2)/zoomSize + cameraPos.x,
         y: (GetMouseY() - height/2)/zoomSize + cameraPos.y
     };
-
+    
+    // クリック・タッチ 開始
     if (CheckMouseDown() || CheckTouchStart())
     {
-        selectRing = CheckMouseOnRing();
-        if (selectRing)
+        const ClickObj = CheckMouseObject();
+        switch (ClickObj[0])
         {
-            StartDragRing(selectRing, mousePos);
-        } else {
-            StartPan(GetMousePos());
+            case "menu":
+                isAddRing = true;
+                break;
+            case "ring":
+                selectRing = ClickObj[1];
+                StartDragRing(selectRing, mousePos);
+                break;
+            default :
+                StartPan(GetMousePos());
         }
     }
-    if (CheckMouse() || CheckTouch())
+    // クリック・タッチ 中
+    else if (CheckMouse() || CheckTouch())
     {
-        if (isDragging)
+        if (isAddRing)
+        {
+            if (!CheckMouseOnMenu()) // マウスがメニューから外れたら
+            {
+                selectRing = new MagicRing(mousePos);
+                rings.push(selectRing);
+                StartDragRing(selectRing, mousePos);
+                isAddRing = false;
+            }
+        }
+        else if (isDragging)
         {
             DragRing(selectRing, mousePos);
-        } else if (isPanning) {
+        }
+        else if (isPanning) {
             Pan(GetMousePos());
         }
     }
-    if (CheckMouseUp() || CheckTouchEnded())
+    // クリック・タッチ 終わり
+    else if (CheckMouseUp() || CheckTouchEnded())
     {
         if (isDragging)
         {
             EndDragRing();
-        } else if (isPanning){
+        }
+        else if (isPanning){
             EndPan();
         }
+        isAddRing = false;
     }
 
     if (CheckKeyDown(Key.I))
@@ -99,19 +133,20 @@ function Draw()
     Translate(width/2, height/2);
     Scale(zoomSize);
     Translate(-cameraPos.x, -cameraPos.y);
-    
     rings.forEach(ring => 
     {
        ring.Draw(); 
     });
     PopTransform();
     
+    // メニュー表示
+    FillRect(0, 0, width, config.menuHeight, config.nemuBgColor);
+
     // FPS表示
     DrawText(12, "FPS: " + GetFPSText(), width - 10, height - 10, color(0, 0, 0), RIGHT);
     DrawText(12, "MausePos: (" + mousePos.x + ", " + mousePos.y + ")", width - 10, height - 30, color(0, 0, 0), RIGHT);
     DrawText(12, "Pos: (" + cameraPos.x + ", " + cameraPos.y + ")", width - 10, height - 50, color(0,0,0), RIGHT);
     DrawText(12, "Size: " + zoomSize, width - 10, height - 70, color(0,0,0),RIGHT);
-    //console.log("Hello");
 }
 
 function OnResize()
@@ -119,17 +154,7 @@ function OnResize()
     let [width, height] = GetScreenSize();
 }
 
-function CheckMouseOnRing()
-{
-    let hitRing;
-    for (const ring of rings)
-    {
-        hitRing = ring.CheckPosIsOn(mousePos);
-        if (hitRing) break;
-    }
-    return hitRing;
-}
-
+// グリッド描画
 function DrawGrid()
 {
     let [width, height] = GetScreenSize();
@@ -150,9 +175,52 @@ function DrawGrid()
     }
 }
 
+// ---------------------------------------------
+// マウスの位置に何があるか
+// ---------------------------------------------
+function CheckMouseObject()
+{
+    if (CheckMouseOnMenu())
+    {
+        return ["menu"];
+    }
+    const ring = CheckMouseOnRing();
+    if (ring)
+    {
+        return ["ring", ring];
+    }
+    return [null];
+}
+
+function CheckMouseOnRing()
+{
+    let hitRing;
+    for (const ring of rings)
+    {
+        hitRing = ring.CheckPosIsOn(mousePos);
+        if (hitRing) break;
+    }
+    return hitRing;
+}
+
+function CheckMouseOnMenu()
+{
+    if (GetMouseY() < config.menuHeight)
+    {
+        return true;
+    }
+    return false;
+}
+
+
+
+// ---------------------------------------------
+// ズームインアウト
+// ---------------------------------------------
 function ZoomIn()
 {
     zoomSize += 0.1;
+    if (zoomSize > 5) zoomSize = 5;
 }
 function ZoomOut()
 {
@@ -160,11 +228,15 @@ function ZoomOut()
     if (zoomSize < 0.1) zoomSize = 0.1;
 }
 
+// ---------------------------------------------
+// リングをドラッグして動かす
+// ---------------------------------------------
 function StartDragRing(ring, pos)
 {
     isDragging = true;
     dragOffset.x = ring.pos.x - pos.x;
-    dragOffset.y = ring.pos.y - pos.y;    
+    dragOffset.y = ring.pos.y - pos.y; 
+    console.log("StartDrag");  
 }
 
 function DragRing(ring, pos)
@@ -172,14 +244,19 @@ function DragRing(ring, pos)
     if (!isDragging) return;
     ring.pos.x = pos.x + dragOffset.x;
     ring.pos.y = pos.y + dragOffset.y;
+    console.log("Drag");
 }
 
 function EndDragRing()
 {
     if (!isDragging) return;
     isDragging = false;
+    console.log("EndDrag");
 }
 
+// ---------------------------------------------
+// 描画範囲を移動させる
+// ---------------------------------------------
 function StartPan(mousePos)
 {
     isPanning = true;
