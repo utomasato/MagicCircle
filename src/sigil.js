@@ -7,6 +7,7 @@ function DrawSigil(token, x, y, config)
     Scale(config.sigilSize);
     stroke(config.sigilColor);
     strokeWeight(config.sigilLineWidth);
+    noFill();
     switch(token)
     {
         case "RETURN":
@@ -17,19 +18,434 @@ function DrawSigil(token, x, y, config)
             line(   0,  -0.5,   0,    -1);
             line(-0.3, -0.75, 0.3, -0.75);
             break;
-        case "abs":
+        case "COMPLETE":
+            line(-0.25, 0, 0.25, 0);
+            line(0.25, 0, 0, -0.5);
+            line(-0.25, 0, 0, -0.5);
+            line(0, -0.5, 0, -1);
+            break;
+        case "pop": // スタックのトップを削除
+            line(0.5, -0.5, 0.5, 0.5);
+            line(0.5, 0.5, -0.25, 0.5);
+            arc(-0.25, 0.25, 0.5, 0.5, HALF_PI, HALF_PI*3);
+            line(-0.25, 0, 0.5, 0);
+            line(0.25,-0.25,-0.25,0.25);
+            line(0.25, 0.25,-0.25, -0.25);
+            line(0, 0.3536, 0, -0.3536);
+            break;
+        case "exch": // スタックのトップとその下を交換する
+            line(-0.5, 0.5, 0.5, 0.5);
+            line(0.5, 0.5, 0.5, -0.5);
+            line(0.5, -0.5, -0.5, -0.5);
+            line(0.5, 0, -0.5, 0);
+            line(0.25, -0.25, -0.25, 0.25);
+            line(-0.25, 0.25, 0, 0.25);
+            line(0.25, 0.25, -0.25, -0.25);
+            line(-0.25, -0.25, 0, -0.25);
+            break;
+        case "dup": // トップを複製する
+            push();
+            translate(0.125,0);
+            line(0.25, 0.5, 0, 0.5);
+            arc(0,0,1,1,HALF_PI,3*HALF_PI);
+            line(0, -0.5, 0.25, -0.5);
+            line(0.25, 0.5, 0.25,-0.5);
+            line(0, 0.5, 0, -0.5);        
+            pop();
+            break;
+        case "copy": // 配列、辞書、文字列のコピー　or スタックの上から指定された数を複製
+            arc(0, 0, 1, 1, -2/3*PI, 2/3*PI);
+            arc(-0.25, 0, 1, 1, -2/3*PI, 2/3*PI);
+            break;
+        case "index": // 指定された深さのオブジェクトを複製する
+            line(0, -0.5, 0, 0.5);
+            line(-0.25, 0.5, 0.25, 0.5);
+            line(-0.25, -0.5, 0.25, -0.5);
+            line(0, 0.25, 0.25, 0.25);
+            line(0.25, 0.25, 0.25, -0.25);
+            break;
+        case "roll": // 指定された数の要素を指定された向きと方向にシフトさせる
+            line(0.375, -0.5, 0.375, 0.125);
+            line(-0.25, -0.5, 0, -0.25);
+            push();
+            translate(0, 0.125);
+            ellipse(0,0,0.75);
+            line(-0.1875, -0.3248, 0.0647, -0.2415);
+            line(-0.1875, 0.3248, -0.2415, 0.0647);
+            line(0.375, 0, 0.1768, 0.1768);
+            pop();
+            break;
+        case "add": // 和
+            line( -0.5,  -0.5,    0,  0.5);
+            line(    0,   0.5,  0.5, -0.5);
+            line(-0.25,     0, 0.25,    0);
+            line(    0, -0.25,    0, 0.25);
+            break;
+        case "sub": // 差
+            push();
+            translate(0.125, 0);
+            arc(0, 0.25, 0.5, 0.5, -HALF_PI, PI);
+            arc(0, -0.25,0.5, 0.5, HALF_PI, TWO_PI);
+            line(-0.5, -0.25, 0, -0.25);
+            pop(); 
+            break;
+        case "mul": // 積
+            line(0.5, -0.5, 0.5, 0.5);
+            line(0.5, 0.5, -0.25, -0.25);
+            line(-0.5, -0.5, -0.5, 0.5);
+            line(-0.5, 0.5, 0.25, -0.25);
+            break;
+        case "div": // 除算
+            line(0.25, -0.5, 0.25, 0.5);
+            line(0.25, 0.5, 0, 0.5);
+            arc(0, 0, 1, 1, HALF_PI, -HALF_PI);
+            line(0, -0.5, 0.25, -0.5);
+            ellipse(0.5, 0, config.sigilLineWidth);
+            ellipse(0, 0, config.sigilLineWidth);
+            break;
+        case "idiv": // 整数除算
+            line(0.25, -0.5, 0.25, 0.5);
+            line(0.25, 0.5, 0, 0.5);
+            arc(0, 0, 1, 1, HALF_PI, -HALF_PI);
+            line(0, -0.5, 0.25, -0.5);
+            ellipse(0.5, 0, config.sigilLineWidth);
+            ellipse(0, 0, config.sigilLineWidth);
+            push();
+            translate(0.25,0);
+            line(0.25, -0.25, -0.25, -0.25);
+            line(0.25, 0.25, -0.25, 0.25);
+            pop();
+            break;
+        case "mod": // 剰余
+            line(0.5, -0.5, 0.5, 0.5);
+            line(0.5, 0.5, 0, 0);
+            line(-0.5, -0.5, -0.5, 0.5);
+            line(-0.5, 0.5, 0, 0);
+            ellipse(0, 0, 0.5);
+            break;
+        case "abs": // 絶対値
             line( -0.5,  0.5, -0.5, -0.5);
             line( -0.5, -0.5,    0,  0.5);
             line(    0,  0.5,  0.5, -0.5);
             line(  0.5, -0.5,  0.5,  0.5);
             line(-0.25,    0, 0.25,    0);
             break;
-        case "add":
-            line( -0.5,  -0.5,    0,  0.5);
-            line(    0,   0.5,  0.5, -0.5);
-            line(-0.25,     0, 0.25,    0);
-            line(    0, -0.25,    0, 0.25);
+        case "neg": // 符号反転
+            line(0.375, -0.5, 0.375, 0.5);
+            line(0.375, 0.5, -0.375, -0.5);
+            line(-0.375, -0.5, -0.375, 0.5);
+            line(0.25, 0, -0.25, 0);        
             break;
+        case "sqrt": // 平方根
+            for(let i = 0; i < 2; i++)
+            {
+              push();
+              rotate(i*PI);
+              line(0.5, 0.25, 0.375, 0);
+              line(0.375, 0, 0.25, 0.5);
+              line(0.25, 0.5, -0.5, 0.5);
+              pop();
+            }
+            line(-0.3125, -0.25, 0.3125, 0.25);
+            break;
+        case "atan": 
+            line(0.5, -0.5, 0.5, 0);
+            arc(0, 0, 1, 1, 0, PI);
+            line(-0.5, 0, -0.5, -0.5);
+            ellipse(-0.3535, 0.3535, 0.25);
+            line(-0.3535, 0.3535, 0, 0);
+            line(0, 0, 0, 0.3535);
+            line(0, 0.3535, -0.3535, 0.3535);
+            break;
+        case "cos":
+            ellipse(0, 0, 0.25);
+            line(0, 0, -0.3535, 0.3535);
+            line(-0.3535, 0.3535, 0, 0.3535);
+            arc(0, 0, 1, 1, -3/4*PI, 3/4*PI);
+            break;
+        case "sin":
+            ellipse(0, 0, 0.25);
+            line(0.3535, 0, 0.3535, 0.3535);
+            line(0.3535, 0.3535, -0.3535, -0.3535);
+            line(-0.3535, -0.3535, -0.3535, 0);
+            arc(0, 0, 1, 1, PI/4, 3/4*PI);
+            arc(0, 0, 1, 1, -3/4*PI, -PI/4);
+            break;
+        case "rand": // 乱数
+            push();
+            translate(0, 0.1);
+            scale(0.8);
+            strokeWeight(config.sigilLineWidth/0.8);
+            sigil_parts("rand");
+            pop();
+            line(0.3464, -0.1, 0.3535, -0.5);
+            line(0, -0.3, -0.2, -0.5);
+            break;
+        case "srand": // シードの設定
+            push();
+            translate(0, 0.1);
+            scale(0.8);
+            strokeWeight(config.sigilLineWidth/0.8);
+            sigil_parts("rand");
+            pop();
+            line(0.27, -0.3, -0.27, -0.3);
+            line(0.27, -0.3, 0, -0.5);
+            line(0, -0.3, 0, -0.5)
+            line(-0.27, -0.3, 0, -0.5);
+            line(0, -0.5, 0.5, -0.5);
+            break;
+        case "rrand": // シード値の取得
+            push();
+            translate(0, -0.1);
+            scale(0.8);
+            strokeWeight(config.sigilLineWidth/0.8);
+            sigil_parts("rand");
+            pop();
+            line(0, 0.3, -0.5, 0.5);
+            line(0, 0.3, 0.5, 0.5);
+            line(-0.5, 0.5, 0.5, 0.5);
+            ellipse(0, 0.4, config.sigilLineWidth*1.2);
+            break;
+        case "array": // 指定されたサイズの配列を作成する(要素はすべてnull)
+            ellipse(0, 0, 1);
+            ellipse(0, 0, 0.5);
+            line(0.433, -0.25, 0.5, -0.5);
+            line(-0.433, -0.25, -0.5, -0.5);
+            break;
+        case "string":
+            arc(-0.25, 0, 0.5, 0.5, HALF_PI, -HALF_PI);
+            line(-0.25, -0.25, 0.25, -0.25);
+            arc(0.25, 0, 0.5, 0.5, -HALF_PI, HALF_PI);
+            line(0.25, 0.25, -0.25, 0.25);
+            for (let i=-0.25; i<0.3; i+=0.125)
+                line(-i, -0.125, -i, 0.125);
+            arc(0, 0, 1, 1, 0, HALF_PI);
+            arc(0, 0, 1, 1, PI, -HALF_PI);
+            break;
+        case "length":
+            line(0.375, 0.5, 0.375, -0.5);
+            line(0.375, -0.5, -0.375, -0.5);
+            for (let i=-0.25;i<0.4;i+=0.125)
+            {
+                line(-i, -0.5, -i, -0.25);
+            }
+            break;
+        case "get":
+            push();
+            translate(0.125, 0);
+            sigil_parts("look");
+            arc(0.25, 0, 1, 1, HALF_PI, -HALF_PI);
+            ellipse(-0.125, 0, -0.25);
+            pop();
+            break;
+        case "put":
+            push();
+            translate(0.125, 0);
+            sigil_parts("write");
+            arc(0.25, 0, 1, 1, HALF_PI, -HALF_PI);
+            ellipse(-0.125, 0, -0.25);
+            pop();
+            break;
+        case "getinterval":
+            push();
+            translate(0.125, 0);
+            sigil_parts("look");
+            translate(0.25, 0);
+            arc(0, 0, 1, 1, HALF_PI, -HALF_PI);
+            arc(0, 0, 0.75, 0.75, QUARTER_PI*3, QUARTER_PI*5);
+            line(-0.3536, 0.3536, -0.1326, 0.1326);
+            line(-0.3536, -0.3536, -0.1326, -0.1326);
+            pop();
+            break;
+        case "putinterval":
+            push();
+            translate(0.125, 0);
+            sigil_parts("write");
+            translate(0.25, 0);
+            arc(0, 0, 1, 1, HALF_PI, -HALF_PI);
+            arc(0, 0, 0.75, 0.75, QUARTER_PI*3, QUARTER_PI*5);
+            line(-0.3536, 0.3536, -0.1326, 0.1326);
+            line(-0.3536, -0.3536, -0.1326, -0.1326);
+            pop();
+            break;
+        case "forall":
+            line(0.375, -0.5, 0.375, 0.5);
+            line(0.375, 0.5, -0.375, 0.5);
+            line(0.375, 0, -0.375, 0);
+            ellipse(0, 0, 0.5);
+            break;
+        case "eq": // ==
+            line(0.5, 0.25, -0.5, 0.25);
+            line(0.25, 0.25, 0.25, -0.25);
+            line(0.5, -0.25, -0.5, -0.25);
+            line(0.25, 0, -0.25, 0);
+            break;
+        case "ne": // !=
+            line(0.5, 0.25, -0.5, 0.25);
+            line(0.25, 0.25, 0.25, -0.25);
+            line(0.5, -0.25, -0.5, -0.25);
+            line(0.25, 0, -0.25, 0);
+            line(0.5, 0, 0, 0.5);
+            line(0, 0.5, 0, -0.5);
+            line(0, -0.5, -0.5, 0);
+            break
+        case "ge": // >=
+            line(0.5, 0.5, 0.5, 0);
+            line(0.5, 0, -0.5, 0);
+            line(-0.5, 0, 0, 0.25);
+            line(0, 0.25, 0.25, 0.25);
+            line(0.25, 0, 0.25, -0.5);
+            line(0.5, -0.5, -0.5, -0.5);
+            line(0.25, -0.25, -0.25, -0.25);
+            break;
+        case "gt": // >
+            line(0.5, 0.5, 0.5, -0.125);
+            line(0.5, -0.125, -0.5, -0.125);
+            line(-0.5, -0.125, 0, 0.25);
+            line(0, 0.25, 0.25, 0.25);
+            line(0.375, 0, -0.125, 0);
+            line(0.125, 0, 0.125, -0.5);
+            break;
+        case "le": // <=
+            line(0, 0.5, 0.5, 0);
+            line(0.5, 0, -0.5, 0);
+            line(0.25, 0, 0.25, -0.5);
+            line(0.5, -0.5, -0.5, -0.5);
+            line(0.25, -0.25, -0.25, -0.25);
+            break;
+        case "lt": // <
+            line(0, 0.5, 0.5, -0.25);
+            line(0.5, -0.25, -0.5, -0.25);
+            line(0.125, 0, -0.375, 0);
+            line(-0.125, 0, -0.125, -0.5);
+            break;
+        case "and":
+            line(-0.25, -0.5, 0 + 0.125 * Math.cos(-PI/6), 0.25 + 0.125 * Math.sin(-PI/6));
+            arc(0, 0.25, 0.125*2, 0.125*2, -PI/6, HALF_PI);
+            arc(0, 0.25, 0.125*2, 0.125*2, HALF_PI, 7/6*PI);
+            line(0 + 0.125 * Math.cos(7/6*PI), 0.25 + 0.125 * Math.sin(7/6*PI), 0.25, -0.5);
+            arc(0, 0, 0.375*2, 0.375*2, -3/4*PI, -1/3*PI);
+            break;
+        case "not":
+            line(0.375, -0.5, 0.375, 0.5);
+            line(0.375, 0.5, -0.375, -0.5);
+            line(-0.375, -0.5, -0.375, 0.5);
+            line(0.25, 0, -0.25, 0);
+            line(-0.25, 0, -0.25, -0.125);
+            break;
+        case "or":
+            ellipse(0, 0, 0.75);
+            line(0, 0.5, 0, 0.125);
+            line(0, -0.5, 0, -0.125);
+            break;
+        case "xor":
+            line(-0.5, 0.5, 0.3536, -0.3536);
+            line(-0.3536, -0.3536, 0.5, 0.5);
+            arc(0, 0, 1, 1, -QUARTER_PI, QUARTER_PI*5)
+            break;
+        case "true":
+            line(0.5, 0.5, -0.5, 0.5);
+            line(0.25, 0.25, -0.25, 0.25);
+            line(0, 0.5, 0, -0.5);
+            break;
+        case "false":
+            line(0, 0.25, -0.25, 0.25);
+            line(-0.5, 0.5, 0, 0.5);
+            line(0, 0.5, 0, -0.5);
+            line(0.5, -0.5, -0.5, -0.5);
+            break;
+        case "exec":
+            push();
+            for (let i=0; i<5;i++)
+            {
+                line(0, 0.5, 0.2939, -0.4045);
+                rotate(TWO_PI/5);
+            }
+            pop();
+            break;
+        case "if":
+            line(0, -0.5, 0, 0.5);
+            line(0.25, 0.5, -0.25, 0.5);
+            line(0.25, -0.5, -0.25, -0.5);
+            bezier(0, -0.5, 0, -0.25, -0.25, -0.25, -0.25, 0);
+            break;
+        case "ifelse":
+            line(0, -0.5, 0, 0.5);
+            line(0.25, 0.5, -0.25, 0.5);
+            line(0.25, -0.5, -0.25, -0.5);
+            bezier(0, -0.5, 0, -0.25, 0.25, -0.25, 0.25, 0);
+            bezier(0, -0.5, 0, -0.25, -0.25, -0.25, -0.25, 0);
+            break;
+        case "for":
+            line(0.375, -0.5, 0.375, 0.5);
+            line(0.375, 0.5, -0.375, 0.5);
+            line(0.375, 0, -0.375, 0);
+            for(let i = -0.25; i<0.3125; i+=0.125)
+                line(-i, -0.125, -i, 0.125);
+            break;
+        case "repeat":
+            for (let i=0; i<3; i++)
+                line(-0.125+0.25*i, 0, -0.375+0.25*i, -0.5);
+            line(0.375, -0.5, 0.375, 0.5);
+            line(0.375, 0.5, -0.125, 0.5);
+            arc(-0.125, 0.25, 0.5, 0.5, HALF_PI, HALF_PI*3);
+            line(-0.125, 0, 0.375, 0);
+            break;
+        case "loop":
+            line(0.25, 0.5, 0.25, -0.375);
+            arc(0.375, -0.375, 0.25, 0.25, PI, HALF_PI);
+            line(0.375, -0.25, -0.5, -0.25);
+            arc(0, 0, 0.5, 0.5, 0, -HALF_PI);
+            break;
+        case "exit":
+            line(-0.125, 0.375, 0, 0.5);
+            line(0, 0.5, 0.25, 0.25);
+            line(0.25, 0.25, 0, 0);
+            line(0, 0, -0.125, 0.125);
+            line(0.25, 0.25, -0.25, 0.25);
+            line(0, 0, 0, -0.5);
+            line(0.25, -0.25, -0.25, -0.25);
+            break;
+        default:
+            arc(0, 0.25, 0.5, 0.5, 0, -HALF_PI);
+            line(0, 0, 0, -0.25);
+            ellipse(0, -0.375, 0.1);
     }
     PopTransform();
-};
+}
+
+function sigil_parts(part)
+{
+    switch(part)
+    {
+        case "rand":
+            line(0, 0.5, -0.433, 0.25);
+            line(-0.433, 0.25, -0.433, -0.25);
+            line(-0.433, -0.25, 0, -0.5);
+            line(0, -0.5, 0.433, -0.25);
+            line(0.433, -0.25, 0.433, 0.25);
+            line(0.433, 0.25, 0, 0.5);
+            line(0, 0, -0.433, 0.25);
+            line(0, 0, 0.433, 0.25);
+            line(0, 0, 0, -0.5);
+            break;
+        case "current":
+            ellipse(0,0.375,config.sigilLineWidth*1.2);
+            line(0.5, 0.5, -0.5, 0.5);
+            line(-0.5, 0.5, 0, 0.25);
+            line(0, 0.25, 0.5, 0.5);
+            break;
+        case "look":
+            push();
+            rotate(HALF_PI);
+            sigil_parts("current");
+            pop();
+            break;
+        case "write":
+            line(-0.5, 0.25, -0.25, 0);
+            line(-0.25, 0, -0.5, -0.25);
+            line(-0.5, -0.25, -0.5, 0.25);
+            line(-0.5, 0, -0.25, 0);
+            break;
+    }
+}

@@ -24,13 +24,13 @@ function Start()
     config.menuHeight = 100;
     config.menuBgColor = color(55, 55, 55, 200);
     config.sigilColor = color(0, 0, 0);
-    config.sigilSize = 10;
+    config.sigilSize = 40;
     config.sigilLineWidth = 0.04;
     
     buttons = [
-        {x: -10, y: 10, w: 80, h:80, c:color(255, 200, 200), anchor: {x:1,y:0}, pivot:{x:1,y:0}, pressed: function(){ZoomOut();}},
-        {x: -100, y: 10, w: 80, h:80, c:color(255, 200, 200), anchor: {x:1,y:0}, pivot:{x:1,y:0}, pressed: function(){ZoomIn();}},
-        {x: 10, y: 10, w: 80, h:80, c:color(255, 200, 200), anchor: {x:0,y:0}, pivot:{x:0,y:0}, pressed: function(){isAddRing = true;}},
+        new Button(-10, 10, 80, 80, color(255, 200, 200), {x: 1, y: 0}, {x: 1, y: 0}, function(){ZoomOut();}),
+        new Button(-100, 10, 80, 80, color(255, 200, 200), {x: 1, y: 0}, {x: 1, y: 0}, function(){ZoomIn();}),
+        new Button(10, 10, 80, 80, color(255, 200, 200), {x: 0, y: 0}, {x: 0, y: 0}, function(){isAddRing = true;}),
     ];
     
     zoomSize = 1;
@@ -220,26 +220,17 @@ function CheckMouseOnMenu()
 // ---------------------------------------------
 function DrawButtons()
 {
-    let [width, height] = GetScreenSize();
     buttons.forEach (btn =>
     {
-        const x = width * btn.anchor.x + btn.x - btn.w * btn.pivot.x;
-        const y = height * btn.anchor.y + btn.y - btn.h * btn.pivot.y;
-        FillRect(x, y, btn.w, btn.h, btn.c);
+        btn.Draw();
     })
 }
-//{x: 10, y: 10, w: 80, h:80, c:color(255, 200, 200), anchor: {x:0,y:0}, pivot:{x:0,y:0}, pressed: function(){isAddRing = true;}}
 
 function CheckButtons()
 {
     buttons.forEach (btn =>
     {
-        const x = width * btn.anchor.x + btn.x - btn.w * btn.pivot.x;
-        const y = height * btn.anchor.y + btn.y - btn.h * btn.pivot.y;
-        if (x < GetMouseX() && GetMouseX() < x + btn.w && y < GetMouseY() && GetMouseY() < y + btn.h)
-        {
-            btn.pressed();
-        }
+        btn.CheckPressed();
     });
 }
 

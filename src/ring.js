@@ -33,3 +33,38 @@ class MagicRing
         return null;
     }
 }
+
+
+class Button
+{
+    constructor(x, y, w, h, c, anchor, pivot, pressed)
+    {
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+        this.c = c;
+        this.anchor = anchor;
+        this.pivot = pivot;
+        this.pressed = pressed;
+    }
+    
+    Draw()
+    {
+        let [width, height] = GetScreenSize();
+        const x = width * this.anchor.x + this.x - this.w * this.pivot.x;
+        const y = height * this.anchor.y + this.y - this.h * this.pivot.y;
+        FillRect(x, y, this.w, this.h, this.c);
+    }
+    
+    CheckPressed()
+    {
+        let [width, height] = GetScreenSize();
+        const x = width * this.anchor.x + this.x - this.w * this.pivot.x;
+        const y = height * this.anchor.y + this.y - this.h * this.pivot.y;
+        if (x < GetMouseX() && GetMouseX() < x + this.w && y < GetMouseY() && GetMouseY() < y + this.h)
+        {
+            this.pressed();
+        }
+    }
+}
