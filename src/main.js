@@ -28,9 +28,10 @@ function Start()
     config.sigilLineWidth = 0.04;
     
     buttons = [
-        new Button(-10, 10, 80, 80, color(255, 200, 200), {x: 1, y: 0}, {x: 1, y: 0}, function(){ZoomOut();}),
-        new Button(-100, 10, 80, 80, color(255, 200, 200), {x: 1, y: 0}, {x: 1, y: 0}, function(){ZoomIn();}),
-        new Button(10, 10, 80, 80, color(255, 200, 200), {x: 0, y: 0}, {x: 0, y: 0}, function(){isAddRing = true;}),
+        // new Button(x, y, w, h, color, anchor, pivot, text, pressed);
+        new Button(-10, 10, 80, 80, color(255, 200, 200), {x: 1, y: 0}, {x: 1, y: 0}, "-", function(){ZoomOut();}),
+        new Button(-100, 10, 80, 80, color(255, 200, 200), {x: 1, y: 0}, {x: 1, y: 0}, "+", function(){ZoomIn();}),
+        new Button(10, 10, 80, 80, color(255, 200, 200), {x: 0, y: 0}, {x: 0, y: 0}, "Add", function(){isAddRing = true;}),
     ];
     
     zoomSize = 1;

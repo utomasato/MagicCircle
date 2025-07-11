@@ -34,18 +34,44 @@ class MagicRing
     }
 }
 
+class RingItem {
+    constructor()
+    {
+        this.x = x;
+        this.y = y;
+        this.type = "item";
+        this.value = value;
+    }
+    
+    GetLength()
+    {
+        return 0;
+    }
+    
+    Draw(radWidth, config)
+    {
+    }
+}
+
+class Sigil extends RingItem {
+    constructor()
+    {
+        super();
+    }
+}
 
 class Button
 {
-    constructor(x, y, w, h, c, anchor, pivot, pressed)
+    constructor(x, y, w, h, color, anchor, pivot, text, pressed)
     {
         this.x = x;
         this.y = y;
         this.w = w;
         this.h = h;
-        this.c = c;
+        this.color = color;
         this.anchor = anchor;
         this.pivot = pivot;
+        this.text = text;
         this.pressed = pressed;
     }
     
@@ -54,7 +80,8 @@ class Button
         let [width, height] = GetScreenSize();
         const x = width * this.anchor.x + this.x - this.w * this.pivot.x;
         const y = height * this.anchor.y + this.y - this.h * this.pivot.y;
-        FillRect(x, y, this.w, this.h, this.c);
+        FillRect(x, y, this.w, this.h, this.color);
+        DrawText(24, this.text, x + this.w/2, y + this.h/2, color(0, 0, 0), CENTER);
     }
     
     CheckPressed()
