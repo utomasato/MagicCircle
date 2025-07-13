@@ -182,12 +182,12 @@ function RotateRing(ring, pos)
 {
     if(!isRotating) return;
     const mouseAngle = Math.atan2(pos.y - ring.pos.y, pos.x - ring.pos.x);
-    const newAngleRad = mouseAngle + rotateOffset;
-    ring.angle = newAngleRad;
+    const newAngle = mouseAngle + rotateOffset;
+    ring.angle = newAngle;
     console.log("Rotate");
 }
 
-function EndRotateRing()
+function EndRotateRing(ring)
 {
     isRotating = false;
     console.log("EndRotate");

@@ -57,6 +57,12 @@ class MagicRing
             this.layouts.push({item: item, angle: currentAngle, angle2: itemEndAngle}); // [描画されるアイテム, 描画される位置(中心), 次のアイテムとの境目]
             currentAngle -= (item.GetLength() / this.circumference * PI + this.itemRadWidth.padding);
         });
+        /*
+        this.layouts.forEach(layout => {
+            console.log(layout.angle2);
+        });
+        console.log("--------------------");
+        */
     }
     
     Draw() 
@@ -65,6 +71,10 @@ class MagicRing
         PushTransform();
         Translate(this.pos.x, this.pos.y);
         Rotate(this.angle);
+        if(debugMode)
+        {
+            FillCircle(0, 0, this.outerradius + config.ringRotateHandleWidth, color(200,200,200));
+        }
         DrawCircle(0, 0, this.innerradius, color(0,0,0)); // 内側の円
         DrawCircle(0, 0, this.outerradius, color(0,0,0)); // 外側の円
 
@@ -106,11 +116,37 @@ class MagicRing
                 {
                     return [this, "inner"];
                 }
+                const item = this.CheckPosItem(pos);
+                console.log(item.item.type + ": " + item.item.value + " index: " + item.index);
                 return [this, "ring"]
             }
             return [this, "outer"];
         }
         return null;
+    }
+    
+    CheckPosItem(pos)
+    {
+        const mouseAngle = -PI - Math.atan2(pos.x - this.pos.x, pos.y - this.pos.y);
+        const angle = (((mouseAngle - this.angle)/PI % 2 + 2) % 2 - 2) * PI;
+        /*
+        for (const layout of this.layouts)
+        {
+            if (layout.angle2 <= angle)
+            {
+                return layout.item;
+            }
+        }
+        */
+        for (let i = 0; i < this.layouts.length; i++)
+        {
+            const layout = this.layouts[i];
+            if (layout.angle2 <= angle)
+            {
+                return {item :layout.item, index: i};
+            }
+        }
+        return {item: this.layouts[0].item, index: 0};
     }
 }
 
