@@ -2,6 +2,7 @@ let config = {};
 let cameraPos;
 let zoomSize;
 let rings = [];
+let fieldItems = [];
 let buttons = [];
 
 let debugMode;
@@ -25,9 +26,9 @@ function Start()
         minRingCircumference: 40,
         itemPadding: 2, //アイテム同士の幅
         sigilWidth: 7,
-        charSpacing: 0.3, // 文字同士の幅
-        charWidth: 1,
-        fontsize: 15,
+        charSpacing: 0.2, // 文字同士の幅
+        charWidth: 1.5,
+        fontSize: 15,
         fontColor: color(0, 0, 0),
         sigilSize: 40,
         sigilColor: color(0, 0, 0),
@@ -44,16 +45,8 @@ function Start()
     
     zoomSize = 1;
     cameraPos = {x: 0, y: 0};
-    isPanning = false;
-    panStart = {x: 0, y: 0};
-    isDragging = false;
-    dragOffset = {x: 0, y: 0};
-    isRotating = false;
-    isAddRing = false;
     
-    mousePos = {x: 0, y: 0};
-    
-    selectRing = null;
+    InputInitialize();
     
     //test
     rings.push(new MagicRing({x: 0, y: 0}));
@@ -104,7 +97,17 @@ function Draw()
     {
        ring.Draw(); 
     });
+    fieldItems.forEach(item =>
+    {
+        item.DrawByCanvas();
+    });
     PopTransform();
+    
+    if(draggingItem)
+    {
+        draggingItem.item.DrawByDrag();
+    }
+    
     
     // メニュー表示
     FillRect(0, 0, width, config.menuHeight, config.menuBgColor);
@@ -112,9 +115,9 @@ function Draw()
 
     // FPS表示
     DrawText(12, "FPS: " + GetFPSText(), width - 10, height - 10, color(0, 0, 0), RIGHT);
-    //DrawText(12, "MausePos: (" + mousePos.x + ", " + mousePos.y + ")", width - 10, height - 30, color(0, 0, 0), RIGHT);
-    //DrawText(12, "Pos: (" + cameraPos.x + ", " + cameraPos.y + ")", width - 10, height - 50, color(0,0,0), RIGHT);
-    DrawText(12, "Size: " + zoomSize, width - 10, height - 30, color(0,0,0),RIGHT);
+    DrawText(12, "MausePos: (" + mousePos.x + ", " + mousePos.y + ")", width - 10, height - 30, color(0, 0, 0), RIGHT);
+    DrawText(12, "Pos: (" + cameraPos.x + ", " + cameraPos.y + ")", width - 10, height - 50, color(0,0,0), RIGHT);
+    DrawText(12, "Size: " + zoomSize, width - 10, height - 70, color(0,0,0),RIGHT);
 }
 
 /*

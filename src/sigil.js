@@ -1,10 +1,11 @@
 //各シジルの描画
 
-function DrawSigil(token, x, y)
+function DrawSigil(token, x, y, rotate = 0, zoom = 1)
 {
     PushTransform();
     Translate(x, y);
-    Scale(config.sigilSize);
+    Scale(config.sigilSize * zoom);
+    Rotate(rotate);
     stroke(config.sigilColor);
     strokeWeight(config.sigilLineWidth);
     noFill();
