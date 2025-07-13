@@ -33,6 +33,7 @@ function Start()
         sigilSize: 40,
         sigilColor: color(0, 0, 0),
         sigilLineWidth: 0.04,
+        stringSideWidth: 2,
         ringRotateHandleWidth: 20,
     };
     
