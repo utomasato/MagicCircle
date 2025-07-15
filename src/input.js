@@ -5,6 +5,7 @@ let dragOffset;
 let isRotating;
 let rotateOffset;
 let isAddRing;
+let isAddSigil;
 let mousePos = {};
 let selectRing;
 let isItemDragging;
@@ -19,6 +20,7 @@ function InputInitialize()
     dragOffset = {x: 0, y: 0};
     isRotating = false;
     isAddRing = false;
+    isAddSigil = false;
     mousePos = {x: 0, y: 0};
     selectRing = null;
     isItemDragging = false;
@@ -74,6 +76,16 @@ function MouseHoldEvent()
             rings.push(selectRing);
             StartDragRing(selectRing, mousePos);
             isAddRing = false;
+        }
+    }
+    else if (isAddSigil)
+    {
+        if (!CheckMouseOnMenu()) // マウスがメニューから外れたら
+        {
+            const newItem = new Sigil(0, 0, "add", null);
+            fieldItems.push(newItem);
+            StartDragItem(newItem, fieldItems.length-1)
+            isAddSigil = false;
         }
     }
     else if (isDragging)

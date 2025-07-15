@@ -41,7 +41,8 @@ function Start()
         new Button(10, -10, 40, 40, color(200, 200, 200), {x: 0, y: 1}, {x: 0, y: 1}, "-", function(){ZoomOut();}),
         new Button(10, -60, 40, 40, color(200, 200, 200), {x: 0, y: 1}, {x: 0, y: 1}, "=", function(){ZoomReset();}),
         new Button(10, -110, 40, 40, color(200, 200, 200), {x: 0, y: 1}, {x: 0, y: 1}, "+", function(){ZoomIn();}),
-        new Button(10, 10, 80, 80, color(255, 200, 200), {x: 0, y: 0}, {x: 0, y: 0}, "Add", function(){isAddRing = true;}),
+        new Button(10, 10, 80, 80, color(255, 200, 200), {x: 0, y: 0}, {x: 0, y: 0}, "ring", function(){isAddRing = true;}),
+        new Button(100, 10, 80, 80, color(255, 200, 200), {x: 0, y: 0}, {x: 0, y: 0}, "sigil", function(){isAddSigil = true;}),
     ];
     
     zoomSize = 1;

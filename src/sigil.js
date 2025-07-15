@@ -247,7 +247,7 @@ function DrawSigil(token, x, y, rotate = 0, zoom = 1)
             ellipse(-0.125, 0, -0.25);
             pop();
             break;
-        case "getinterval":
+        case "getinterval": // 部分取得
             push();
             translate(0.125, 0);
             sigil_parts("look");
