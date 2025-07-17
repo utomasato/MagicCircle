@@ -435,6 +435,12 @@ function DrawSigil(token, x, y, rotate = 0, zoom = 1)
             line(0, 0, 0, -0.5);
             line(0.25, -0.25, -0.25, -0.25);
             break;
+        case "name":
+            const a = 2;
+            line(0, 1, 0.866, -0.5);
+            line(0.866, -0.5, -0.866, -0.5);
+            line(-0.866, -0.5, 0, 1);
+            break;
         default:
             arc(0, 0.25, 0.5, 0.5, 0, -HALF_PI);
             line(0, 0, 0, -0.25);

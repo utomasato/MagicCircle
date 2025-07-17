@@ -11,14 +11,15 @@ class MagicRing
         this.color = color(0, 0, 0, 128);
         this.items = [new Sigil(0, 0, "RETURN", this),
             new Sigil(0, 0, "add", this),
-            new Chars(0, 0, "longName", this),
-            new Chars(0, 0, "a", this),
-            new StringToken(0, 0, "a", this),
             new Sigil(0, 0, "sub", this),
-            new Chars(0, 0, "bcdefghijklmnop", this),
             new Sigil(0, 0, "mul", this),
-            new StringToken(0, 0, "BCDEFGHIJKOMNOP", this),
             new Sigil(0, 0, "div", this),
+            new Chars(0, 0, "a", this),
+            new Chars(0, 0, "LongName", this),
+            new StringToken(0, 0, "a", this),
+            new StringToken(0, 0, "LongName", this),
+            new Name(0, 0, "a", this),
+            new Name(0, 0, "LongLongName", this),
             ];
         this.circumference = 0;
         this.itemRadWidth = {sigil: 0, char: 0, charSpacing:0, padding: 0};
@@ -56,15 +57,18 @@ class MagicRing
             padding: config.itemPadding / this.circumference * TWO_PI,
         };
         
+        const excessLength = this.circumference - totalLength;
+        const excessAngle = excessLength / this.circumference * TWO_PI;
+        
         let currentAngle = this.items[0].GetLength() / this.circumference * PI;
         this.items.forEach(item =>
         {
             if (item)
             {
                 currentAngle -= item.GetLength() / this.circumference * PI; // アイテムの描画位置(中心)
-                const itemEndAngle = currentAngle - (item.GetLength() / this.circumference * PI) - this.itemRadWidth.padding/2; // 次のアイテムとの境目
+                const itemEndAngle = currentAngle - (item.GetLength() / this.circumference * PI) - this.itemRadWidth.padding/2 - excessAngle/this.items.length/2; // 次のアイテムとの境目
                 this.layouts.push({angle: currentAngle, angle2: itemEndAngle}); // [描画されるアイテム, 描画される位置(中心), 次のアイテムとの境目]
-                currentAngle -= (item.GetLength() / this.circumference * PI + this.itemRadWidth.padding);
+                currentAngle -= (item.GetLength() / this.circumference * PI + this.itemRadWidth.padding + excessAngle/this.items.length);
             }
         });
         /*
@@ -414,6 +418,79 @@ class StringToken extends RingItem {
     CheckPosIsOn(pos)
     {
         if (this.pos.x-this.GetLength()*PI < pos.x && pos.x < this.pos.x+this.GetLength()*PI && this.pos.y-config.fontSize/2  < pos.y && pos.y < this.pos.y+config.fontSize/2)
+        {
+            return true;
+        }
+        return false;
+    }
+}
+
+class Name extends RingItem {
+    constructor(x, y, value, ring)
+    {
+        super();
+        this.x = x;
+        this.y = y;
+        this.type = "name";
+        this.value = value;
+        this.ring = ring;
+    }
+    
+    GetLength()
+    {
+        return max(this.value.length * config.charWidth + (this.value.length-1) * config.charSpacing, config.nameObjectMinWidth);
+    }
+    
+    DrawByRing(radius, angle, itemRadWidth)
+    {
+        PushTransform();
+        Rotate(angle);
+        DrawSigil("name", 0, -radius);
+        Rotate(PI);
+        const radwide = (this.value.length * config.charWidth + (this.value.length-1) * config.charSpacing) / radius * TWO_PI;
+        Rotate(radwide/2 - itemRadWidth.char/2);
+        const chars = this.value.split('');
+        chars.forEach(char =>
+        {
+            DrawText(config.fontSize, char, 0, radius, config.fontColor, CENTER);
+            Rotate(-itemRadWidth.char-itemRadWidth.charSpacing);
+        });
+        PopTransform();
+    }
+
+    DrawByDrag()
+    {
+        const ClickObj = CheckMouseObject();
+        PushTransform();
+        
+        Translate(GetMouseX(), GetMouseY());
+        if (ClickObj[0] == "ring")
+        {
+            const ring = ClickObj[1][0];
+            const mouseAngle = Math.atan2(ring.pos.x - mousePos.x, ring.pos.y - mousePos.y);
+            Rotate(-mouseAngle + PI);
+        }
+        Scale(zoomSize);
+        DrawText(config.fontSize, this.value, 0, 0, config.fontColor, CENTER);
+        DrawSigil("name", 0, 0, PI);
+        PopTransform();
+    }
+    
+    DrawByCanvas()
+    {
+        if(debugMode){
+            DrawRect(this.pos.x-this.GetLength()*PI, this.pos.y-config.fontSize/2, this.GetLength()*TWO_PI, config.fontSize, color(0,255,0));
+            DrawRect(this.pos.x-config.sigilSize, this.pos.y-config.sigilSize, config.sigilSize*2, config.sigilSize*2, color(0,255,0));
+        }
+        DrawText(config.fontSize, this.value, this.pos.x, this.pos.y, config.fontColor, CENTER);
+        DrawSigil("name", this.pos.x, this.pos.y, PI);
+    }
+    
+    CheckPosIsOn(pos)
+    {
+        const textCollider = this.pos.x-this.GetLength()*PI < pos.x && pos.x < this.pos.x+this.GetLength()*PI && this.pos.y-config.fontSize/2  < pos.y && pos.y < this.pos.y+config.fontSize/2;
+        const sigilCollider = this.pos.x-config.sigilSize < pos.x && pos.x < this.pos.x+config.sigilSize && this.pos.y-config.sigilSize  < pos.y && pos.y < this.pos.y+config.sigilSize;
+        if (textCollider || sigilCollider)
         {
             return true;
         }

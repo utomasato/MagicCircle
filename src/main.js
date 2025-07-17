@@ -23,7 +23,7 @@ function Start()
         menuHeight: 100,
         menuBgColor: color(55, 55, 55, 200),
         ringWidth: 45,
-        minRingCircumference: 40,
+        minRingCircumference: 50,
         itemPadding: 2, //アイテム同士の幅
         sigilWidth: 7,
         charSpacing: 0.2, // 文字同士の幅
@@ -34,6 +34,7 @@ function Start()
         sigilColor: color(0, 0, 0),
         sigilLineWidth: 0.04,
         stringSideWidth: 2,
+        nameObjectMinWidth: 8,
         ringRotateHandleWidth: 20,
     };
     
@@ -122,12 +123,12 @@ function Draw()
     DrawText(12, "Size: " + zoomSize, width - 10, height - 70, color(0,0,0),RIGHT);
 }
 
-/*
+
 function OnResize()
 {
-    let [width, height] = GetScreenSize();
+    //let [width, height] = GetScreenSize();
 }
-*/
+
 
 // グリッド描画
 function DrawGrid()
