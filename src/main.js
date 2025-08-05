@@ -18,7 +18,7 @@ function Start()
     
     config = {
         bgColor: color(255, 255, 255),
-        gridColor: color(100, 100, 100, 100),
+        gridColor: color(200, 200, 200, 100),
         gridWidth: 100,
         menuHeight: 100,
         menuBgColor: color(55, 55, 55, 200),
@@ -39,11 +39,11 @@ function Start()
     };
     
     buttons = [
+        new Button(10, 10, 80, 80, color(255, 200, 200), {x: 0, y: 0}, {x: 0, y: 0}, "ring", function(){isAddRing = true;}),
+        new Button(100, 10, 80, 80, color(255, 200, 200), {x: 0, y: 0}, {x: 0, y: 0}, "sigil", function(){isAddSigil = true;}),
         new Button(10, -10, 40, 40, color(200, 200, 200), {x: 0, y: 1}, {x: 0, y: 1}, "-", function(){ZoomOut();}),
         new Button(10, -60, 40, 40, color(200, 200, 200), {x: 0, y: 1}, {x: 0, y: 1}, "=", function(){ZoomReset();}),
         new Button(10, -110, 40, 40, color(200, 200, 200), {x: 0, y: 1}, {x: 0, y: 1}, "+", function(){ZoomIn();}),
-        new Button(10, 10, 80, 80, color(255, 200, 200), {x: 0, y: 0}, {x: 0, y: 0}, "ring", function(){isAddRing = true;}),
-        new Button(100, 10, 80, 80, color(255, 200, 200), {x: 0, y: 0}, {x: 0, y: 0}, "sigil", function(){isAddSigil = true;}),
     ];
     
     zoomSize = 1;
@@ -118,9 +118,12 @@ function Draw()
 
     // FPS表示
     DrawText(12, "FPS: " + GetFPSText(), width - 10, height - 10, color(0, 0, 0), RIGHT);
-    DrawText(12, "MausePos: (" + mousePos.x + ", " + mousePos.y + ")", width - 10, height - 30, color(0, 0, 0), RIGHT);
-    DrawText(12, "Pos: (" + cameraPos.x + ", " + cameraPos.y + ")", width - 10, height - 50, color(0,0,0), RIGHT);
-    DrawText(12, "Size: " + zoomSize, width - 10, height - 70, color(0,0,0),RIGHT);
+    DrawText(12, "Size: " + zoomSize, width - 10, height - 30, color(0,0,0),RIGHT);
+    if(debugMode)
+    {
+        DrawText(12, "MausePos: (" + mousePos.x + ", " + mousePos.y + ")", width - 10, height - 50, color(0, 0, 0), RIGHT);
+        DrawText(12, "Pos: (" + cameraPos.x + ", " + cameraPos.y + ")", width - 10, height - 70, color(0,0,0), RIGHT);
+    }
 }
 
 

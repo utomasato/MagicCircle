@@ -10,16 +10,20 @@
     
     <title>p5.js Responsive Control</title>
     <script src="lib/p5/p5.min.js"></script>
+
+    <link rel="stylesheet" href="TemplateData/style.css">
+
     <style>
+        /* フォントや絵文字の定義 (元のコードから) */
         @font-face {
           font-family: 'NotoColorEmojiLocal';
           src: url('NotoColorEmoji-Regular.ttf') format('truetype');
         }
-    
         .emoji {
           font-family: 'NotoColorEmojiLocal', 'Apple Color Emoji', sans-serif;
         }
 
+        /* 基本設定 */
         * {
             box-sizing: border-box;
         }
@@ -31,13 +35,43 @@
             width: 100%;
             overflow: hidden; /* スクロールバーを完全に非表示 */
             font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+        }
+
+        /* --- ここからがレイアウトの核となる部分です --- */
+        
+        /* 1. 全体を囲むコンテナをFlexboxに設定 */
+        #main-container {
+            display: flex; /* 中の要素を横並びにする */
+            width: 100%;
+            height: 100%;
+        }
+
+        #p5-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; /* 奥側 */
         }
         
-        body {
-            position: relative;
+        /* 3. Unityコンテナを画面の右半分に配置して最前面に */
+        #unity-container {
+            position: absolute;
+            top: 0;
+            left: 50%; /* 左から50%の位置に開始点を指定 */
+            width: 50%;  /* 幅を50%に指定 */
+            height: 100%;
+            z-index: 10; /* 手前側 */
         }
-        
+
+        /* 4. Unityのcanvasがコンテナいっぱいに広がるように設定 */
+        #unity-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* 4. p5.jsの情報表示欄のスタイル (元のコードから) */
         .info {
             position: fixed;
             top: 10px;
@@ -49,28 +83,51 @@
             z-index: 100;
             pointer-events: none; /* マウスイベントを通す */
         }
-        
-        /* p5.jsのキャンバス用のスタイル */
-        main {
-            display: block;
-            width: 100vw;
-            height: 100vh;
-        }
     </style>
 </head>
+
 <body>
-    <div class="info">
-        <div>Canvas: <span id="canvas-size"></span></div>
-        <div>Device Pixel Ratio: <span id="pixel-ratio"></span></div>
+    <div id="main-container">
+        <div id="p5-container">
+            <div class="info">
+                <div>Canvas: <span id="canvas-size"></span></div>
+                <div>Device Pixel Ratio: <span id="pixel-ratio"></span></div>
+            </div>
+        </div>
+
+        <div id="unity-container">
+            <canvas id="unity-canvas"></canvas>
+            <div id="unity-loading-bar">
+                <div id="unity-logo"></div>
+                <div id="unity-progress-bar-empty">
+                    <div id="unity-progress-bar-full"></div>
+                </div>
+            </div>
+        </div>
     </div>
-    
 
     <script src="./lib/engine.js"></script>
     <script src="./lib/gamelib.js"></script>
-    <script src="./lib/touch.js"></script> // 追加
+    <script src="./lib/touch.js"></script> 
     <script src="./src/main.js"></script>
-    <script src="./src/ring.js"></script> // boll.jsから変更
-    <script src="./src/sigil.js"></script> // 追加
-    <script src="./src/input.js"></script> //追加
+    <script src="./src/ring.js"></script> 
+    <script src="./src/sigil.js"></script> 
+    <script src="./src/input.js"></script>
+
+    <script src="Build/effectwindow.loader.js"></script>
+    <script>
+      createUnityInstance(document.querySelector("#unity-canvas"), {
+        // 各ファイルパスはご自身の環境に合わせて修正してください
+        dataUrl: "Build/effectwindow.data",
+        frameworkUrl: "Build/effectwindow.framework.js",
+        codeUrl: "Build/effectwindow.wasm",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "DefaultCompany",
+        productName: "YourGameName",
+        productVersion: "0.1",
+      }).then((unityInstance) => {
+        // 必要であれば、ここでunityInstanceを使った処理を記述
+      });
+    </script>
 </body>
 </html>

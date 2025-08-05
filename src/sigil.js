@@ -435,6 +435,41 @@ function DrawSigil(token, x, y, rotate = 0, zoom = 1)
             line(0, 0, 0, -0.5);
             line(0.25, -0.25, -0.25, -0.25);
             break;
+        case "color":
+            arc(0, 0, 1, 1, -5/6*PI, 5/6*PI);
+            const r = 0.1333;
+            ellipse(0, 0.1333, 0.4);
+            ellipse(0.1155, -0.0667, 0.4);
+            ellipse(-0.1155, -0.0667, 0.4);
+            break;
+        case "setcolor":
+            arc(0, 0.125, 0.75, 0.75, -5/6*PI, 5/6*PI);
+            sigil_parts("set");
+            break;
+        case "currentcolor":
+            arc(0, -0.125, 0.75, 0.75, -5/6*PI, 5/6*PI);
+            sigil_parts("current");
+            break;
+        case "print":
+            line(0.5, -0.5, 0.5, 0.5);
+            line(0.5, 0.5, -0.25, 0.5);
+            arc(-0.25, 0.25, 0.5, 0.5, HALF_PI, HALF_PI*3);
+            line(-0.25, 0, 0.5, 0);
+            for (let i=-0.3; i<0.3; i+=0.125)
+                line(-i, 0.125, -i, 0.375);
+            break;
+        case "stack":
+            line(-0.5, 0.25, -0.5, 0.5);
+            line(-0.5, 0.5, 0.5, 0.5);
+            line(0.5, 0.5, 0.5, 0.25);
+            line(0.5, 0.25, 0.2, 0);
+            line(-0.2, 0, -0.5, -0.25)        
+            line(-0.5, -0.25, -0.5, -0.5);
+            line(-0.5, -0.5, 0.5, -0.5)
+            line(0.5, -0.5, 0.5, -0.25);
+            for (let i=-0.25; i<0.3; i+=0.125)
+                line(0.2, i, -0.2, i);
+            break;
         case "name":
             const a = 2;
             line(0, 1, 0.866, -0.5);
@@ -475,6 +510,13 @@ function sigil_parts(part)
             rotate(HALF_PI);
             sigil_parts("current");
             pop();
+            break;
+        case "set":
+            line(0.25, -0.25, -0.27, -0.25);
+            line(0.25, -0.25, 0, -0.5);
+            line(0, -0.25, 0, -0.5)
+            line(-0.25, -0.25, 0, -0.5);
+            line(0, -0.5, 0.5, -0.5);
             break;
         case "write":
             line(-0.5, 0.25, -0.25, 0);

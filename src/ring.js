@@ -87,14 +87,12 @@ class MagicRing
         Rotate(this.angle);
         if(debugMode)
         {
-            FillCircle(0, 0, this.outerradius + config.ringRotateHandleWidth, color(200,200,200));
+            FillCircle(0, 0, this.outerradius + config.ringRotateHandleWidth, color(200,200,200,100));
         }
         DrawCircle(0, 0, this.innerradius, color(0,0,0)); // 内側の円
         DrawCircle(0, 0, this.outerradius, color(0,0,0)); // 外側の円
 
-        //this.layouts.forEach(l=>{
-        //    l.item.DrawByRing(this.radius, l.angle, this.itemRadWidth)
-        //});
+        this.DrawRingStar();
         for (let i = 0; i< this.items.length; i++)
         {
             if (this.items[i])
@@ -104,6 +102,21 @@ class MagicRing
         }
         if(debugMode){
             this.DrawDebugLine();
+        }
+        PopTransform();
+    }
+    
+    DrawRingStar()
+    {
+        const itemn = this.items.length; // アイテムの数
+        const n = itemn<=2 ? 5 : itemn; // 頂点の数
+        const step = floor(n * 2 / 5); // 何個おきに頂点を結ぶか
+        const onesteprad = TWO_PI / n;
+        PushTransform();
+        for (let i = 0; i < n; i++)
+        {
+            DrawLine(0, -this.innerradius, Math.sin(onesteprad*step) * this.innerradius, -Math.cos(onesteprad*step) * this.innerradius, color(0,0,0))
+            Rotate(onesteprad);
         }
         PopTransform();
     }
