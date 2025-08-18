@@ -29,6 +29,7 @@ function InputInitialize()
 
 function MouseDownEvent()
 {
+    if (GetMouseX() > GetScreenSize()[0]) return;
     const ClickObj = CheckMouseObject();
     switch (ClickObj[0])
     {
@@ -68,6 +69,7 @@ function MouseDownEvent()
 
 function MouseHoldEvent()
 {
+    if (GetMouseX() > GetScreenSize()[0]) return;
     if (isAddRing)
     {
         if (!CheckMouseOnMenu()) // マウスがメニューから外れたら
@@ -108,6 +110,7 @@ function MouseHoldEvent()
 
 function MouseUpEvent()
 {
+    if (GetMouseX() > GetScreenSize()[0]) return;
     if (isDragging)
     {
         EndDragRing();
@@ -233,6 +236,13 @@ function DragRing(ring, pos)
 
 function EndDragRing()
 {
+    if (CheckMouseObject()[0] == "menu")
+    {
+        console.log("menu");
+        rings = rings.filter(function( item ) {
+            return item !== selectRing;
+        });
+    }
     isDragging = false;
     console.log("EndDrag");
 }
@@ -281,6 +291,16 @@ function EndDragItem()
     const obj = CheckMouseObject()
     switch(obj[0])
     {
+        case "menu":
+            const old = draggingItem.item.ring;
+            if (old)
+            {
+                old.RemoveItem(draggingItem.index);
+                old.CalculateLayout();
+            }
+            // 無所属になる
+            draggingItem.item.ring = null;
+            break;
         case "ring":
             const newring = obj[1][0];
             const iteminfo = newring.CheckPosItem(mousePos);
