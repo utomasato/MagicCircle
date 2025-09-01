@@ -71,12 +71,6 @@ class MagicRing
                 currentAngle -= (item.GetLength() / this.circumference * PI + this.itemRadWidth.padding + excessAngle/this.items.length);
             }
         });
-        /*
-        this.layouts.forEach(layout => {
-            console.log(layout.angle2);
-        });
-        console.log("--------------------");
-        */
     }
     
     Draw() 
@@ -183,16 +177,28 @@ class MagicRing
         }
         return {item: this.items[0], index: 0};
     }
+    
+    Spell()
+    {
+        let spell = "";
+        this.items.forEach( item =>
+        {
+            spell += item.SpellToken();
+            spell += " ";
+        });
+        //spell = spell.substr(0, -1);
+        return spell;
+    }
 }
 
 class RingItem {
-    constructor(x, y, value, ring)
+    constructor(x, y, value, parentRing)
     {
         this.x = x;
         this.y = y;
         this.type = "item";
         this.value = value;
-        this.ring = ring;
+        this.parentRing = parentRing;
     }
     
     GetLength()
@@ -218,17 +224,22 @@ class RingItem {
     {
         return false;
     }
+    
+    SpellToken()
+    {
+        return this.value;
+    }
 }
 
 class Sigil extends RingItem {
-    constructor(x, y, value, ring)
+    constructor(x, y, value, parentRing)
     {
         super();
         //this.x = x;
         //this.y = y;
         this.type = "sigil";
         this.value = value;
-        this.ring = ring;
+        this.parentRing = parentRing;
     }
     
     GetLength()
@@ -279,14 +290,14 @@ class Sigil extends RingItem {
 }
 
 class Chars extends RingItem {
-    constructor(x, y, value, ring)
+    constructor(x, y, value, parentRing)
     {
         super();
         this.x = x;
         this.y = y;
         this.type = "chars";
         this.value = value;
-        this.ring = ring;
+        this.parentRing = parentRing;
     }
     
     GetLength()
@@ -347,14 +358,14 @@ class Chars extends RingItem {
 }
 
 class StringToken extends RingItem {
-    constructor(x, y, value, ring)
+    constructor(x, y, value, parentRing)
     {
         super();
         this.x = x;
         this.y = y;
         this.type = "string_token";
         this.value = value;
-        this.ring = ring;
+        this.parentRing = parentRing;
     }
     
     GetLength()
@@ -436,17 +447,22 @@ class StringToken extends RingItem {
         }
         return false;
     }
+    
+    SpellToken()
+    {
+        return "(" + this.value + ")";
+    }
 }
 
 class Name extends RingItem {
-    constructor(x, y, value, ring)
+    constructor(x, y, value, parentRing)
     {
         super();
         this.x = x;
         this.y = y;
         this.type = "name";
         this.value = value;
-        this.ring = ring;
+        this.parentRing = parentRing;
     }
     
     GetLength()
@@ -508,6 +524,11 @@ class Name extends RingItem {
             return true;
         }
         return false;
+    }
+    
+    SpellToken()
+    {
+        return "~" + this.value;
     }
 }
 

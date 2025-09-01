@@ -11,6 +11,12 @@ let selectRing;
 let isItemDragging;
 let draggingItem = {};
 
+// p5.domで生成したinput要素と、編集中のアイテムを保持するためのグローバル変数
+let currentInputElement = null;
+let editingItem = null;
+// ▼▼▼ 修正点1: 終了処理の重複実行を防ぐためのフラグを追加 ▼▼▼
+let isFinishingText = false;
+
 
 function InputInitialize()
 {
@@ -25,45 +31,89 @@ function InputInitialize()
     selectRing = null;
     isItemDragging = false;
     draggingItem = null;
+
+    // 既存の入力欄があれば削除
+    if (currentInputElement) {
+        currentInputElement.remove();
+        currentInputElement = null;
+        editingItem = null;
+    }
 }
 
 function MouseDownEvent()
 {
+
+    // もし入力欄が表示されていて、その入力欄以外をクリックしたら入力欄を消す
+    if (currentInputElement) {
+        const inpRect = currentInputElement.elt.getBoundingClientRect();
+        if (
+            mouseX < inpRect.left || mouseX > inpRect.right ||
+            mouseY < inpRect.top  || mouseY > inpRect.bottom
+        ) {
+            finishTextInput(); // 入力内容を確定して削除
+            return; 
+        }
+    }
+
     if (GetMouseX() > GetScreenSize()[0]) return;
     const ClickObj = CheckMouseObject();
-    switch (ClickObj[0])
+    switch (cursormode)
     {
-        case "menu":
-        case "button":
-            break;
-        case "ring":
-            selectRing = ClickObj[1][0];
-            switch (ClickObj[1][1])
+        case "grad":
+            switch (ClickObj[0])
             {
-                case "inner":
-                    StartDragRing(selectRing, mousePos);
-                    break;
-                case "outer":
-                    StartRotateRing(selectRing, mousePos);
+                case "menu":
+                case "button":
                     break;
                 case "ring":
-                    const iteminfo = ClickObj[1][2];
-                    if (iteminfo.index == 0)
+                    selectRing = ClickObj[1][0];
+                    switch (ClickObj[1][1])
                     {
-                        StartRotateRing(selectRing, mousePos);
-                    }
-                    else
-                    {
-                        StartDragItem(selectRing.items[iteminfo.index], iteminfo.index);
+                        case "inner":
+                            StartDragRing(selectRing, mousePos);
+                            break;
+                        case "outer":
+                            StartRotateRing(selectRing, mousePos);
+                            break;
+                        case "ring":
+                            const iteminfo = ClickObj[1][2];
+                            if (iteminfo.item && iteminfo.index != 0) {
+                                StartDragItem(iteminfo.item, iteminfo.index);
+                            } else { // シジルや空きスロットは回転
+                                StartRotateRing(selectRing, mousePos);
+                            }
+                            break;
                     }
                     break;
+                case "item":
+                    StartDragItem(fieldItems[ClickObj[1]], ClickObj[1]);
+                    break;
+                default :
+                    StartPan(GetMousePos());
             }
             break;
-        case "item":
-            StartDragItem(fieldItems[ClickObj[1]], ClickObj[1]);
+        case "default":
+            switch (ClickObj[0])
+            {
+                case "menu":
+                case "button":
+                    break;
+                case "ring": // リング内のアイテムをクリックした場合
+                    const iteminfo = ClickObj[1][2];
+                    if (iteminfo && iteminfo.item && iteminfo.item.type !== "sigil") {
+                        ChangeItem(iteminfo.item);
+                    }
+                    break;
+                case "item": // リング外のアイテムをクリックした場合
+                    const item = fieldItems[ClickObj[1]];
+                    if (item && item.type !== "sigil") {
+                         ChangeItem(item);
+                    }
+                    break;
+                default :
+                    StartPan(GetMousePos());
+            }
             break;
-        default :
-            StartPan(GetMousePos());
     }
 }
 
@@ -150,7 +200,7 @@ function CheckMouseObject()
     }
     const hititem = CheckMouseOnItem();
     if (hititem[0])
-    {        
+    {       
         return ["item", hititem[1]];
     }
     
@@ -223,7 +273,7 @@ function StartDragRing(ring, pos)
     isDragging = true;
     dragOffset.x = ring.pos.x - pos.x;
     dragOffset.y = ring.pos.y - pos.y; 
-    console.log("StartDrag");  
+    console.log("StartDrag");   
 }
 
 function DragRing(ring, pos)
@@ -280,71 +330,122 @@ function StartDragItem(item, index)
 {
     isItemDragging = true;
     draggingItem = {item: item, index: index};
-    if (item.ring)
-        item.ring.items[index] = null;
+    if (item.parentRing)
+        item.parentRing.items[index] = null;
     else
         fieldItems.splice(index,1);
 }
 
 function EndDragItem()
 {
-    const obj = CheckMouseObject()
-    switch(obj[0])
+    if (!draggingItem || !draggingItem.item) {
+        isItemDragging = false;
+        draggingItem = null;
+        return;
+    }
+
+    const obj = CheckMouseObject();
+    const draggedItem = draggingItem.item;
+    const originalRing = draggedItem.parentRing;
+    const originalIndex = draggingItem.index;
+
+    // 先に元のリングからアイテムを完全に削除する
+    if (originalRing) {
+        originalRing.RemoveItem(originalIndex);
+    }
+
+    switch(obj[0]) // ドロップした位置
     {
         case "menu":
-            const old = draggingItem.item.ring;
-            if (old)
-            {
-                old.RemoveItem(draggingItem.index);
-                old.CalculateLayout();
-            }
-            // 無所属になる
-            draggingItem.item.ring = null;
+            draggedItem.parentRing = null;
             break;
+
         case "ring":
             const newring = obj[1][0];
             const iteminfo = newring.CheckPosItem(mousePos);
-            if (iteminfo.item == null) // 元の場所に戻す
-            {
-                newring.items[iteminfo.index] = draggingItem.item;
-            }
-            else
-            {
-                const oldring = draggingItem.item.ring;
-                if (oldring == newring) // リングの中で移動する時
+            
+            if (iteminfo.item == null) { // リングの空白スロットにドラッグした時
+                newring.InsertItem(draggedItem, iteminfo.index);
+            } else {
+                if (newring == originalRing)
                 {
-                    newring.RemoveItem(draggingItem.index);
-                    const insertidnex = max(iteminfo.index, 1);
-                    newring.InsertItem(draggingItem.item, insertidnex);
-                    newring.CalculateLayout();
-                }
-                else // 違うリングに行く時
-                {
-                    if (oldring)
-                    {
-                        oldring.RemoveItem(draggingItem.index);
-                        oldring.CalculateLayout();
-                    }
-                    newring.InsertItem(draggingItem.item, iteminfo.index+1);
-                    newring.CalculateLayout();
-                    draggingItem.item.ring = newring;
+                    if (originalIndex <= iteminfo.index+1)
+                        newring.InsertItem(draggedItem, iteminfo.index);
+                    else
+                        newring.InsertItem(draggedItem, iteminfo.index +1);
+                } else {
+                    newring.InsertItem(draggedItem, iteminfo.index + 1);
                 }
             }
+            draggedItem.parentRing = newring;
+            newring.CalculateLayout();
             break;
+
         default:
-            fieldItems.push(draggingItem.item);
-            draggingItem.item.pos = mousePos;
-            const oldring = draggingItem.item.ring;
-            if (oldring)
-            {
-                oldring.RemoveItem(draggingItem.index);
-                oldring.CalculateLayout();
-            }
-            // 無所属になる
-            draggingItem.item.ring = null;      
+            draggedItem.parentRing = null;
+            fieldItems.push(draggedItem);
+            draggedItem.pos = mousePos;
     }
     draggingItem = null;
     isItemDragging = false;
+    if (originalRing) {
+        originalRing.CalculateLayout();
+    }
+}
+
+// ---------------------------------------------
+// テキスト入力関連の関数
+// ---------------------------------------------
+
+function finishTextInput() {
+    if (isFinishingText) return;
+    isFinishingText = true;
+
+    if (currentInputElement && editingItem) {
+        editingItem.value = currentInputElement.value();
+        
+        if (editingItem.parentRing) {
+            editingItem.parentRing.CalculateLayout();
+        }
+    }
+
+    if(currentInputElement) {
+        currentInputElement.remove();
+        currentInputElement = null;
+    }
+    
+    editingItem = null;
+
+    setTimeout(() => {
+        isFinishingText = false;
+    }, 50); 
+}
+
+function ChangeItem(item) {
+    if (currentInputElement) {
+        return;
+    }
+
+    editingItem = item; // 現在編集中のアイテムを保存
+
+    currentInputElement = createInput(item.value);
+    currentInputElement.position(GetMouseX() + 15, GetMouseY() - 10);
+    currentInputElement.style('z-index', '1000');
+    currentInputElement.style('border', '1px solid black');
+    currentInputElement.style('padding', '4px');
+    currentInputElement.style('font-size', '14px');
+    currentInputElement.elt.focus();
+
+    const keyInterceptor = (e) => {
+        e.stopImmediatePropagation();
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            finishTextInput();
+        }
+    };
+
+    currentInputElement.elt.addEventListener('keydown', keyInterceptor, true);
+    currentInputElement.elt.addEventListener('blur', finishTextInput);
 }
 
 // ---------------------------------------------
@@ -376,5 +477,3 @@ function EndPan()
     SetMouseCursor('grab');
     console.log("panEnd");
 }
-
-

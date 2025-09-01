@@ -4,6 +4,7 @@ let zoomSize;
 let rings = [];
 let fieldItems = [];
 let buttons = [];
+let cursormode = "grad";
 
 let debugMode;
 
@@ -38,12 +39,17 @@ function Start()
         ringRotateHandleWidth: 20,
     };
     
+    // Button(x, y, w, h, color, anchor, pivot, text, pressed)
     buttons = [
         new Button(10, 10, 80, 80, color(255, 200, 200), {x: 0, y: 0}, {x: 0, y: 0}, "ring", function(){isAddRing = true;}),
         new Button(100, 10, 80, 80, color(255, 200, 200), {x: 0, y: 0}, {x: 0, y: 0}, "sigil", function(){isAddSigil = true;}),
+        new Button(-10, 10, 80, 80, color(255, 200, 200), {x: 1, y: 0}, {x: 1, y: 0}, "▶️", function(){CommitMagicSpell();}),
         new Button(10, -10, 40, 40, color(200, 200, 200), {x: 0, y: 1}, {x: 0, y: 1}, "-", function(){ZoomOut();}),
         new Button(10, -60, 40, 40, color(200, 200, 200), {x: 0, y: 1}, {x: 0, y: 1}, "=", function(){ZoomReset();}),
         new Button(10, -110, 40, 40, color(200, 200, 200), {x: 0, y: 1}, {x: 0, y: 1}, "+", function(){ZoomIn();}),
+        new Button(10, 110, 40, 40, color(200, 200, 200), {x: 0, y: 0}, {x: 0, y: 0}, "a", function(){cursormode = "grad"; SetMouseCursor('grab');}),
+        new Button(10, 155, 40, 40, color(200, 200, 200), {x: 0, y: 0}, {x: 0, y: 0}, "b", function(){cursormode = "default"; SetMouseCursor('default');}),
+        
     ];
     
     zoomSize = 1;
@@ -170,4 +176,23 @@ function ZoomOut()
 function ZoomReset()
 {
     zoomSize = 1;
+}
+
+function CommitMagicSpell()
+{
+    const magicSpell = GenerateSpell();
+    const data = {
+        isActive: true,
+        message: "MagicSpell",
+        value: 0,
+        text: magicSpell,
+    };
+
+    sendJsonToUnity('JsReceiver', 'ReceiveGeneralData', data);
+}
+
+function GenerateSpell()
+{
+    const spell = rings[0].Spell();
+    return spell;
 }

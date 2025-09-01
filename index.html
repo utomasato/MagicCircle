@@ -10,6 +10,8 @@
     
     <title>p5.js Resizable Control</title>
     <script src="lib/p5/p5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.9.4/lib/addons/p5.dom.min.js"></script>
+
 
     <link rel="stylesheet" href="TemplateData/style.css">
 
@@ -59,7 +61,7 @@
         
         /* 3. 中央のリサイズバー (新規追加) */
         #resizer {
-            width: 10px;
+            width: 15px;
             height: 100%;
             background: #ccc;
             cursor: col-resize; /* カーソルをリサイズアイコンに変更 */
@@ -85,7 +87,7 @@
             height: 100% !important;
             display: block;
         }
-
+/*
         /* 6. p5.jsの情報表示欄のスタイル */
         .info {
             position: absolute; /* #p5-containerを基準に配置 */
@@ -96,9 +98,9 @@
             padding: 10px;
             border-radius: 5px;
             font-size: 12px;
-            z-index: 100;
+            z-index: 20;
             pointer-events: none; /* マウスイベントを通す */
-        }
+        }*/
     </style>
 </head>
 
@@ -136,22 +138,44 @@
     <script src="./src/sigil.js"></script>  
     <script src="./src/input.js"></script>
 
-    <script src="Build/effectwindow.loader.js"></script>
+    <script src="assets/effectwindow/Build/effectwindow.loader.js"></script>
     <script>
-      createUnityInstance(document.querySelector("#unity-canvas"), {
-        dataUrl: "Build/effectwindow.data",
-        frameworkUrl: "Build/effectwindow.framework.js",
-        codeUrl: "Build/effectwindow.wasm",
-        streamingAssetsUrl: "StreamingAssets",
-        companyName: "DefaultCompany",
-        productName: "YourGameName",
-        productVersion: "0.1",
-      }).then((unityInstance) => {
-        // 必要であれば、ここでunityInstanceを使った処理を記述
-      });
+        // --- ▼▼▼ ここからが追加・変更部分です ▼▼▼ ---
+
+        // Unityインスタンスをグローバルに保持するための変数
+        let unityInstance = null;
+
+        // 他のスクリプトから呼び出せるように、Unityへデータを送信する関数を定義
+        function sendJsonToUnity(gameObjectName, methodName, data) {
+            // Unityインスタンスがまだ準備できていなければ何もしない
+            if (!unityInstance) {
+                console.error("Unity instance is not ready yet.");
+                return;
+            }
+            // データをJSON文字列に変換
+            const jsonString = JSON.stringify(data);
+            // Unityのメソッドを呼び出す
+            unityInstance.SendMessage(gameObjectName, methodName, jsonString);
+        }
+
+        createUnityInstance(document.querySelector("#unity-canvas"), {
+            dataUrl: "assets/effectwindow/Build/effectwindow.data",
+            frameworkUrl: "assets/effectwindow/Build/effectwindow.framework.js",
+            codeUrl: "assets/effectwindow/Build/effectwindow.wasm",
+            streamingAssetsUrl: "StreamingAssets",
+            companyName: "DefaultCompany",
+            productName: "YourGameName",
+            productVersion: "0.1",
+        }).then((instance) => {
+            // 読み込みが完了したら、インスタンスをグローバル変数に格納
+            unityInstance = instance;
+            console.log("Unity instance is ready.");
+        });
+
+        // --- ▲▲▲ ここまでが追加・変更部分です ▲▲▲ ---
     </script>
 
-    <!-- ▼▼▼ リサイズ処理とクリック判定用のJavaScript (タッチ対応) ▼▼▼ -->
+    <!-- ▼▼▼ リサイズ処理のスクリプト (変更なし) ▼▼▼ -->
     <script>
         const resizer = document.getElementById('resizer');
         const leftPanel = document.getElementById('p5-container');
@@ -185,6 +209,7 @@
             if (newLeftWidth > maxWidth) newLeftWidth = maxWidth;
 
             leftPanel.style.width = newLeftWidth + 'px';
+            window.dispatchEvent(new Event('resize'));
         };
 
         // ドラッグ終了時の処理 (マウスとタッチ共通)
