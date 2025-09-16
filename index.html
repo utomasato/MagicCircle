@@ -102,6 +102,9 @@
             pointer-events: none; /* マウスイベントを通す */
         }*/
     </style>
+    
+    <script src="//cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
 </head>
 
 <body>
@@ -138,9 +141,20 @@
     <script src="./src/sigil.js"></script>  
     <script src="./src/input.js"></script>
 
+    <script>
+      // http:// 接続時に navigator.mediaDevices が未定義になる問題への対策
+      if (window.navigator && !window.navigator.mediaDevices) {
+        window.navigator.mediaDevices = {};
+      }
+      if (window.navigator.mediaDevices && !window.navigator.mediaDevices.enumerateDevices) {
+        // enumerateDevices関数が存在しない場合に、空のリストを返すダミー関数を定義する
+        window.navigator.mediaDevices.enumerateDevices = function() {
+          return Promise.resolve([]);
+        }
+      }
+    </script>
     <script src="assets/effectwindow/Build/effectwindow.loader.js"></script>
     <script>
-        // --- ▼▼▼ ここからが追加・変更部分です ▼▼▼ ---
 
         // Unityインスタンスをグローバルに保持するための変数
         let unityInstance = null;
@@ -172,10 +186,8 @@
             console.log("Unity instance is ready.");
         });
 
-        // --- ▲▲▲ ここまでが追加・変更部分です ▲▲▲ ---
     </script>
 
-    <!-- ▼▼▼ リサイズ処理のスクリプト (変更なし) ▼▼▼ -->
     <script>
         const resizer = document.getElementById('resizer');
         const leftPanel = document.getElementById('p5-container');

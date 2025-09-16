@@ -6,17 +6,23 @@ let isRotating;
 let rotateOffset;
 let isAddRing;
 let isAddSigil;
+let isAddNum;
+let isAddStr;
+let isAddName;
+let isAddArrayRing;
+let isAddDictRing; // DictRing追加用にフラグを追加
 let mousePos = {};
 let selectRing;
 let isItemDragging;
 let draggingItem = {};
 
-// p5.domで生成したinput要素と、編集中のアイテムを保持するためのグローバル変数
+// --- UI要素を管理するためのグローバル変数 ---
+let currentUiPanel = null; 
 let currentInputElement = null;
+let currentSelectElement = null;
 let editingItem = null;
-// ▼▼▼ 修正点1: 終了処理の重複実行を防ぐためのフラグを追加 ▼▼▼
-let isFinishingText = false;
 
+let isFinishingText = false;
 
 function InputInitialize()
 {
@@ -27,30 +33,39 @@ function InputInitialize()
     isRotating = false;
     isAddRing = false;
     isAddSigil = false;
+    isAddNum = false;
+    isAddStr = false;
+    isAddName = false;
+    isAddArrayRing = false;
+    isAddDictRing = false; // 初期化
     mousePos = {x: 0, y: 0};
     selectRing = null;
     isItemDragging = false;
     draggingItem = null;
 
-    // 既存の入力欄があれば削除
-    if (currentInputElement) {
-        currentInputElement.remove();
-        currentInputElement = null;
-        editingItem = null;
+    if (currentUiPanel) {
+        currentUiPanel.remove();
+        currentUiPanel = null;
     }
+    currentInputElement = null;
+    currentSelectElement = null;
+    editingItem = null;
 }
 
 function MouseDownEvent()
 {
-
-    // もし入力欄が表示されていて、その入力欄以外をクリックしたら入力欄を消す
-    if (currentInputElement) {
-        const inpRect = currentInputElement.elt.getBoundingClientRect();
-        if (
-            mouseX < inpRect.left || mouseX > inpRect.right ||
-            mouseY < inpRect.top  || mouseY > inpRect.bottom
-        ) {
-            finishTextInput(); // 入力内容を確定して削除
+    // パネルの外側がクリックされた場合の処理
+    if (currentUiPanel) {
+        const panelRect = currentUiPanel.elt.getBoundingClientRect();
+        if (mouseX < panelRect.left || mouseX > panelRect.right || mouseY < panelRect.top || mouseY > panelRect.bottom) {
+            if (currentInputElement) {
+                finishTextInput(); 
+            } else {
+                currentUiPanel.remove();
+                currentUiPanel = null;
+                currentSelectElement = null;
+                editingItem = null;
+            }
             return; 
         }
     }
@@ -79,7 +94,7 @@ function MouseDownEvent()
                             const iteminfo = ClickObj[1][2];
                             if (iteminfo.item && iteminfo.index != 0) {
                                 StartDragItem(iteminfo.item, iteminfo.index);
-                            } else { // シジルや空きスロットは回転
+                            } else { 
                                 StartRotateRing(selectRing, mousePos);
                             }
                             break;
@@ -98,16 +113,33 @@ function MouseDownEvent()
                 case "menu":
                 case "button":
                     break;
-                case "ring": // リング内のアイテムをクリックした場合
-                    const iteminfo = ClickObj[1][2];
-                    if (iteminfo && iteminfo.item && iteminfo.item.type !== "sigil") {
-                        ChangeItem(iteminfo.item);
+                case "ring": 
+                    const ringObject = ClickObj[1][0];
+                    const clickLocation = ClickObj[1][1];
+                    const ringItemInfo = ClickObj[1][2];
+
+                    if (ringItemInfo && ringItemInfo.item) {
+                        const itemInRing = ringItemInfo.item;
+                        if (itemInRing.type === 'joint') {
+                            createJointPanel(itemInRing);
+                        } else if (itemInRing.type === 'sigil') {
+                            if (itemInRing.value != "RETURN" && itemInRing.value != "COMPLETE")
+                                createSigilDropdown(itemInRing);
+                        } else {
+                            createTextInput(itemInRing);
+                        }
+                    } else if (clickLocation === 'inner') { 
+                        createRingPanel(ringObject);
                     }
                     break;
-                case "item": // リング外のアイテムをクリックした場合
-                    const item = fieldItems[ClickObj[1]];
-                    if (item && item.type !== "sigil") {
-                         ChangeItem(item);
+                case "item": 
+                    const fieldItem = fieldItems[ClickObj[1]];
+                    if (fieldItem.type === 'joint') {
+                        createJointPanel(fieldItem);
+                    } else if (fieldItem.type === 'sigil') {
+                        createSigilDropdown(fieldItem);
+                    } else {
+                        createTextInput(fieldItem);
                     }
                     break;
                 default :
@@ -122,22 +154,79 @@ function MouseHoldEvent()
     if (GetMouseX() > GetScreenSize()[0]) return;
     if (isAddRing)
     {
-        if (!CheckMouseOnMenu()) // マウスがメニューから外れたら
+        if (!CheckMouseOnMenu()) 
         {
             selectRing = new MagicRing(mousePos);
+            selectRing.isNew = true;
             rings.push(selectRing);
             StartDragRing(selectRing, mousePos);
             isAddRing = false;
         }
     }
+    else if (isAddArrayRing) 
+    {
+        if (!CheckMouseOnMenu())
+        {
+            selectRing = new ArrayRing(mousePos);
+            selectRing.isNew = true;
+            rings.push(selectRing);
+            StartDragRing(selectRing, mousePos);
+            isAddArrayRing = false;
+        }
+    }
+    else if (isAddDictRing)
+    {
+        if (!CheckMouseOnMenu())
+        {
+            selectRing = new DictRing(mousePos);
+            selectRing.isNew = true;
+            rings.push(selectRing);
+            StartDragRing(selectRing, mousePos);
+            isAddDictRing = false;
+        }
+    }
     else if (isAddSigil)
     {
-        if (!CheckMouseOnMenu()) // マウスがメニューから外れたら
+        if (!CheckMouseOnMenu()) 
         {
             const newItem = new Sigil(0, 0, "add", null);
+            newItem.isNew = true;
             fieldItems.push(newItem);
             StartDragItem(newItem, fieldItems.length-1)
             isAddSigil = false;
+        }
+    }
+    else if (isAddNum)
+    {
+        if (!CheckMouseOnMenu()) 
+        {
+            const newItem = new Chars(0, 0, "0", null);
+            newItem.isNew = true;
+            fieldItems.push(newItem);
+            StartDragItem(newItem, fieldItems.length-1)
+            isAddNum = false;
+        }
+    }
+    else if (isAddStr)
+    {
+        if (!CheckMouseOnMenu()) 
+        {
+            const newItem = new StringToken(0, 0, "Hello", null);
+            newItem.isNew = true;
+            fieldItems.push(newItem);
+            StartDragItem(newItem, fieldItems.length-1)
+            isAddStr = false;
+        }
+    }
+    else if (isAddName)
+    {
+        if (!CheckMouseOnMenu()) 
+        {
+            const newItem = new Name(0, 0, "name", null);
+            newItem.isNew = true;
+            fieldItems.push(newItem);
+            StartDragItem(newItem, fieldItems.length-1)
+            isAddName = false;
         }
     }
     else if (isDragging)
@@ -180,9 +269,7 @@ function MouseUpEvent()
     isAddRing = false;
 }
 
-// ---------------------------------------------
-// マウスの位置に何があるか
-// ---------------------------------------------
+// ... (CheckMouseObject and other utility functions remain the same)
 function CheckMouseObject()
 {
     if (CheckButtons())
@@ -200,7 +287,7 @@ function CheckMouseObject()
     }
     const hititem = CheckMouseOnItem();
     if (hititem[0])
-    {       
+    {   
         return ["item", hititem[1]];
     }
     
@@ -244,7 +331,7 @@ function CheckMouseOnMenu()
 }
 
 // ---------------------------------------------
-// ボタン
+// Buttons
 // ---------------------------------------------
 function DrawButtons()
 {
@@ -266,14 +353,13 @@ function CheckButtons()
 }
 
 // ---------------------------------------------
-// リングをドラッグして動かす
+// Ring Drag
 // ---------------------------------------------
 function StartDragRing(ring, pos)
 {
     isDragging = true;
     dragOffset.x = ring.pos.x - pos.x;
-    dragOffset.y = ring.pos.y - pos.y; 
-    console.log("StartDrag");   
+    dragOffset.y = ring.pos.y - pos.y;  
 }
 
 function DragRing(ring, pos)
@@ -281,31 +367,33 @@ function DragRing(ring, pos)
     if (!isDragging) return;
     ring.pos.x = pos.x + dragOffset.x;
     ring.pos.y = pos.y + dragOffset.y;
-    console.log("Drag");
 }
 
 function EndDragRing()
 {
     if (CheckMouseObject()[0] == "menu")
     {
-        console.log("menu");
         rings = rings.filter(function( item ) {
             return item !== selectRing;
         });
     }
     isDragging = false;
-    console.log("EndDrag");
+
+    if (selectRing && selectRing.isNew) {
+        mousePos = GetMousePos();
+        createRingPanel(selectRing);
+        selectRing.isNew = false; 
+    }
 }
 
 // ---------------------------------------------
-// リングをドラッグして回す
+// Ring Rotate
 // ---------------------------------------------
 function StartRotateRing(ring, pos)
 {
     isRotating = true;
     const mouseAngle = Math.atan2(pos.y - ring.pos.y, pos.x - ring.pos.x);
     rotateOffset = (ring.angle) - mouseAngle;
-    console.log("StartRotate");
 }
 
 function RotateRing(ring, pos)
@@ -314,17 +402,15 @@ function RotateRing(ring, pos)
     const mouseAngle = Math.atan2(pos.y - ring.pos.y, pos.x - ring.pos.x);
     const newAngle = mouseAngle + rotateOffset;
     ring.angle = newAngle;
-    console.log("Rotate");
 }
 
 function EndRotateRing(ring)
 {
     isRotating = false;
-    console.log("EndRotate");
 }
 
 // ---------------------------------------------
-// アイテムをドラッグして移動させる
+// Item Drag
 // ---------------------------------------------
 function StartDragItem(item, index)
 {
@@ -349,12 +435,11 @@ function EndDragItem()
     const originalRing = draggedItem.parentRing;
     const originalIndex = draggingItem.index;
 
-    // 先に元のリングからアイテムを完全に削除する
     if (originalRing) {
         originalRing.RemoveItem(originalIndex);
     }
 
-    switch(obj[0]) // ドロップした位置
+    switch(obj[0]) 
     {
         case "menu":
             draggedItem.parentRing = null;
@@ -364,12 +449,12 @@ function EndDragItem()
             const newring = obj[1][0];
             const iteminfo = newring.CheckPosItem(mousePos);
             
-            if (iteminfo.item == null) { // リングの空白スロットにドラッグした時
+            if (iteminfo.item == null) { 
                 newring.InsertItem(draggedItem, iteminfo.index);
             } else {
                 if (newring == originalRing)
                 {
-                    if (originalIndex <= iteminfo.index+1)
+                    if (originalIndex <= iteminfo.index+1 && iteminfo.index)
                         newring.InsertItem(draggedItem, iteminfo.index);
                     else
                         newring.InsertItem(draggedItem, iteminfo.index +1);
@@ -386,6 +471,22 @@ function EndDragItem()
             fieldItems.push(draggedItem);
             draggedItem.pos = mousePos;
     }
+
+    if (draggedItem && draggedItem.isNew) {
+        mousePos = GetMousePos();
+
+        if (draggedItem.type === 'joint') {
+            createJointPanel(draggedItem);
+        } else if (draggedItem.type === 'sigil') {
+            if (draggedItem.value != "RETURN" && draggedItem.value != "COMPLETE") {
+                createSigilDropdown(draggedItem);
+            }
+        } else {
+            createTextInput(draggedItem);
+        }
+        draggedItem.isNew = false; 
+    }
+
     draggingItem = null;
     isItemDragging = false;
     if (originalRing) {
@@ -394,8 +495,80 @@ function EndDragItem()
 }
 
 // ---------------------------------------------
-// テキスト入力関連の関数
+// UI Panel Functions
 // ---------------------------------------------
+
+function createBasePanel(titleText, closeCallback, deleteCallback) {
+    if (currentUiPanel) return null; 
+
+    // Main panel
+    currentUiPanel = createDiv(''); 
+    currentUiPanel.position(GetMouseX() + 15, GetMouseY() - 10);
+    currentUiPanel.style('z-index', '1000');
+    currentUiPanel.style('background-color', 'rgba(240, 240, 240, 0.95)');
+    currentUiPanel.style('padding', '8px');
+    currentUiPanel.style('border-radius', '6px');
+    currentUiPanel.style('box-shadow', '0 2px 5px rgba(0,0,0,0.2)');
+    currentUiPanel.style('display', 'flex');
+    currentUiPanel.style('flex-direction', 'column');
+    currentUiPanel.style('gap', '8px');
+
+    // Header
+    const header = createDiv('');
+    header.parent(currentUiPanel);
+    header.style('display', 'flex');
+    header.style('justify-content', 'space-between');
+    header.style('align-items', 'center');
+
+    const title = createP(titleText);
+    title.parent(header);
+    title.style('margin', '0');
+    title.style('font-weight', 'bold');
+    title.style('color', '#333');
+    
+    const closeButton = createButton('×');
+    closeButton.parent(header);
+    closeButton.style('border', 'none');
+    closeButton.style('background', 'transparent');
+    closeButton.style('font-size', '18px');
+    closeButton.style('cursor', 'pointer');
+    closeButton.style('padding', '0 4px');
+    closeButton.elt.addEventListener('mousedown', (e) => {
+        e.stopPropagation(); 
+        closeCallback();
+    });
+
+    const contentArea = createDiv('');
+    contentArea.parent(currentUiPanel);
+
+    let footer = null;
+    if (deleteCallback) {
+        footer = createDiv('');
+        footer.parent(currentUiPanel);
+        footer.style('display', 'flex');
+        footer.style('justify-content', 'flex-end');
+        footer.style('margin-top', '8px');
+        footer.style('border-top', '1px solid #ddd');
+        footer.style('padding-top', '8px');
+
+        const deleteButton = createButton('Delete');
+        deleteButton.parent(footer);
+        deleteButton.style('border', '1px solid #ff4d4d');
+        deleteButton.style('background', '#fff');
+        deleteButton.style('color', '#ff4d4d');
+        deleteButton.style('font-size', '12px');
+        deleteButton.style('cursor', 'pointer');
+        deleteButton.style('padding', '2px 8px');
+        deleteButton.style('border-radius', '4px');
+        deleteButton.elt.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            deleteCallback();
+        });
+    }
+
+    return { panel: currentUiPanel, contentArea: contentArea };
+}
+
 
 function finishTextInput() {
     if (isFinishingText) return;
@@ -409,11 +582,11 @@ function finishTextInput() {
         }
     }
 
-    if(currentInputElement) {
-        currentInputElement.remove();
-        currentInputElement = null;
+    if(currentUiPanel) {
+        currentUiPanel.remove();
+        currentUiPanel = null;
     }
-    
+    currentInputElement = null;
     editingItem = null;
 
     setTimeout(() => {
@@ -421,20 +594,36 @@ function finishTextInput() {
     }, 50); 
 }
 
-function ChangeItem(item) {
-    if (currentInputElement) {
-        return;
-    }
+function createTextInput(item) {
+    const handleDelete = () => {
+        if (item.parentRing) {
+            const ring = item.parentRing;
+            const index = ring.items.indexOf(item);
+            if (index > -1) {
+                ring.RemoveItem(index);
+                ring.CalculateLayout();
+            }
+        } else {
+            fieldItems = fieldItems.filter(fItem => fItem !== item);
+        }
+        finishTextInput(); 
+    };
+    
+    const panelResult = createBasePanel('Edit Value', finishTextInput, handleDelete);
+    if (!panelResult) return;
+    const { contentArea } = panelResult;
 
-    editingItem = item; // 現在編集中のアイテムを保存
+    editingItem = item;
 
     currentInputElement = createInput(item.value);
-    currentInputElement.position(GetMouseX() + 15, GetMouseY() - 10);
-    currentInputElement.style('z-index', '1000');
-    currentInputElement.style('border', '1px solid black');
+    currentInputElement.parent(contentArea); 
+    currentInputElement.style('border', '1px solid #ccc');
     currentInputElement.style('padding', '4px');
     currentInputElement.style('font-size', '14px');
-    currentInputElement.elt.focus();
+    
+    const inputEl = currentInputElement.elt;
+    inputEl.focus();
+    inputEl.selectionStart = inputEl.selectionEnd = inputEl.value.length;
 
     const keyInterceptor = (e) => {
         e.stopImmediatePropagation();
@@ -448,15 +637,174 @@ function ChangeItem(item) {
     currentInputElement.elt.addEventListener('blur', finishTextInput);
 }
 
+function createSigilDropdown(item) {
+    const closeDropdown = () => {
+        if (currentUiPanel) {
+            currentUiPanel.remove();
+            currentUiPanel = null;
+        }
+        currentSelectElement = null;
+        editingItem = null;
+    };
+    
+    const handleDelete = () => {
+        if (item.parentRing) {
+            const ring = item.parentRing;
+            const index = ring.items.indexOf(item);
+            if (index > -1) {
+                ring.RemoveItem(index);
+                ring.CalculateLayout();
+            }
+        } else {
+            fieldItems = fieldItems.filter(fItem => fItem !== item);
+        }
+        closeDropdown();
+    };
+
+    const panelResult = createBasePanel('Select Sigil', closeDropdown, handleDelete);
+    if (!panelResult) return;
+    const { contentArea } = panelResult;
+
+    editingItem = item;
+
+    currentSelectElement = createSelect();
+    currentSelectElement.parent(contentArea); 
+    
+    const sigilOptions = [
+    "pop","exch","dup","copy","index", "roll", "add", "sub","mul","div","idiv","mod","abs","neg","sqrt","atan","cos","sin","rand","srand","rrand","array","string","length","get","put","getinterval","putinterval","forall","dict","begin","end","def","eq","ne","ge","gt","le","lt","and","not","or","xor","true","false","exec","if","ifelse","for","repeat","loop","exit", "color", "setcolor", "currentcolor", "print", "stack"
+    ];
+
+    sigilOptions.forEach(opt => {
+        currentSelectElement.option(opt);
+    });
+    
+    currentSelectElement.selected(item.value);
+
+    currentSelectElement.changed(() => {
+        if (editingItem) {
+            editingItem.value = currentSelectElement.value();
+            
+            if (editingItem.parentRing) {
+                editingItem.parentRing.CalculateLayout();
+            }
+        }
+        closeDropdown();
+    });
+}
+
+function createRingPanel(ring) {
+    const closePanel = () => {
+        if (currentUiPanel) {
+            currentUiPanel.remove();
+            currentUiPanel = null;
+        }
+        editingItem = null;
+    };
+    
+    const handleDelete = () => {
+        rings = rings.filter(r => r !== ring);
+        closePanel();
+    };
+
+    const panelResult = createBasePanel('Ring Settings', closePanel, handleDelete);
+    if (!panelResult) return;
+    const { contentArea } = panelResult;
+
+    editingItem = ring;
+
+    if (ring.isNew) {
+        const typeLabel = createP('Ring Type:');
+        typeLabel.parent(contentArea);
+        typeLabel.style('margin', '5px 0 2px 0');
+
+        const typeSelect = createSelect();
+        typeSelect.parent(contentArea);
+        typeSelect.option('MagicRing');
+        typeSelect.option('ArrayRing');
+        typeSelect.option('DictRing'); // ★DictRingを追加
+        typeSelect.selected(ring.constructor.name);
+
+        typeSelect.changed(() => {
+            const newType = typeSelect.value();
+            const ringIndex = rings.indexOf(ring);
+
+            if (ringIndex !== -1 && ring.constructor.name !== newType) {
+                let newRing;
+                if (newType === 'MagicRing') {
+                    newRing = new MagicRing(ring.pos);
+                } else if (newType === 'ArrayRing') { 
+                    newRing = new ArrayRing(ring.pos);
+                } else { // DictRing
+                    newRing = new DictRing(ring.pos);
+                }
+                newRing.isNew = false; 
+                rings[ringIndex] = newRing;
+            }
+            closePanel(); 
+        });
+    }
+
+    if (ring instanceof MagicRing) {
+        const jointButton = createButton('Create Joint');
+        jointButton.parent(contentArea);
+        jointButton.style('width', '100%');
+        jointButton.style('padding', '5px');
+        jointButton.style('margin-top', '5px');
+        jointButton.style('cursor', 'pointer');
+        
+        jointButton.elt.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+
+            const radius = ring.outerradius;
+            const angle = ring.angle;
+            const jointSpawnX = ring.pos.x + (radius + 60) * Math.sin(angle + 1/20*PI);
+            const jointSpawnY = ring.pos.y - (radius + 60) * Math.cos(angle + 1/20*PI);
+
+            const newJoint = new Joint(jointSpawnX, jointSpawnY, ring, null);
+            fieldItems.push(newJoint);
+
+            closePanel(); 
+        });
+    }
+}
+
+function createJointPanel(item) {
+    const closePanel = () => {
+        if (currentUiPanel) {
+            currentUiPanel.remove();
+            currentUiPanel = null;
+        }
+        editingItem = null;
+    };
+
+    const handleDelete = () => {
+        if (item.parentRing) {
+            const ring = item.parentRing;
+            const index = ring.items.indexOf(item);
+            if (index > -1) {
+                ring.RemoveItem(index);
+                ring.CalculateLayout();
+            }
+        } else {
+            fieldItems = fieldItems.filter(fItem => fItem !== item);
+        }
+        closePanel();
+    };
+
+    const panelResult = createBasePanel('Joint', closePanel, handleDelete);
+    if (!panelResult) return;
+    
+    editingItem = item;
+}
+
 // ---------------------------------------------
-// 描画範囲を移動させる
+// Panning
 // ---------------------------------------------
 function StartPan(mousePos)
 {
     isPanning = true;
     panStart = mousePos;
     SetMouseCursor('grabbing');
-    console.log("panStart");
 }
 
 function Pan(mousePos)
@@ -467,7 +815,6 @@ function Pan(mousePos)
     cameraPos.x -= dx / zoomSize;
     cameraPos.y -= dy / zoomSize;
     panStart = mousePos;
-    console.log("pan");
 }
 
 function EndPan()
@@ -475,5 +822,4 @@ function EndPan()
     if (!isPanning) return;
     isPanning = false;
     SetMouseCursor('grab');
-    console.log("panEnd");
 }

@@ -20,10 +20,10 @@ function DrawSigil(token, x, y, rotate = 0, zoom = 1)
             line(-0.3, -0.75, 0.3, -0.75);
             break;
         case "COMPLETE":
-            line(-0.25, 0, 0.25, 0);
-            line(0.25, 0, 0, -0.5);
-            line(-0.25, 0, 0, -0.5);
-            line(0, -0.5, 0, -1);
+            line(-0.25, 0.1, 0.25, 0.1);
+            line(0.25, 0.1, 0, -0.4);
+            line(-0.25, 0.1, 0, -0.4);
+            line(0, -0.4, 0, -0.9);
             break;
         case "pop": // スタックのトップを削除
             line(0.5, -0.5, 0.5, 0.5);
@@ -469,6 +469,10 @@ function DrawSigil(token, x, y, rotate = 0, zoom = 1)
             line(0.5, -0.5, 0.5, -0.25);
             for (let i=-0.25; i<0.3; i+=0.125)
                 line(0.2, i, -0.2, i);
+            break;
+        case "joint":
+            fill(0,0,0);
+            circle(0,0,0.15);
             break;
         case "name":
             push();
