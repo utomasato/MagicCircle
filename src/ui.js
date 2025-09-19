@@ -212,7 +212,8 @@ function createRingPanel(ring) {
     jointButton.elt.addEventListener('mousedown', (e) => {
         e.stopPropagation();
         const newJoint = new Joint(ring.pos.x, ring.pos.y, ring, null);
-        newJoint.pos.x += ring.outerradius + 40;
+        newJoint.pos.x += (ring.outerradius + 40) * cos(ring.angle - HALF_PI);
+        newJoint.pos.y += (ring.outerradius + 40) * sin(ring.angle - HALF_PI);
         fieldItems.push(newJoint);
         closePanel();
     });
