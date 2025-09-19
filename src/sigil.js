@@ -388,7 +388,7 @@ function DrawSigil(token, x, y, rotate = 0, zoom = 1)
             for (let i=0; i<5;i++)
             {
                 line(0, 0.5, 0.2939, -0.4045);
-                rotate(TWO_PI/5);
+                Rotate(TWO_PI/5);
             }
             pop();
             break;

@@ -82,7 +82,7 @@ function layoutSubtreeAndGetEffectiveRadius(parentRing, visited) {
                 const childB = children[j];
                 
                 const distBetween = dist(childA.ring.pos.x, childA.ring.pos.y, childB.ring.pos.x, childB.ring.pos.y);
-                const requiredDist = childA.effectiveRadius + childB.effectiveRadius;
+                const requiredDist = childA.effectiveRadius + childB.effectiveRadius + 5;
 
                 if (distBetween < requiredDist) {
                     collisionFound = true;

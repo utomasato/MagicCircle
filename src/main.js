@@ -75,6 +75,7 @@ function Start() {
         sigilWidth: 7,
         charSpacing: 0.2,
         charWidth: 1.5,
+        jointWidth: 2,
         fontSize: 15,
         fontColor: color(0, 0, 0),
         sigilSize: 40,
@@ -92,10 +93,10 @@ function Start() {
         new Button(190, 10, 50, 50, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, "str", function () { isAddStr = true; }),
         new Button(250, 10, 50, 50, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, "name", function () { isAddName = true; }),
         new Button(-10, 10, 50, 50, color(255, 200, 200), { x: 1, y: 0 }, { x: 1, y: 0 }, "▶️", function () { CommitMagicSpell(); }),
-        // --- ▼▼▼ ここから追加 ▼▼▼ ---
         new Button(-70, 10, 100, 50, color(200, 255, 200), { x: 1, y: 0 }, { x: 1, y: 0 }, "Execute", () => {
             if (rings.length > 0) {
                 const mpsCode = GenerateSpell(rings[0]);
+                console.log(mpsCode);
                 try {
                     const result = activeInterpreter.execute(mpsCode);
                     let consoleMessage = '';
@@ -111,7 +112,6 @@ function Start() {
                 }
             }
         }),
-        // --- ▲▲▲ ここまで ▲▲▲ ---
         new Button(10, -10, 40, 40, color(200, 200, 200), { x: 0, y: 1 }, { x: 0, y: 1 }, "-", function () { ZoomOut(); }),
         new Button(10, -60, 40, 40, color(200, 200, 200), { x: 0, y: 1 }, { x: 0, y: 1 }, "=", function () { ZoomReset(); }),
         new Button(10, -110, 40, 40, color(200, 200, 200), { x: 0, y: 1 }, { x: 0, y: 1 }, "+", function () { ZoomIn(); }),

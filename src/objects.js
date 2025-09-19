@@ -703,7 +703,7 @@ class Joint extends RingItem {
     
     GetLength()
     {
-        return config.sigilWidth;
+        return config.jointWidth;
     }
     
     DrawByRing(radius, angle, itemRadWidth)
