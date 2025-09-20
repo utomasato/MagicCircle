@@ -314,7 +314,7 @@ class ArrayRing extends MagicRing {
     }
 
     CheckPosIsOn(pos) {
-        if (isItemDragging && draggingItem && !this.CanAcceptItem(draggingItem.item)) {
+        if (inputMode == "itemDrag" && draggingItem && !this.CanAcceptItem(draggingItem.item)) {
             return false;
         }
         return super.CheckPosIsOn(pos);
@@ -381,7 +381,7 @@ class DictRing extends MagicRing {
     }
 
     CheckPosIsOn(pos) {
-        if (isItemDragging && draggingItem && !this.CanAcceptItem(draggingItem.item)) {
+        if (inputMode == "itemDrag" && draggingItem && !this.CanAcceptItem(draggingItem.item)) {
             return false;
         }
         return super.CheckPosIsOn(pos);
@@ -901,14 +901,18 @@ class Button
         DrawText(20, this.text, x + this.w/2, y + this.h/2, color(0, 0, 0), CENTER);
     }
     
-    CheckPressed()
+    CheckPressed(active = true)
     {
         let [width, height] = GetScreenSize();
         const x = width * this.anchor.x + this.x - this.w * this.pivot.x;
         const y = height * this.anchor.y + this.y - this.h * this.pivot.y;
         if (x < GetMouseX() && GetMouseX() < x + this.w && y < GetMouseY() && GetMouseY() < y + this.h)
         {
-            this.pressed();
+            if (active)
+            {
+                AddObjectMode = "";
+                this.pressed();
+            }
             return true;
         }
         return false;

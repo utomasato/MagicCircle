@@ -160,7 +160,6 @@ class PostscriptInterpreter {
                     currentToken = '';
                 }
             } else if (inString) {
-                // --- ▼▼▼ ここから修正 ▼▼▼ ---
                 currentToken += char;
                 if (char === '(') parenLevel++;
                 if (char === ')') parenLevel--;
@@ -169,7 +168,6 @@ class PostscriptInterpreter {
                     currentToken = '';
                     inString = false;
                 }
-                // --- ▲▲▲ ここまで ▲▲▲ ---
             } else if (char === '{') {
                 braceLevel++;
                 currentToken += char;
@@ -201,7 +199,6 @@ class PostscriptInterpreter {
 
     run(tokens) {
         for (const token of tokens) {
-            // --- ▼▼▼ ここから修正 ▼▼▼ ---
             if (typeof token === 'string' && token.startsWith('(') && token.endsWith(')')) {
                 this.stack.push(token.slice(1, -1)); // 文字列リテラルとしてスタックに積む
             } else if (typeof token === 'string' && this.commands[token]) {
@@ -226,7 +223,6 @@ class PostscriptInterpreter {
             } else {
                  this.stack.push(token);
             }
-            // --- ▲▲▲ ここまで ▲▲▲ ---
         }
     }
 

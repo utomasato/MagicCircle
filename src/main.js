@@ -14,30 +14,19 @@ let globalIsClockwise = false;
 // 入力と状態管理のためのグローバル変数
 // (他のファイルから参照されます)
 // =============================================
-let isPanning;
+let inputMode;
 let panStart = {};
-let isDragging;
 let dragOffset;
-let isRotating;
 let rotateOffset;
-let isAddRing;
-let isAddSigil;
-let isAddNum;
-let isAddStr;
-let isAddName;
-let isAddArrayRing;
-let isAddDictRing;
+let AddObjectMode = "";
 let mousePos = {};
 let selectRing;
-let isItemDragging;
 let draggingItem = {};
 let currentUiPanel = null;
 let currentInputElement = null;
 let currentSelectElement = null;
 let editingItem = null;
-let isFinishingText = false;
 
-// --- ▼▼▼ ここから追加 ▼▼▼ ---
 let interpreters = {};    // すべてのインタープリタのインスタンスを保持
 let activeInterpreter;    // 現在アクティブなインタープリタ
 
@@ -47,18 +36,15 @@ let consoleText = null;
 let isDraggingConsole = false;
 let consoleDragOffset = { x: 0, y: 0 };
 let isResizingConsole = false;
-// --- ▲▲▲ ここまで ▲▲▲ ---
 
 
 function Start() {
     debugMode = false;
     isUIHidden = false;
 
-    // --- ▼▼▼ ここから追加 ▼▼▼ ---
     interpreters['postscript'] = new PostscriptInterpreter();
     interpreters['lisp'] = new LispInterpreter();
     activeInterpreter = interpreters['postscript']; 
-    // --- ▲▲▲ ここまで ▲▲▲ ---
 
     let [width, height] = GetScreenSize();
     SetTitle("MagicEditor");
@@ -90,11 +76,11 @@ function Start() {
     };
 
     buttons = [
-        new Button(10, 10, 50, 50, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, "ring", function () { isAddRing = true; }),
-        new Button(70, 10, 50, 50, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, "sigil", function () { isAddSigil = true; }),
-        new Button(130, 10, 50, 50, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, "num", function () { isAddNum = true; }),
-        new Button(190, 10, 50, 50, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, "str", function () { isAddStr = true; }),
-        new Button(250, 10, 50, 50, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, "name", function () { isAddName = true; }),
+        new Button(10, 10, 50, 50, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, "ring", function () { AddObjectMode = "ring"; }),
+        new Button(70, 10, 50, 50, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, "sigil", function () { AddObjectMode = "sigil"; }),
+        new Button(130, 10, 50, 50, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, "num", function () { AddObjectMode = "num"; }),
+        new Button(190, 10, 50, 50, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, "str", function () { AddObjectMode = "str"; }),
+        new Button(250, 10, 50, 50, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, "name", function () { AddObjectMode = "name"; }),
         new Button(-10, 10, 50, 50, color(255, 200, 200), { x: 1, y: 0 }, { x: 1, y: 0 }, "▶️", function () {
                 if (rings.length > 0) {
                 const mpsCode = GenerateSpell(rings[0]);
@@ -117,11 +103,6 @@ function Start() {
         new Button(10, -10, 40, 40, color(200, 200, 200), { x: 0, y: 1 }, { x: 0, y: 1 }, "-", function () { ZoomOut(); }),
         new Button(10, -60, 40, 40, color(200, 200, 200), { x: 0, y: 1 }, { x: 0, y: 1 }, "=", function () { ZoomReset(); }),
         new Button(10, -110, 40, 40, color(200, 200, 200), { x: 0, y: 1 }, { x: 0, y: 1 }, "+", function () { ZoomIn(); }),
-        new Button(10, -210, 40, 40, color(200, 200, 200), { x: 0, y: 1 }, { x: 0, y: 1 }, "👁️", function () { isUIHidden = true; }),
-        new Button(10, -160, 40, 40, color(200, 200, 200), { x: 0, y: 1 }, { x: 0, y: 1 }, "📷", () => {
-            isUIHidden = true;       // UIを非表示に設定
-            screenshotRequest = true; // 次の描画フレームで撮影をリクエスト
-        }),
         new Button(10, 80, 40, 40, color(200, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, "a", function () { cursormode = "grad"; SetMouseCursor('grab'); }),
         new Button(60, 80, 40, 40, color(200, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, "b", function () { cursormode = "default"; SetMouseCursor('default'); }),
         new Button(110, 80, 160, 40, color(200, 220, 255), { x: 0, y: 0 }, { x: 0, y: 0 }, "Align Rings", () => {
@@ -129,15 +110,17 @@ function Start() {
                 alignConnectedRings(rings[0]);
             }
         }),
-        // --- ▼▼▼ ここから修正 ▼▼▼ ---
+        new Button(-10, 80, 40, 40, color(200, 200, 200), { x: 1, y: 0 }, { x: 1, y: 0 }, "👁️", function () { isUIHidden = true; }),
+        new Button(-60, 80, 40, 40, color(200, 200, 200), { x: 1, y: 0 }, { x: 1, y: 0 }, "📷", () => {
+            isUIHidden = true;       // UIを非表示に設定
+            screenshotRequest = true; // 次の描画フレームで撮影をリクエスト
+        }),
         new Button(-160, 10, 80, 50, color(220, 220, 255), { x: 1, y: 0 }, { x: 1, y: 0 }, "Import", () => {
             showXMLInputPanel();
         }),
         new Button(-70, 10, 80, 50, color(200, 255, 220), { x: 1, y: 0 }, { x: 1, y: 0 }, "Export", () => {
             exportToXML();
         }),
-        
-        // --- ▲▲▲ ここまで ▲▲▲ ---
     ];
 
     zoomSize = 1;
@@ -147,9 +130,7 @@ function Start() {
 
     rings = [new MagicRing({ x: 0, y: 0 })];
     
-    // --- ▼▼▼ ここから追加 ▼▼▼ ---
     createConsolePanel(); // ui.jsで定義された関数を呼び出す
-    // --- ▲▲▲ ここまで ▲▲▲ ---
 }
 
 function Update() {
@@ -190,6 +171,7 @@ function Draw() {
         DrawButtons();
         DrawText(12, "FPS: " + GetFPSText(), width - 10, height - 10, color(0, 0, 0), RIGHT);
         DrawText(12, "Size: " + zoomSize, width - 10, height - 30, color(0, 0, 0), RIGHT);
+        DrawText(12, "AOMode: " + AddObjectMode, width - 10, height - 50, color(0, 0, 0), RIGHT);
         if (debugMode) {
             DrawText(12, "MousePos: (" + mousePos.x.toFixed(2) + ", " + mousePos.y.toFixed(2) + ")", width - 10, height - 50, color(0, 0, 0), RIGHT);
             DrawText(12, "CameraPos: (" + cameraPos.x.toFixed(2) + ", " + cameraPos.y.toFixed(2) + ")", width - 10, height - 70, color(0, 0, 0), RIGHT);
@@ -226,7 +208,6 @@ function ZoomIn() { zoomSize = min(5, zoomSize + 0.1); }
 function ZoomOut() { zoomSize = max(0.1, zoomSize - 0.1); }
 function ZoomReset() { zoomSize = 1; }
 
-// --- ▼▼▼ ここから追加 ▼▼▼ ---
 function updateConsolePanel(message) {
     if (consoleText) {
         // テキスト内の改行文字(\n)をHTMLの<br>タグに変換して表示
@@ -242,7 +223,6 @@ function setInterpreter(name) {
         console.error(`Interpreter not found: ${name}`);
     }
 }
-// --- ▲▲▲ ここまで ▲▲▲ ---
 
 function CommitMagicSpell() {
     const magicSpell = GenerateSpell();

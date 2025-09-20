@@ -16,11 +16,9 @@ function alignConnectedRings(startRing) {
  */
 function layoutSubtreeAndGetEffectiveRadius(parentRing, visited) {
     if (!parentRing || visited.has(parentRing)) {
-        // --- ▼▼▼ ここから修正 ▼▼▼ ---
         if (parentRing) {
             parentRing.effectiveRadius = parentRing.outerradius;
         }
-        // --- ▲▲▲ ここまで ▲▲▲ ---
         return parentRing ? parentRing.outerradius : 0;
     }
     visited.add(parentRing);
@@ -44,9 +42,7 @@ function layoutSubtreeAndGetEffectiveRadius(parentRing, visited) {
     });
 
     if (children.length === 0) {
-        // --- ▼▼▼ ここから修正 ▼▼▼ ---
         parentRing.effectiveRadius = parentRing.outerradius;
-        // --- ▲▲▲ ここまで ▲▲▲ ---
         return parentRing.outerradius;
     }
     
@@ -54,8 +50,6 @@ function layoutSubtreeAndGetEffectiveRadius(parentRing, visited) {
     children.forEach(child => {
         child.effectiveRadius = layoutSubtreeAndGetEffectiveRadius(child.ring, new Set(visited));
     });
-
-    // --- ▼▼▼ ここから修正 ▼▼▼ ---
 
     // 3. 子リングを親の周りに配置
     const ringGap = 50;
@@ -78,7 +72,6 @@ function layoutSubtreeAndGetEffectiveRadius(parentRing, visited) {
         transformSubtree(child.ring, newX, newY, newAngle);
     });
 
-    // --- ▲▲▲ ここまで ▲▲▲ ---
 
     // 4. 子リング同士の衝突を解消
     const maxIterations = 10;
@@ -122,9 +115,7 @@ function layoutSubtreeAndGetEffectiveRadius(parentRing, visited) {
         maxExtent = max(maxExtent, distToChildCenter + child.effectiveRadius);
     });
     
-    // --- ▼▼▼ ここから修正 ▼▼▼ ---
     parentRing.effectiveRadius = maxExtent;
-    // --- ▲▲▲ ここまで ▲▲▲ ---
     return maxExtent;
 }
 

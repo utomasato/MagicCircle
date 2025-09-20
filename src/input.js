@@ -4,21 +4,11 @@
 
 function InputInitialize()
 {
-    isPanning = false;
+    let inputMode = "";
     panStart = {x: 0, y: 0};
-    isDragging = false;
     dragOffset = {x: 0, y: 0};
-    isRotating = false;
-    isAddRing = false;
-    isAddSigil = false;
-    isAddNum = false;
-    isAddStr = false;
-    isAddName = false;
-    isAddArrayRing = false;
-    isAddDictRing = false;
     mousePos = {x: 0, y: 0};
     selectRing = null;
-    isItemDragging = false;
     draggingItem = null;
 
     if (currentUiPanel) {
@@ -83,8 +73,41 @@ function MouseDownEvent()
                             break;
                     }
                     break;
-                case "item": StartDragItem(fieldItems[ClickObj[1]], ClickObj[1]); break;
-                default : StartPan(GetMousePos());
+                case "item":
+                    StartDragItem(fieldItems[ClickObj[1]], ClickObj[1]); break;
+                default :
+                    let newObject;
+                    switch (AddObjectMode)
+                    {
+                        case "ring":
+                            newObject = new MagicRing(mousePos);
+                            rings.push(newObject);
+                            createRingPanel(newObject);
+                            break;
+                        case "sigil":
+                            newObject = new Sigil(mousePos.x, mousePos.y, "add", null);
+                            fieldItems.push(newObject); 
+                            createSigilDropdown(newObject);
+                            break;
+                        case "num":
+                            newObject = new Chars(mousePos.x, mousePos.y, "0", null);
+                            fieldItems.push(newObject); 
+                            createTextInput(newObject);
+                            break;
+                        case "str":
+                            newObject = new StringToken(mousePos.x, mousePos.y, "Hello", null);
+                            fieldItems.push(newObject); 
+                            createTextInput(newObject);
+                            break;
+                        case "name":
+                            newObject = new Name(mousePos.x, mousePos.y, "name", null);
+                            fieldItems.push(newObject); 
+                            createTextInput(newObject);
+                            break;
+                        default :
+                            StartPan(GetMousePos());
+                    }
+                    AddObjectMode = "";
             }
             break;
         case "default":
@@ -126,34 +149,87 @@ function MouseHoldEvent()
 {
     if (isUIHidden) return;
     if (GetMouseX() > GetScreenSize()[0]) return;
-    if (isAddRing) { if (!CheckMouseOnMenu()) { selectRing = new MagicRing(mousePos); selectRing.isNew = true; rings.push(selectRing); StartDragRing(selectRing, mousePos); isAddRing = false; } }
-    else if (isAddArrayRing) { if (!CheckMouseOnMenu()){ selectRing = new ArrayRing(mousePos); selectRing.isNew = true; rings.push(selectRing); StartDragRing(selectRing, mousePos); isAddArrayRing = false; } }
-    else if (isAddDictRing) { if (!CheckMouseOnMenu()){ selectRing = new DictRing(mousePos); selectRing.isNew = true; rings.push(selectRing); StartDragRing(selectRing, mousePos); isAddDictRing = false; } }
-    else if (isAddSigil) { if (!CheckMouseOnMenu()) { const newItem = new Sigil(0, 0, "add", null); newItem.isNew = true; fieldItems.push(newItem); StartDragItem(newItem, fieldItems.length-1); isAddSigil = false; } }
-    else if (isAddNum) { if (!CheckMouseOnMenu()) { const newItem = new Chars(0, 0, "0", null); newItem.isNew = true; fieldItems.push(newItem); StartDragItem(newItem, fieldItems.length-1); isAddNum = false; } }
-    else if (isAddStr) { if (!CheckMouseOnMenu()) { const newItem = new StringToken(0, 0, "Hello", null); newItem.isNew = true; fieldItems.push(newItem); StartDragItem(newItem, fieldItems.length-1); isAddStr = false; } }
-    else if (isAddName) { if (!CheckMouseOnMenu()) { const newItem = new Name(0, 0, "name", null); newItem.isNew = true; fieldItems.push(newItem); StartDragItem(newItem, fieldItems.length-1); isAddName = false; } }
-    else if (isDragging) { DragRing(selectRing, mousePos); }
-    else if (isRotating) { RotateRing(selectRing, mousePos); }
-    else if (isPanning) { Pan(GetMousePos()); }
-    else if (isItemDragging) { }
+    //console.log(CheckMouseObject(false));
+    if (!CheckMouseOnMenu())
+    {
+        let newItem;
+        switch (AddObjectMode)
+        {
+            case "ring":
+                selectRing = new MagicRing(mousePos);
+                selectRing.isNew = true;
+                rings.push(selectRing);
+                StartDragRing(selectRing, mousePos);
+                break;
+            case "sigil":
+                newItem = new Sigil(0, 0, "add", null);
+                newItem.isNew = true;
+                fieldItems.push(newItem);
+                StartDragItem(newItem, fieldItems.length-1);
+                break;
+            case "num":
+                newItem = new Chars(0, 0, "0", null);
+                newItem.isNew = true;
+                fieldItems.push(newItem);
+                StartDragItem(newItem, fieldItems.length-1);
+                break;
+            case "str":
+                newItem = new StringToken(0, 0, "Hello", null);
+                newItem.isNew = true; 
+                fieldItems.push(newItem);
+                StartDragItem(newItem, fieldItems.length-1);
+                break;
+            case "name":
+                newItem = new Name(0, 0, "name", null);
+                newItem.isNew = true;
+                fieldItems.push(newItem);
+                StartDragItem(newItem, fieldItems.length-1);
+                break;
+        }
+        AddObjectMode = "";
+    }
+    switch (inputMode)
+    {
+        case "ringDrag":
+            DragRing(selectRing, mousePos);
+            break;
+        case "rotate":
+            RotateRing(selectRing, mousePos);RotateRing(selectRing, mousePos);
+            break;
+        case "pan":
+            Pan(GetMousePos());
+            break;
+        case "itemDrag":
+            break;
+    }
 }
 
 function MouseUpEvent()
 {
     if (isUIHidden) return;
     if (GetMouseX() > GetScreenSize()[0]) return;
-    if (isDragging) { EndDragRing(); }
-    else if (isRotating) { EndRotateRing(); }
-    else if (isPanning) { EndPan(); }
-    else if (isItemDragging) { EndDragItem(); }
-    isAddRing = false;
+    switch (inputMode)
+    {
+        case "ringDrag":
+            EndDragRing();
+            break;
+        case "rotate":
+            EndRotateRing();
+            break;
+        case "pan":
+            EndPan();
+            break;
+        case "itemDrag":
+            EndDragItem();
+            break;
+    }
+    inputMode = "";
 }
 
 
-function CheckMouseObject()
+function CheckMouseObject(buttonActive = true)
 {
-    if (CheckButtons()) { return ["button"]; }
+    if (CheckButtons(buttonActive)) { return ["button"]; }
     if (CheckMouseOnMenu()) { return ["menu"]; }
     const ring = CheckMouseOnRing();
     if (ring) { return ["ring", ring]; }
@@ -193,11 +269,11 @@ function DrawButtons()
     buttons.forEach (btn => { btn.Draw(); })
 }
 
-function CheckButtons()
+function CheckButtons(active = true)
 {   
     let isbutton = false;
-    buttons.forEach (btn => {
-        const result = btn.CheckPressed();
+    buttons.forEach (btn => {    
+        const result = btn.CheckPressed(active);
         if (result) isbutton = true;
     });
     return isbutton;
@@ -205,14 +281,13 @@ function CheckButtons()
 
 function StartDragRing(ring, pos)
 {
-    isDragging = true;
+    inputMode = "ringDrag";
     dragOffset.x = ring.pos.x - pos.x;
     dragOffset.y = ring.pos.y - pos.y;  
 }
 
 function DragRing(ring, pos)
 {
-    if (!isDragging) return;
     const oldPos = { x: ring.pos.x, y: ring.pos.y };
     const newX = pos.x + dragOffset.x;
     const newY = pos.y + dragOffset.y;
@@ -227,7 +302,7 @@ function EndDragRing()
     {
         rings = rings.filter(item => item !== selectRing);
     }
-    isDragging = false;
+    inputMode = "";
     if (selectRing && selectRing.isNew) {
         createRingPanel(selectRing);
         selectRing.isNew = false; 
@@ -236,14 +311,13 @@ function EndDragRing()
 
 function StartRotateRing(ring, pos)
 {
-    isRotating = true;
-    const mouseAngle = Math.atan2(pos.y - ring.pos.y, pos.x - ring.pos.x);
+    inputMode = "rotate";
+    const mouseAngle = Math.atan2(pos.y - ring.pos.y, pos.x - ring.pos.x);
     rotateOffset = ring.angle - mouseAngle;
 }
 
 function RotateRing(ring, pos)
 {
-    if(!isRotating) return;
     const oldAngle = ring.angle;
     const mouseAngle = Math.atan2(pos.y - ring.pos.y, pos.x - ring.pos.x);
     const newAngle = mouseAngle + rotateOffset;
@@ -263,12 +337,12 @@ function RotateRing(ring, pos)
 
 function EndRotateRing(ring)
 {
-    isRotating = false;
+    inputMode = "";
 }
 
 function StartDragItem(item, index)
 {
-    isItemDragging = true;
+    inputMode = "itemDrag";
     draggingItem = {item: item, index: index};
     if (item.parentRing)
         item.parentRing.items[index] = null;
@@ -279,8 +353,8 @@ function StartDragItem(item, index)
 function EndDragItem()
 {
     if (!draggingItem || !draggingItem.item) {
-        isItemDragging = false;
-        draggingItem = null;
+        inputMode = "itemDrag";
+        draggingItem = null;
         return;
     }
     const obj = CheckMouseObject();
@@ -328,22 +402,21 @@ function EndDragItem()
     }
 
     draggingItem = null;
-    isItemDragging = false;
-    if (originalRing) {
+    inputMode = "";
+    if (originalRing) {
         originalRing.CalculateLayout();
     }
 }
 
 function StartPan(mousePos)
 {
-    isPanning = true;
+    inputMode = "pan";
     panStart = mousePos;
     SetMouseCursor('grabbing');
 }
 
 function Pan(mousePos)
 {
-    if (!isPanning) return;
     const dx = mousePos.x - panStart.x;
     const dy = mousePos.y - panStart.y;
     cameraPos.x -= dx / zoomSize;
@@ -353,8 +426,7 @@ function Pan(mousePos)
 
 function EndPan()
 {
-    if (!isPanning) return;
-    isPanning = false;
+    inputMode = "";
     SetMouseCursor('grab');
 }
 
