@@ -581,3 +581,246 @@ function createConsolePanel() {
     // --- ▲▲▲ リサイズ処理の終了 ▲▲▲ ---
 }
 
+/**
+ * XMLコンテンツを表示するためのモーダルパネルを作成します。
+ * @param {string} xmlContent 表示するXML文字列
+ */
+function showXMLPanel(xmlContent) {
+    // 既存のUIパネルがあれば閉じる
+    if (currentUiPanel) {
+        currentUiPanel.remove();
+        currentUiPanel = null;
+    }
+
+    // 1. オーバーレイを作成
+    const overlay = createDiv('');
+    overlay.style('position', 'fixed');
+    overlay.style('top', '0');
+    overlay.style('left', '0');
+    overlay.style('width', '100%');
+    overlay.style('height', '100%');
+    overlay.style('background', 'rgba(0, 0, 0, 0.7)');
+    overlay.style('display', 'flex');
+    overlay.style('justify-content', 'center');
+    overlay.style('align-items', 'center');
+    overlay.style('z-index', '2000');
+
+    // 2. パネル本体を作成
+    const panel = createDiv('');
+    panel.parent(overlay);
+    panel.style('width', '80vw');
+    panel.style('height', '80vh');
+    panel.style('max-width', '800px');
+    panel.style('max-height', '600px');
+    panel.style('background', '#f5f5f5');
+    panel.style('border-radius', '8px');
+    panel.style('box-shadow', '0 4px 15px rgba(0,0,0,0.2)');
+    panel.style('display', 'flex');
+    panel.style('flex-direction', 'column');
+    panel.style('padding', '15px');
+
+    // パネルの外側をクリックしたら閉じる
+    overlay.elt.addEventListener('mousedown', (e) => {
+        if (e.target === overlay.elt) {
+            overlay.remove();
+        }
+    });
+    
+    // 3. ヘッダー
+    const header = createDiv('');
+    header.parent(panel);
+    header.style('display', 'flex');
+    header.style('justify-content', 'space-between');
+    header.style('align-items', 'center');
+    header.style('margin-bottom', '10px');
+    header.style('flex-shrink', '0');
+
+    const title = createP('XML Output');
+    title.parent(header);
+    title.style('margin', '0');
+    title.style('font-size', '18px');
+    title.style('font-weight', 'bold');
+
+    const closeButton = createButton('×');
+    closeButton.parent(header);
+    closeButton.style('border', 'none');
+    closeButton.style('background', 'transparent');
+    closeButton.style('font-size', '24px');
+    closeButton.style('cursor', 'pointer');
+    closeButton.mousePressed(() => {
+        overlay.remove();
+    });
+
+    // 4. テキストエリア
+    const textArea = createElement('textarea', xmlContent);
+    textArea.parent(panel);
+    textArea.attribute('readonly', '');
+    textArea.style('width', '100%');
+    textArea.style('flex-grow', '1');
+    textArea.style('resize', 'none');
+    textArea.style('border', '1px solid #ccc');
+    textArea.style('border-radius', '4px');
+    textArea.style('padding', '10px');
+    textArea.style('font-family', 'monospace');
+    textArea.style('font-size', '14px');
+    textArea.style('background-color', '#fff');
+
+    // 5. フッター（コピーボタン）
+    const footer = createDiv('');
+    footer.parent(panel);
+    footer.style('display', 'flex');
+    footer.style('justify-content', 'flex-end');
+    footer.style('margin-top', '10px');
+    footer.style('flex-shrink', '0');
+
+    const copyButton = createButton('クリップボードにコピー');
+    copyButton.parent(footer);
+    copyButton.style('padding', '8px 15px');
+    copyButton.style('border', '1px solid #007bff');
+    copyButton.style('background-color', '#007bff');
+    copyButton.style('color', 'white');
+    copyButton.style('border-radius', '4px');
+    copyButton.style('cursor', 'pointer');
+
+    copyButton.mousePressed(() => {
+        textArea.elt.select();
+        // execCommandはiframe環境での互換性のために使用
+        document.execCommand('copy');
+        copyButton.html('コピーしました！');
+        setTimeout(() => {
+            copyButton.html('クリップボードにコピー');
+        }, 2000);
+    });
+}
+// --- ▼▼▼ ここから追加 ▼▼▼ ---
+/**
+ * XMLをペーストしてインポートするためのモーダルパネルを作成します。
+ */
+function showXMLInputPanel() {
+    if (currentUiPanel) {
+        currentUiPanel.remove();
+        currentUiPanel = null;
+    }
+
+    const overlay = createDiv('');
+    overlay.style('position', 'fixed');
+    overlay.style('top', '0');
+    overlay.style('left', '0');
+    overlay.style('width', '100%');
+    overlay.style('height', '100%');
+    overlay.style('background', 'rgba(0, 0, 0, 0.7)');
+    overlay.style('display', 'flex');
+    overlay.style('justify-content', 'center');
+    overlay.style('align-items', 'center');
+    overlay.style('z-index', '2000');
+
+    const panel = createDiv('');
+    panel.parent(overlay);
+    panel.style('width', '80vw');
+    panel.style('height', '80vh');
+    panel.style('max-width', '800px');
+    panel.style('max-height', '600px');
+    panel.style('background', '#f5f5f5');
+    panel.style('border-radius', '8px');
+    panel.style('box-shadow', '0 4px 15px rgba(0,0,0,0.2)');
+    panel.style('display', 'flex');
+    panel.style('flex-direction', 'column');
+    panel.style('padding', '15px');
+
+    overlay.elt.addEventListener('mousedown', (e) => {
+        if (e.target === overlay.elt) {
+            overlay.remove();
+        }
+    });
+    
+    const header = createDiv('');
+    header.parent(panel);
+    header.style('display', 'flex');
+    header.style('justify-content', 'space-between');
+    header.style('align-items', 'center');
+    header.style('margin-bottom', '10px');
+    header.style('flex-shrink', '0');
+
+    const title = createP('XML Import');
+    title.parent(header);
+    title.style('margin', '0');
+    title.style('font-size', '18px');
+    title.style('font-weight', 'bold');
+
+    const closeButton = createButton('×');
+    closeButton.parent(header);
+    closeButton.style('border', 'none');
+    closeButton.style('background', 'transparent');
+    closeButton.style('font-size', '24px');
+    closeButton.style('cursor', 'pointer');
+    closeButton.mousePressed(() => {
+        overlay.remove();
+    });
+
+    const textArea = createElement('textarea', 'ここにXMLをペーストしてください...');
+    textArea.parent(panel);
+    textArea.style('width', '100%');
+    textArea.style('flex-grow', '1');
+    textArea.style('resize', 'none');
+    textArea.style('border', '1px solid #ccc');
+    textArea.style('border-radius', '4px');
+    textArea.style('padding', '10px');
+    textArea.style('font-family', 'monospace');
+    textArea.style('font-size', '14px');
+    textArea.style('background-color', '#fff');
+    textArea.elt.addEventListener('focus', () => {
+        if (textArea.value() === 'ここにXMLをペーストしてください...') {
+            textArea.value('');
+        }
+    });
+
+    const errorMsg = createP('');
+    errorMsg.parent(panel);
+    errorMsg.style('color', 'red');
+    errorMsg.style('margin', '5px 0 0 0');
+    errorMsg.style('font-size', '12px');
+    errorMsg.style('text-align', 'right');
+    errorMsg.style('flex-shrink', '0');
+    errorMsg.hide();
+
+    const footer = createDiv('');
+    footer.parent(panel);
+    footer.style('display', 'flex');
+    footer.style('justify-content', 'flex-end');
+    footer.style('gap', '10px');
+    footer.style('margin-top', '10px');
+    footer.style('flex-shrink', '0');
+
+    const handleImport = (mode) => {
+        try {
+            const xmlContent = textArea.value();
+            importFromXML(xmlContent, mode);
+            overlay.remove();
+        } catch (e) {
+            errorMsg.html(e.message);
+            errorMsg.show();
+        }
+    };
+
+    const addButton = createButton('追加 (Add)');
+    addButton.parent(footer);
+    addButton.style('padding', '8px 15px');
+    addButton.style('border', '1px solid #28a745');
+    addButton.style('background-color', '#28a745');
+    addButton.style('color', 'white');
+    addButton.style('border-radius', '4px');
+    addButton.style('cursor', 'pointer');
+    addButton.mousePressed(() => handleImport('add'));
+
+    const overwriteButton = createButton('上書き (Overwrite)');
+    overwriteButton.parent(footer);
+    overwriteButton.style('padding', '8px 15px');
+    overwriteButton.style('border', '1px solid #dc3545');
+    overwriteButton.style('background-color', '#dc3545');
+    overwriteButton.style('color', 'white');
+    overwriteButton.style('border-radius', '4px');
+    overwriteButton.style('cursor', 'pointer');
+    overwriteButton.mousePressed(() => handleImport('overwrite'));
+}
+// --- ▲▲▲ ここまで ▲▲▲ ---
+

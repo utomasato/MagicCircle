@@ -16,6 +16,11 @@ function alignConnectedRings(startRing) {
  */
 function layoutSubtreeAndGetEffectiveRadius(parentRing, visited) {
     if (!parentRing || visited.has(parentRing)) {
+        // --- ▼▼▼ ここから修正 ▼▼▼ ---
+        if (parentRing) {
+            parentRing.effectiveRadius = parentRing.outerradius;
+        }
+        // --- ▲▲▲ ここまで ▲▲▲ ---
         return parentRing ? parentRing.outerradius : 0;
     }
     visited.add(parentRing);
@@ -39,6 +44,9 @@ function layoutSubtreeAndGetEffectiveRadius(parentRing, visited) {
     });
 
     if (children.length === 0) {
+        // --- ▼▼▼ ここから修正 ▼▼▼ ---
+        parentRing.effectiveRadius = parentRing.outerradius;
+        // --- ▲▲▲ ここまで ▲▲▲ ---
         return parentRing.outerradius;
     }
     
@@ -82,7 +90,7 @@ function layoutSubtreeAndGetEffectiveRadius(parentRing, visited) {
                 const childB = children[j];
                 
                 const distBetween = dist(childA.ring.pos.x, childA.ring.pos.y, childB.ring.pos.x, childB.ring.pos.y);
-                const requiredDist = childA.effectiveRadius + childB.effectiveRadius;
+                const requiredDist = childA.effectiveRadius + childB.effectiveRadius + 5;
 
                 if (distBetween < requiredDist) {
                     collisionFound = true;
@@ -114,6 +122,9 @@ function layoutSubtreeAndGetEffectiveRadius(parentRing, visited) {
         maxExtent = max(maxExtent, distToChildCenter + child.effectiveRadius);
     });
     
+    // --- ▼▼▼ ここから修正 ▼▼▼ ---
+    parentRing.effectiveRadius = maxExtent;
+    // --- ▲▲▲ ここまで ▲▲▲ ---
     return maxExtent;
 }
 
@@ -211,4 +222,3 @@ function transformSubtree(ringToUpdate, newX, newY, newAngle) {
     
     ringToUpdate.angle = newAngle;
 }
-
