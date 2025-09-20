@@ -124,11 +124,12 @@ function createTextInput(item) {
     };
 
     const handleDuplicate = () => {
-        const newItem = item.clone();
+        const newItem = item.clone(new Map());
         if (item.parentRing) {
             const ring = item.parentRing;
             const index = ring.items.indexOf(item);
             ring.InsertItem(newItem, index + 1);
+            newItem.parentRing = ring; // 複製したアイテムに親リングを正しく設定
             ring.CalculateLayout();
         } else {
             const index = fieldItems.indexOf(item);
@@ -193,12 +194,14 @@ function createSigilDropdown(item) {
         } else { fieldItems = fieldItems.filter(fItem => fItem !== item); }
         closeDropdown();
     };
+
     const handleDuplicate = () => {
-        const newItem = item.clone();
+        const newItem = item.clone(new Map());
         if (item.parentRing) {
             const ring = item.parentRing;
             const index = ring.items.indexOf(item);
             ring.InsertItem(newItem, index + 1);
+            newItem.parentRing = ring; // 複製したアイテムに親リングを正しく設定
             ring.CalculateLayout();
         } else {
             const index = fieldItems.indexOf(item);
@@ -247,8 +250,7 @@ function createRingPanel(ring) {
         closePanel();
     };
     const handleDuplicate = () => {
-        const newRing = ring.clone();
-        rings.push(newRing);
+        ring.clone(); // cloneメソッド内でrings配列への追加が行われるため、ここでのpushは不要
         closePanel();
     };
 
@@ -363,12 +365,14 @@ function createJointPanel(item) {
         } else { fieldItems = fieldItems.filter(fItem => fItem !== item); }
         closePanel();
     };
+
     const handleDuplicate = () => {
-        const newItem = item.clone();
+        const newItem = item.clone(new Map());
         if (item.parentRing) {
             const ring = item.parentRing;
             const index = ring.items.indexOf(item);
             ring.InsertItem(newItem, index + 1);
+            newItem.parentRing = ring; // 複製したアイテムに親リングを正しく設定
             ring.CalculateLayout();
         } else {
             const index = fieldItems.indexOf(item);

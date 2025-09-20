@@ -24,6 +24,42 @@ class MagicRing
         this.CalculateLayout();
     }
 
+    // --- ▼▼▼ ここから修正 ▼▼▼ ---
+    clone(clonedMap = new Map()) {
+        // 既にこのリングが複製プロセスで処理されている場合は、その複製を返す
+        if (clonedMap.has(this)) {
+            return clonedMap.get(this);
+        }
+
+        // 新しいリングを少しずらした位置に生成
+        const newRing = new this.constructor({ x: this.pos.x + 50, y: this.pos.y + 50 });
+
+        // 循環参照を解決するため、新しいリングをすぐにマップに登録
+        clonedMap.set(this, newRing);
+
+        // グローバル配列に新しいリングを追加し、どこから複製されても登録されるようにする
+        rings.push(newRing);
+
+        // 角度などの基本プロパティをコピー
+        newRing.angle = this.angle;
+
+        // items配列をディープコピー（各アイテムもcloneする）
+        newRing.items = this.items.map(item => {
+            if (item) {
+                // cloneメソッドにclonedMapを渡す
+                const newItem = item.clone(clonedMap);
+                newItem.parentRing = newRing; // 新しい親リングへの参照を設定
+                return newItem;
+            }
+            return null;
+        });
+
+        // 新しいリングのレイアウトを再計算
+        newRing.CalculateLayout();
+
+        return newRing;
+    }
+    // --- ▲▲▲ ここまで ▲▲▲ ---
     
     CalculateLayout()
     {
@@ -367,6 +403,14 @@ class RingItem {
         this.parentRing = parentRing;
     }
     
+    // --- ▼▼▼ ここから修正 ▼▼▼ ---
+    clone(clonedMap) { // clonedMap引数を追加
+        // this.constructor を使うことで、呼び出し元のクラス（Sigil, Charsなど）の新しいインスタンスを生成できる
+        const newItem = new this.constructor(this.pos.x, this.pos.y, this.value, null);
+        return newItem;
+    }
+    // --- ▲▲▲ ここまで ▲▲▲ ---
+
     GetLength() { return 0; }
     DrawByRing(radius, layout, itemRadWidth) {}
     DrawByCanvas() {}
@@ -708,6 +752,29 @@ class Joint extends RingItem {
         super(x, y, value, parentRing); 
         this.type = "joint";
     }
+
+    // --- ▼▼▼ ここから追加 ▼▼▼ ---
+    clone(clonedMap) {
+        const newJoint = new Joint(this.pos.x, this.pos.y, null, null);
+
+        // 接続先のリング(this.value)が存在する場合
+        if (this.value instanceof MagicRing) {
+            // clonedMapに既に接続先のクローンが存在するかチェック
+            if (clonedMap.has(this.value)) {
+                // 存在すれば、そのクローンを参照する
+                newJoint.value = clonedMap.get(this.value);
+            } else {
+                // 存在しなければ、新たにクローンを作成し、それを参照する
+                // MagicRing.cloneがclonedMapを更新してくれる
+                newJoint.value = this.value.clone(clonedMap);
+            }
+        } else {
+            // リングでない場合（通常はありえないが念のため）は、そのまま値をコピー
+            newJoint.value = this.value;
+        }
+        return newJoint;
+    }
+    // --- ▲▲▲ ここまで ▲▲▲ ---
     
     GetLength()
     {
@@ -869,4 +936,3 @@ class Button
         return false;
     }
 }
-

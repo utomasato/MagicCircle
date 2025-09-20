@@ -128,7 +128,97 @@ function Start() {
 
     InputInitialize();
 
-    rings = [new MagicRing({ x: 0, y: 0 })];
+    // MPSコードに対応する魔法陣の構造を生成
+    rings = [
+        new MagicRing({ x: 0, y: 0 }),     // 0: NEW ROOT
+        new DictRing({ x: 0, y: 0 }),      // 1: old root
+        new DictRing({ x: 0, y: 0 }),      // 2: main
+        new DictRing({ x: 0, y: 0 }),      // 3: emission
+        new DictRing({ x: 0, y: 0 }),      // 4: shape
+        new DictRing({ x: 0, y: 0 }),      // 5: colorOverLifetime
+        new DictRing({ x: 0, y: 0 }),      // 6: rotationOverLifetime
+        new DictRing({ x: 0, y: 0 }),      // 7: renderer
+        new ArrayRing({ x: 0, y: 0 }),     // 8: startLifetime array
+        new ArrayRing({ x: 0, y: 0 }),     // 9: startSize array
+        new ArrayRing({ x: 0, y: 0 }),     // 10: startRotation array
+        new DictRing({ x: 0, y: 0 }),      // 11: gradient object < ... >
+        new ArrayRing({ x: 0, y: 0 }),     // 12: rotation (z) array
+        new ArrayRing({ x: 0, y: 0 }),     // 13: colorKeys array [ [...] ]
+        new ArrayRing({ x: 0, y: 0 }),     // 14: alphaKeys array [ [...] ]
+        new ArrayRing({ x: 0, y: 0 }),     // 15: colorKey 1
+        new ArrayRing({ x: 0, y: 0 }),     // 16: colorKey 2
+        new ArrayRing({ x: 0, y: 0 }),     // 17: alphaKey 1
+        new ArrayRing({ x: 0, y: 0 }),     // 18: alphaKey 2
+        new ArrayRing({ x: 0, y: 0 }),     // 19: alphaKey 3
+    ];
+    rings[0].items.push(new Joint(0, 0, rings[1], rings[0]));
+    rings[1].items.push(new Name(0, 0, "main", rings[1]));
+    rings[1].items.push(new Joint(0, 0, rings[2], rings[1]));
+    rings[1].items.push(new Name(0, 0, "emission", rings[1]));
+    rings[1].items.push(new Joint(0, 0, rings[3], rings[1]));
+    rings[1].items.push(new Name(0, 0, "shape", rings[1]));
+    rings[1].items.push(new Joint(0, 0, rings[4], rings[1]));
+    rings[1].items.push(new Name(0, 0, "colorOverLifetime", rings[1]));
+    rings[1].items.push(new Joint(0, 0, rings[5], rings[1]));
+    rings[1].items.push(new Name(0, 0, "rotationOverLifetime", rings[1]));
+    rings[1].items.push(new Joint(0, 0, rings[6], rings[1]));
+    rings[1].items.push(new Name(0, 0, "renderer", rings[1]));
+    rings[1].items.push(new Joint(0, 0, rings[7], rings[1]));
+    rings[2].items.push(new Name(0, 0, "startLifetime", rings[2]));
+    rings[2].items.push(new Joint(0, 0, rings[8], rings[2]));
+    rings[2].items.push(new Name(0, 0, "startSpeed", rings[2]));
+    rings[2].items.push(new Chars(0, 0, "0.5", rings[2]));
+    rings[2].items.push(new Name(0, 0, "startSize", rings[2]));
+    rings[2].items.push(new Joint(0, 0, rings[9], rings[2]));
+    rings[2].items.push(new Name(0, 0, "startRotation", rings[2]));
+    rings[2].items.push(new Joint(0, 0, rings[10], rings[2]));
+    rings[8].items.push(new Chars(0, 0, "0.5", rings[8]));
+    rings[8].items.push(new Chars(0, 0, "1.0", rings[8]));
+    rings[9].items.push(new Chars(0, 0, "0.2", rings[9]));
+    rings[9].items.push(new Chars(0, 0, "0.4", rings[9]));
+    rings[10].items.push(new Chars(0, 0, "0", rings[10]));
+    rings[10].items.push(new Chars(0, 0, "360", rings[10]));
+    rings[3].items.push(new Name(0, 0, "rateOverTime", rings[3]));
+    rings[3].items.push(new Chars(0, 0, "50", rings[3]));
+    rings[4].items.push(new Name(0, 0, "angle", rings[4]));
+    rings[4].items.push(new Chars(0, 0, "5", rings[4]));
+    rings[4].items.push(new Name(0, 0, "radius", rings[4]));
+    rings[4].items.push(new Chars(0, 0, "0.0001", rings[4]));
+    rings[5].items.push(new Name(0, 0, "gradient", rings[5]));
+    rings[5].items.push(new Joint(0, 0, rings[11], rings[5]));
+    rings[11].items.push(new Name(0, 0, "colorKeys", rings[11]));
+    rings[11].items.push(new Joint(0, 0, rings[13], rings[11]));
+    rings[11].items.push(new Name(0, 0, "alphaKeys", rings[11]));
+    rings[11].items.push(new Joint(0, 0, rings[14], rings[11]));
+    rings[13].items.push(new Joint(0, 0, rings[15], rings[13]));
+    rings[13].items.push(new Joint(0, 0, rings[16], rings[13]));
+    rings[15].items.push(new Chars(0, 0, "1.0", rings[15]));
+    rings[15].items.push(new Chars(0, 0, "0.6", rings[15]));
+    rings[15].items.push(new Chars(0, 0, "0.0", rings[15]));
+    rings[15].items.push(new Chars(0, 0, "1.0", rings[15]));
+    rings[15].items.push(new Chars(0, 0, "0.0", rings[15]));
+    rings[16].items.push(new Chars(0, 0, "1.0", rings[16]));
+    rings[16].items.push(new Chars(0, 0, "0.0", rings[16]));
+    rings[16].items.push(new Chars(0, 0, "0.0", rings[16]));
+    rings[16].items.push(new Chars(0, 0, "1.0", rings[16]));
+    rings[16].items.push(new Chars(0, 0, "1.0", rings[16]));
+    rings[14].items.push(new Joint(0, 0, rings[17], rings[14]));
+    rings[14].items.push(new Joint(0, 0, rings[18], rings[14]));
+    rings[14].items.push(new Joint(0, 0, rings[19], rings[14]));
+    rings[17].items.push(new Chars(0, 0, "0.0", rings[17]));
+    rings[17].items.push(new Chars(0, 0, "0.0", rings[17]));
+    rings[18].items.push(new Chars(0, 0, "1.0", rings[18]));
+    rings[18].items.push(new Chars(0, 0, "0.5", rings[18]));
+    rings[19].items.push(new Chars(0, 0, "0.0", rings[19]));
+    rings[19].items.push(new Chars(0, 0, "1.0", rings[19]));
+    rings[6].items.push(new StringToken(0, 0, "z", rings[6]));
+    rings[6].items.push(new Joint(0, 0, rings[12], rings[6]));
+    rings[12].items.push(new Chars(0, 0, "-45", rings[12]));
+    rings[12].items.push(new Chars(0, 0, "45", rings[12]));
+    rings[7].items.push(new Name(0, 0, "materialName", rings[7]));
+    rings[7].items.push(new StringToken(0, 0, "Fire_1", rings[7]));
+    rings.forEach(ring => ring.CalculateLayout());
+    alignConnectedRings(rings[0]);
     
     // --- ▼▼▼ ここから追加 ▼▼▼ ---
     createConsolePanel(); // ui.jsで定義された関数を呼び出す
