@@ -13,6 +13,9 @@ class MagicRing
         this.itemRadWidth = {sigil: 0, char: 0, charSpacing:0, padding: 0};
         this.layouts = [];
         this.angle = 0;
+        
+        this.spellstart = "{ ";
+        this.spellend = "}";
 
         // レイアウト計算で使用する設定値を変数として保持
         this.configWidth = config.ringWidth;
@@ -241,7 +244,7 @@ class MagicRing
         {
             if (item) spell += item.SpellToken() + " ";
         });
-        return spell;
+        return this.spellstart + spell + this.spellend;
     }
 }
 
@@ -252,6 +255,9 @@ class ArrayRing extends MagicRing {
 
         this.configWidth = config.arrayWidth;
         this.configMinCircumference = config.minArrayCircumference;
+        
+        this.spellstart = "[ ";
+        this.spellend = "]";
 
         this.CalculateLayout();
     }
@@ -289,6 +295,8 @@ class DictRing extends MagicRing {
     constructor(pos) {
         super(pos);
         this.items = [new Sigil(0, 0, "COMPLETE", this)]; 
+        this.spellstart = "< ";
+        this.spellend = ">";
         this.CalculateLayout();
     }
 
@@ -818,13 +826,7 @@ class Joint extends RingItem {
     {
         if (this.value && typeof this.value.Spell === 'function') {
             const spell = this.value.Spell();
-            if (this.value instanceof DictRing) {
-                return "< " + spell + " >";
-            } else if (this.value instanceof ArrayRing) {
-                return "[ " + spell + " ]";
-            } else { 
-                return "{ " + spell + " }";
-            }
+            return spell;
         }
         return "joint";
     }
