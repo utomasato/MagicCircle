@@ -77,12 +77,12 @@ function Start() {
     };
 
     buttons = [
-        new Button(10, 10, 55, 35, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "Ring", function () { AddObjectMode = "ring"; }),
-        new Button(70, 10, 55, 35, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, 17, false ? "Rune" : "Mark", function () { AddObjectMode = "sigil"; }),
-        new Button(130, 10, 55, 35, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "Num", function () { AddObjectMode = "num"; }),
-        new Button(190, 10, 55, 35, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "Str", function () { AddObjectMode = "str"; }),
-        new Button(250, 10, 55, 35, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "Name", function () { AddObjectMode = "name"; }),
-        new Button(-5, 10, 50, 35, color(255, 200, 200), { x: 1, y: 0 }, { x: 1, y: 0 }, 17, "Run", function () {
+        new Button(10, 10, 40, 40, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, 30, "ring", function () { AddObjectMode = "ring"; },true),
+        new Button(55, 10, 40, 40, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, 30, "sigil", function () { AddObjectMode = "sigil"; },true),
+        new Button(100, 10, 40, 40, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, 30, "num", function () { AddObjectMode = "num"; },true),
+        new Button(145, 10, 40, 40, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, 30, "string", function () { AddObjectMode = "str"; },true),
+        new Button(190, 10, 40, 40, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, 30, "name", function () { AddObjectMode = "name"; },true),
+        new Button(-5, 10, 40, 40, color(255, 200, 200), { x: 1, y: 0 }, { x: 1, y: 0 }, 17, "Run", function () {
                 if (rings.length > 0) {
                 const mpsCode = GenerateSpell(rings[0]);
                 console.log(mpsCode);
@@ -101,24 +101,24 @@ function Start() {
                 }
             }
         }),
-        new Button(-150, 10, 80, 35, color(220, 220, 255), { x: 1, y: 0 }, { x: 1, y: 0 }, 17, "Import", () => {
+        new Button(-150, 10, 80, 40, color(220, 220, 255), { x: 1, y: 0 }, { x: 1, y: 0 }, 17, "Import", () => {
             showXMLInputPanel();
         }),
-        new Button(-65, 10, 80, 35, color(200, 255, 220), { x: 1, y: 0 }, { x: 1, y: 0 }, 17, "Export", () => {
+        new Button(-65, 10, 80, 40, color(200, 255, 220), { x: 1, y: 0 }, { x: 1, y: 0 }, 17, "Export", () => {
             exportToXML();
         }),
-        new Button(10, -10, 35, 35, color(200, 200, 200), { x: 0, y: 1 }, { x: 0, y: 1 }, 25, "-", function () { ZoomOut(); }),
-        new Button(10, -50, 35, 35, color(200, 200, 200), { x: 0, y: 1 }, { x: 0, y: 1 }, 25, "=", function () { ZoomReset(); }),
-        new Button(10, -90, 35, 35, color(200, 200, 200), { x: 0, y: 1 }, { x: 0, y: 1 }, 25, "+", function () { ZoomIn(); }),
-        new Button(10, 60, 35, 35, color(200, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "a", function () { cursormode = "grad"; SetMouseCursor('grab'); }),
-        new Button(50, 60, 35, 35, color(200, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "b", function () { cursormode = "default"; SetMouseCursor('default'); }),
-        new Button(90, 60, 65, 35, color(200, 220, 255), { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "Align", () => {
+        new Button(10, -10, 40, 40, color(200, 200, 200), { x: 0, y: 1 }, { x: 0, y: 1 }, 25, "-", function () { ZoomOut(); }),
+        new Button(10, -55, 40, 40, color(200, 200, 200), { x: 0, y: 1 }, { x: 0, y: 1 }, 25, "=", function () { ZoomReset(); }),
+        new Button(10, -100, 40, 40, color(200, 200, 200), { x: 0, y: 1 }, { x: 0, y: 1 }, 25, "+", function () { ZoomIn(); }),
+        new Button(10, 60, 40, 40, color(200, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "🖐️", function () { cursormode = "grad"; SetMouseCursor('grab'); }),
+        new Button(55, 60, 40, 40, color(200, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "🪶", function () { cursormode = "default"; SetMouseCursor('default'); }),
+        new Button(100, 60, 65, 40, color(200, 220, 255), { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "Align", () => {
             if (rings.length > 0) {
                 alignConnectedRings(rings[0]);
             }
         }),
-        new Button(-10, 60, 35, 35, color(200, 200, 200), { x: 1, y: 0 }, { x: 1, y: 0 }, 20, "👁️", function () { isUIHidden = true; }),
-        new Button(-50, 60, 35, 35, color(200, 200, 200), { x: 1, y: 0 }, { x: 1, y: 0 }, 20, "📷", () => {
+        new Button(-10, 60, 40, 40, color(200, 200, 200), { x: 1, y: 0 }, { x: 1, y: 0 }, 20, "👁️", function () { isUIHidden = true; }),
+        new Button(-55, 60, 40, 40, color(200, 200, 200), { x: 1, y: 0 }, { x: 1, y: 0 }, 20, "📷", () => {
             isUIHidden = true;       // UIを非表示に設定
             screenshotRequest = true; // 次の描画フレームで撮影をリクエスト
         }),

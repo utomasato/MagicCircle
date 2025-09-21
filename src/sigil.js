@@ -533,3 +533,103 @@ function sigil_parts(part)
             break;
     }
 }
+
+function DrawIcon(a, x, y, size)
+{
+    PushTransform();
+    Translate(x, y);
+    Scale(size);
+    stroke(config.sigilColor);
+    strokeWeight(config.sigilLineWidth);
+    noFill();
+    switch (a)
+    {
+        case "ring":
+            ellipse(0, 0, 1);
+            ellipse(0, 0, 0.8);
+            line(0, 0.4, 0.3464, -0.2);
+            line(0.3464, -0.2, -0.3464, -0.2);
+            line(-0.3464, -0.2, 0, 0.4);
+            line(0, -0.4, 0.3464, 0.2);
+            line(0.3464, 0.2, -0.3464, 0.2);
+            line(-0.3464, 0.2, 0, -0.4);
+            break;
+        case "sigil":
+            const n = 0.9;
+            line(-0.5, -0.05, -0.275, -0.5);
+            line(-0.275, -0.5, -0.05, -0.05);
+            line(-0.3875, -0.275, -0.1625, -0.275);
+            line(-0.275, -0.1625, -0.275, -0.3875);
+
+            arc(0.17375, -0.3875, -0.225, -0.225, HALF_PI, TWO_PI);
+            arc(0.17375, -0.1625, -0.225, -0.225, -HALF_PI, PI);
+            line(0.41675, -0.1625, 0.17375, -0.1625);
+
+            line(-0.05, 0.5, -0.05, 0.05);
+            line(-0.05, 0.05, -0.3875, 0.3875);
+            line(-0.5, 0.5, -0.5, 0.05);
+            line(-0.5, 0.05, -0.1625, 0.3875);
+
+            line(0.1625, 0.5, 0.1625, 0.05);
+            line(0.1625, 0.05, 0.275, 0.05);
+            arc(0.275, 0.275, -0.45, -0.45, -HALF_PI, HALF_PI);
+            line(0.275, 0.5, 0.1625, 0.5);
+            ellipse(0.05, 0.275, 0.036);
+            ellipse(0.275, 0.275, 0.036);
+            break;
+        case "num":
+            /*　こっちだとSafariで実行時文字の位置がズレる　原因不明 Chromeだと正常に動く
+            textSize(0.5);
+            textAlign(CENTER,CENTER);
+            fill(0);
+            strokeWeight(0);
+            text("123",0,-0.25);
+            text("var",0, 0.25);
+            */
+            pop();
+            DrawText(size*0.5, "123", x, y-size*0.25, config.fontColor, CENTER);
+            DrawText(size*0.5, "var", x, y+size*0.25, config.fontColor, CENTER);
+            push();
+            break;
+        case "string":
+            /*　こっちだとSafariで実行時文字の位置がズレる　原因不明 Chromeだと正常に動く
+            textSize(0.5);
+            textAlign(CENTER,CENTER);
+            fill(0);
+            strokeWeight(0);
+            text("Str",0,0);
+            */
+            pop();
+            DrawText(size*0.5, "Str", x, y, config.fontColor, CENTER);
+            push();
+            break;
+        case "name":
+            /*　こっちだとSafariで実行時文字の位置がズレる　原因不明 Chromeだと正常に動く
+            textSize(0.4);
+            textAlign(CENTER,CENTER);
+            fill(0);
+            strokeWeight(0);
+            text("Name",0,0);
+            */
+            pop();
+            DrawText(size*0.5, "Name", x, y, config.fontColor, CENTER);
+            push();
+            break;
+        default:
+            /*　こっちだとSafariで実行時文字の位置がズレる　原因不明 Chromeだと正常に動く
+            textSize(1);
+            textAlign(CENTER,CENTER);
+            fill(0);
+            strokeWeight(0);
+            text(a,0,0);
+            */
+            pop();
+            textSize(size);
+            textAlign(CENTER,CENTER);
+            fill(0);
+            strokeWeight(0);
+            text(a,x,y);
+            push();
+    }
+    pop();
+}

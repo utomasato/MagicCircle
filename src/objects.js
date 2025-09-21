@@ -863,7 +863,7 @@ class Joint extends RingItem {
 }
 class Button
 {
-    constructor(x, y, w, h, color, anchor, pivot, fontSize, text, pressed)
+    constructor(x, y, w, h, color, anchor, pivot, size, text, pressed, isIcon = false)
     {
         this.x = x;
         this.y = y;
@@ -872,9 +872,11 @@ class Button
         this.color = color;
         this.anchor = anchor;
         this.pivot = pivot;
-        this.fontSize = fontSize;
+        this.size = size;
         this.text = text;
         this.pressed = pressed;
+        this.isIcon = isIcon;
+        console.log(isIcon)
     }
     
     Draw()
@@ -884,7 +886,8 @@ class Button
         const y = height * this.anchor.y + this.y - this.h * this.pivot.y;
         DrawRoundRect(x, y, this.w, this.h, 10, color(0,0,0), 3); 
         FillRoundRect(x, y, this.w, this.h, 10, this.color);
-        DrawText(this.fontSize, this.text, x + this.w/2, y + this.h/2, color(0, 0, 0), CENTER);
+        //DrawText(this.size, this.text, x + this.w/2, y + this.h/2, color(0, 0, 0), CENTER);
+        DrawIcon(this.text, x + this.w/2, y + this.h/2, this.size);
     }
     
     CheckPressed(active = true)

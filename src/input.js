@@ -66,6 +66,7 @@ function MouseDownEvent()
 
 
     if (GetMouseX() > GetScreenSize()[0]) return;
+    if (AddObjectMode != "") return;
     const ClickObj = CheckMouseObject();
     switch (cursormode)
     {
@@ -92,7 +93,8 @@ function MouseDownEvent()
                     }
                     break;
                 case "item":
-                    StartDragItem(fieldItems[ClickObj[1]], ClickObj[1]); break;
+                    StartDragItem(fieldItems[ClickObj[1]], ClickObj[1]);
+                    break;
                 default :
                     let newObject;
                     switch (AddObjectMode)

@@ -39,6 +39,20 @@
             font-family: Arial, sans-serif;
             /* iOS Safariでのオーバースクロール（画面が引っ張られる現象）を防止 */
             touch-action: none;
+            /* --- ▼▼▼ Prevent text selection on canvas ▼▼▼ --- */
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* IE 10+ */
+            user-select: none;         /* Standard syntax */
+            -webkit-touch-callout: none; /* Disable callout on iOS */
+        }
+
+        /* --- ▼▼▼ Allow text selection on inputs ▼▼▼ --- */
+        input, textarea, [contenteditable="true"] {
+            -webkit-user-select: auto;
+            -moz-user-select: auto;
+            -ms-user-select: auto;
+            user-select: auto;
         }
 
         /* Erudaデバッグボタンを常に右下に配置 */
