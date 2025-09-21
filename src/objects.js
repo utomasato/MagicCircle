@@ -443,7 +443,7 @@ class Sigil extends RingItem {
     
     DrawByDrag()
     {
-        const ClickObj = CheckMouseObject();
+        const ClickObj = CheckMouseObject(false);
         if (ClickObj[0] == "ring")
         {
             const ring = ClickObj[1][0];
@@ -508,7 +508,7 @@ class Chars extends RingItem {
     
     DrawByDrag()
     {
-        const ClickObj = CheckMouseObject();
+        const ClickObj = CheckMouseObject(false);
         if (ClickObj[0] == "ring")
         {
             const ring = ClickObj[1][0];
@@ -595,7 +595,7 @@ class StringToken extends RingItem {
     
     DrawByDrag()
     {
-        const ClickObj = CheckMouseObject();
+        const ClickObj = CheckMouseObject(false);
         PushTransform();
         
         Translate(GetMouseX(), GetMouseY());
@@ -660,22 +660,7 @@ class Name extends RingItem {
     }
     
     DrawByRing(radius, angle, itemRadWidth)
-    {
-        /*
-        PushTransform();
-        Rotate(angle);
-        if (!globalIsClockwise) Rotate(PI);
-        const radwide = this.GetLength() / radius * TWO_PI;
-        Rotate((radwide/2 - itemRadWidth.char/2) * direction);
-        const chars = this.value.split('');
-        chars.forEach(char =>
-        {
-            DrawText(config.fontSize, char, 0, radius * direction , config.fontColor, CENTER);
-            Rotate((-itemRadWidth.char-itemRadWidth.charSpacing) * direction);
-        });
-        PopTransform();
-        */
-        
+    {   
         const direction = globalIsClockwise ? -1 : 1;
         PushTransform();
         Rotate(angle);
@@ -694,7 +679,7 @@ class Name extends RingItem {
 
     DrawByDrag()
     {
-        const ClickObj = CheckMouseObject();
+        const ClickObj = CheckMouseObject(false);
         PushTransform();
         
         Translate(GetMouseX(), GetMouseY());
@@ -806,7 +791,7 @@ class Joint extends RingItem {
             bezier(p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y);
         }
         
-        const ClickObj = CheckMouseObject();
+        const ClickObj = CheckMouseObject(false);
         if (ClickObj[0] == "ring")
         {
             const ring = ClickObj[1][0];
@@ -878,7 +863,7 @@ class Joint extends RingItem {
 }
 class Button
 {
-    constructor(x, y, w, h, color, anchor, pivot, text, pressed)
+    constructor(x, y, w, h, color, anchor, pivot, fontSize, text, pressed)
     {
         this.x = x;
         this.y = y;
@@ -887,6 +872,7 @@ class Button
         this.color = color;
         this.anchor = anchor;
         this.pivot = pivot;
+        this.fontSize = fontSize;
         this.text = text;
         this.pressed = pressed;
     }
@@ -898,7 +884,7 @@ class Button
         const y = height * this.anchor.y + this.y - this.h * this.pivot.y;
         DrawRoundRect(x, y, this.w, this.h, 10, color(0,0,0), 3); 
         FillRoundRect(x, y, this.w, this.h, 10, this.color);
-        DrawText(20, this.text, x + this.w/2, y + this.h/2, color(0, 0, 0), CENTER);
+        DrawText(this.fontSize, this.text, x + this.w/2, y + this.h/2, color(0, 0, 0), CENTER);
     }
     
     CheckPressed(active = true)

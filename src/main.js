@@ -55,7 +55,7 @@ function Start() {
         bgColor: color(255, 255, 255),
         gridColor: color(200, 200, 200, 100),
         gridWidth: 100,
-        menuHeight: 70,
+        menuHeight: 55,
         menuBgColor: color(55, 55, 55, 200),
         ringWidth: 45,
         arrayWidth: 30,
@@ -77,12 +77,12 @@ function Start() {
     };
 
     buttons = [
-        new Button(10, 10, 50, 50, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, "ring", function () { AddObjectMode = "ring"; }),
-        new Button(70, 10, 50, 50, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, "sigil", function () { AddObjectMode = "sigil"; }),
-        new Button(130, 10, 50, 50, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, "num", function () { AddObjectMode = "num"; }),
-        new Button(190, 10, 50, 50, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, "str", function () { AddObjectMode = "str"; }),
-        new Button(250, 10, 50, 50, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, "name", function () { AddObjectMode = "name"; }),
-        new Button(-10, 10, 50, 50, color(255, 200, 200), { x: 1, y: 0 }, { x: 1, y: 0 }, "▶️", function () {
+        new Button(10, 10, 55, 35, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "Ring", function () { AddObjectMode = "ring"; }),
+        new Button(70, 10, 55, 35, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, 17, false ? "Rune" : "Mark", function () { AddObjectMode = "sigil"; }),
+        new Button(130, 10, 55, 35, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "Num", function () { AddObjectMode = "num"; }),
+        new Button(190, 10, 55, 35, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "Str", function () { AddObjectMode = "str"; }),
+        new Button(250, 10, 55, 35, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "Name", function () { AddObjectMode = "name"; }),
+        new Button(-5, 10, 50, 35, color(255, 200, 200), { x: 1, y: 0 }, { x: 1, y: 0 }, 17, "Run", function () {
                 if (rings.length > 0) {
                 const mpsCode = GenerateSpell(rings[0]);
                 console.log(mpsCode);
@@ -101,26 +101,26 @@ function Start() {
                 }
             }
         }),
-        new Button(10, -10, 40, 40, color(200, 200, 200), { x: 0, y: 1 }, { x: 0, y: 1 }, "-", function () { ZoomOut(); }),
-        new Button(10, -60, 40, 40, color(200, 200, 200), { x: 0, y: 1 }, { x: 0, y: 1 }, "=", function () { ZoomReset(); }),
-        new Button(10, -110, 40, 40, color(200, 200, 200), { x: 0, y: 1 }, { x: 0, y: 1 }, "+", function () { ZoomIn(); }),
-        new Button(10, 80, 40, 40, color(200, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, "a", function () { cursormode = "grad"; SetMouseCursor('grab'); }),
-        new Button(60, 80, 40, 40, color(200, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, "b", function () { cursormode = "default"; SetMouseCursor('default'); }),
-        new Button(110, 80, 160, 40, color(200, 220, 255), { x: 0, y: 0 }, { x: 0, y: 0 }, "Align Rings", () => {
+        new Button(-150, 10, 80, 35, color(220, 220, 255), { x: 1, y: 0 }, { x: 1, y: 0 }, 17, "Import", () => {
+            showXMLInputPanel();
+        }),
+        new Button(-65, 10, 80, 35, color(200, 255, 220), { x: 1, y: 0 }, { x: 1, y: 0 }, 17, "Export", () => {
+            exportToXML();
+        }),
+        new Button(10, -10, 35, 35, color(200, 200, 200), { x: 0, y: 1 }, { x: 0, y: 1 }, 25, "-", function () { ZoomOut(); }),
+        new Button(10, -50, 35, 35, color(200, 200, 200), { x: 0, y: 1 }, { x: 0, y: 1 }, 25, "=", function () { ZoomReset(); }),
+        new Button(10, -90, 35, 35, color(200, 200, 200), { x: 0, y: 1 }, { x: 0, y: 1 }, 25, "+", function () { ZoomIn(); }),
+        new Button(10, 60, 35, 35, color(200, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "a", function () { cursormode = "grad"; SetMouseCursor('grab'); }),
+        new Button(50, 60, 35, 35, color(200, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "b", function () { cursormode = "default"; SetMouseCursor('default'); }),
+        new Button(90, 60, 65, 35, color(200, 220, 255), { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "Align", () => {
             if (rings.length > 0) {
                 alignConnectedRings(rings[0]);
             }
         }),
-        new Button(-10, 80, 40, 40, color(200, 200, 200), { x: 1, y: 0 }, { x: 1, y: 0 }, "👁️", function () { isUIHidden = true; }),
-        new Button(-60, 80, 40, 40, color(200, 200, 200), { x: 1, y: 0 }, { x: 1, y: 0 }, "📷", () => {
+        new Button(-10, 60, 35, 35, color(200, 200, 200), { x: 1, y: 0 }, { x: 1, y: 0 }, 20, "👁️", function () { isUIHidden = true; }),
+        new Button(-50, 60, 35, 35, color(200, 200, 200), { x: 1, y: 0 }, { x: 1, y: 0 }, 20, "📷", () => {
             isUIHidden = true;       // UIを非表示に設定
             screenshotRequest = true; // 次の描画フレームで撮影をリクエスト
-        }),
-        new Button(-160, 10, 80, 50, color(220, 220, 255), { x: 1, y: 0 }, { x: 1, y: 0 }, "Import", () => {
-            showXMLInputPanel();
-        }),
-        new Button(-70, 10, 80, 50, color(200, 255, 220), { x: 1, y: 0 }, { x: 1, y: 0 }, "Export", () => {
-            exportToXML();
         }),
     ];
 
@@ -172,7 +172,6 @@ function Draw() {
         DrawButtons();
         DrawText(12, "FPS: " + GetFPSText(), width - 10, height - 10, color(0, 0, 0), RIGHT);
         DrawText(12, "Size: " + zoomSize, width - 10, height - 30, color(0, 0, 0), RIGHT);
-        DrawText(12, "AOMode: " + AddObjectMode, width - 10, height - 50, color(0, 0, 0), RIGHT);
         if (debugMode) {
             DrawText(12, "MousePos: (" + mousePos.x.toFixed(2) + ", " + mousePos.y.toFixed(2) + ")", width - 10, height - 50, color(0, 0, 0), RIGHT);
             DrawText(12, "CameraPos: (" + cameraPos.x.toFixed(2) + ", " + cameraPos.y.toFixed(2) + ")", width - 10, height - 70, color(0, 0, 0), RIGHT);

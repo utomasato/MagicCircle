@@ -211,7 +211,7 @@ function createSigilDropdown(item) {
         closeDropdown();
     };
 
-    const panelResult = createBasePanel('Select Sigil', closeDropdown, handleDelete, handleDuplicate);
+    const panelResult = createBasePanel('Select Mark', closeDropdown, handleDelete, handleDuplicate);
     if (!panelResult) return;
     const { contentArea } = panelResult;
     editingItem = item;
