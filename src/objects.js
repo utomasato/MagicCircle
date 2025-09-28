@@ -876,7 +876,7 @@ class Button
         this.text = text;
         this.pressed = pressed;
         this.isIcon = isIcon;
-        console.log(isIcon)
+        //console.log(isIcon)
     }
     
     Draw()

@@ -9,7 +9,7 @@
 class PostscriptInterpreter {
     constructor() {
         this.stack = [];
-        this.dictStack = [{}]; 
+        this.dictStack = [{}];
         this.commandLoopLevel = 0;
         this.output = [];
 
@@ -50,20 +50,133 @@ class PostscriptInterpreter {
             rand: () => { this.stack.push(Math.floor(Math.random() * 2147483647)); },
             srand: () => { /* Not implemented */ },
             rrand: () => { /* Not implemented */ },
-            length: () => { this.stack.push(this.stack.pop().length); },
-            get: () => { const [index, arr] = [this.stack.pop(), this.stack.pop()]; this.stack.push(arr[index]); },
-            put: () => { const [value, index, arr] = [this.stack.pop(), this.stack.pop(), this.stack.pop()]; arr[index] = value; },
-            getinterval: () => { const [count, index, arr] = [this.stack.pop(), this.stack.pop(), this.stack.pop()]; this.stack.push(arr.slice(index, index + count)); },
-            putinterval: () => { const [subArr, index, arr] = [this.stack.pop(), this.stack.pop(), this.stack.pop()]; arr.splice(index, subArr.length, ...subArr); },
-            forall: () => {
-                const proc = this.stack.pop();
-                const arr = this.stack.pop();
-                for (const item of arr) {
-                    this.stack.push(item);
-                    this.run(proc);
+            length: () => {
+                const obj = this.stack.pop();
+                let len;
+                if (typeof obj === 'object' && obj !== null && (obj.type === 'array' || obj.type === 'string') && Array.isArray(obj.value)) {
+                    len = obj.value.length;
+                } else if (typeof obj === 'string') { // Fallback for native strings from variables
+                    len = obj.length;
+                } else {
+                    throw new Error("`length` requires an array or string.");
+                }
+                this.stack.push(len);
+            },
+            get: () => {
+                const indexOrKey = this.stack.pop();
+                const collection = this.stack.pop();
+                let val = null;
+
+                if (typeof collection === 'object' && collection !== null && (collection.type === 'array' || collection.type === 'string') && Array.isArray(collection.value)) {
+                    val = collection.value[indexOrKey];
+                } else if (typeof collection === 'object' && collection !== null && collection.type === 'dict') {
+                     const dictTokens = collection.value;
+                    for (let i = 0; i < dictTokens.length; i += 2) {
+                        const keyToken = dictTokens[i];
+                        if (keyToken === indexOrKey || (typeof keyToken === 'object' && keyToken.type ==='string' && keyToken.value.join('') === indexOrKey)) {
+                            val = dictTokens[i + 1];
+                            break;
+                        }
+                    }
+                } else if (typeof collection === 'string') { // Fallback for native strings from variables
+                    val = collection.charAt(indexOrKey);
+                } else {
+                    throw new Error("`get` requires an array, dictionary, or string.");
+                }
+                this.stack.push(val);
+            },
+            // --- ▼▼▼ ここから修正 ▼▼▼ ---
+            put: () => {
+                let value = this.stack.pop();
+                const indexOrKey = this.stack.pop();
+                const collection = this.stack.pop();
+
+                if (typeof collection === 'object' && collection !== null && collection.type === 'string' && Array.isArray(collection.value)) {
+                    // If the value to put is a string object, extract its first character.
+                    if (typeof value === 'object' && value !== null && value.type === 'string' && value.value.length > 0) {
+                        value = value.value[0];
+                    }
+                    // Then convert the final value to its string representation.
+                    collection.value[indexOrKey] = String(value);
+                } else if (typeof collection === 'object' && collection !== null && collection.type === 'array' && Array.isArray(collection.value)) {
+                    collection.value[indexOrKey] = value;
+                } else if (typeof collection === 'object' && collection !== null && collection.type === 'dict') {
+                    const dictTokens = collection.value;
+                    let keyFound = false;
+                    for (let i = 0; i < dictTokens.length; i += 2) {
+                         const keyToken = dictTokens[i];
+                        if (keyToken === indexOrKey || (typeof keyToken === 'object' && keyToken.type ==='string' && keyToken.value.join('') === indexOrKey)) {
+                            dictTokens[i + 1] = value;
+                            keyFound = true;
+                            break;
+                        }
+                    }
+                    if (!keyFound) {
+                        dictTokens.push(indexOrKey, value);
+                    }
+                } else {
+                    throw new Error("`put` requires an array, dictionary, or string.");
                 }
             },
-            dict: () => { this.stack.push({}); },
+            // --- ▲▲▲ ここまで ▲▲▲ ---
+            string: () => {
+                const n = this.stack.pop();
+                this.stack.push({ type: 'string', value: new Array(n).fill(null) });
+            },
+            cvi: (val) => {
+                const str = this.stack.pop();
+                let charCode = -1;
+                if (typeof str === 'object' && str !== null && str.type === 'string' && str.value.length > 0) {
+                    charCode = str.value[0].charCodeAt(0);
+                } else if (typeof str === 'string' && str.length > 0) {
+                    charCode = str.charCodeAt(0);
+                } else {
+                    throw new Error("`cvi` requires a non-empty string.");
+                }
+                this.stack.push(charCode);
+            },
+            chr: () => {
+                const charCode = this.stack.pop();
+                if (typeof charCode !== 'number') {
+                    throw new Error("`chr` requires a number (character code).");
+                }
+                const char = String.fromCharCode(charCode);
+                this.stack.push({ type: 'string', value: [char] });
+            },
+            getinterval: () => { const [count, index, arr] = [this.stack.pop(), this.stack.pop(), this.stack.pop()]; this.stack.push(arr.slice(index, index + count)); },
+            putinterval: () => { const [subArr, index, arr] = [this.stack.pop(), this.stack.pop(), this.stack.pop()]; arr.splice(index, subArr.length, ...subArr); },
+            array: () => {
+                const n = this.stack.pop();
+                if (typeof n !== 'number' || !Number.isInteger(n) || n < 0) {
+                    throw new Error("`array` requires a non-negative integer.");
+                }
+                const newArr = new Array(n).fill(null);
+                this.stack.push({ type: 'array', value: newArr });
+            },
+            forall: () => {
+                const proc = this.stack.pop();
+                const arrObject = this.stack.pop();
+                
+                const procedure = Array.isArray(proc) ? proc : (proc.value || []);
+
+                let itemsToIterate = [];
+                if (typeof arrObject === 'object' && arrObject !== null && arrObject.type === 'array' && Array.isArray(arrObject.value)) {
+                    itemsToIterate = arrObject.value;
+                     for (const token of itemsToIterate) {
+                        this.run([token]);
+                        this.run(procedure);
+                    }
+                } else if (Array.isArray(arrObject)) {
+                    itemsToIterate = arrObject;
+                     for (const item of itemsToIterate) {
+                        this.stack.push(item);
+                        this.run(procedure);
+                    }
+                } else {
+                    throw new Error("`forall` requires an array on the stack.");
+                }
+            },
+            dict: () => { this.stack.push({ type: 'dict', value: [] }); },
             def: () => {
                 const value = this.stack.pop();
                 let key = this.stack.pop();
@@ -82,9 +195,20 @@ class PostscriptInterpreter {
             not: () => { this.stack.push(!this.stack.pop()); },
             true: () => { this.stack.push(true); },
             false: () => { this.stack.push(false); },
+            null: () => { this.stack.push(null); },
             exec: () => {
                 const proc = this.stack.pop();
-                if (Array.isArray(proc)) this.run(proc);
+                if (Array.isArray(proc)) {
+                    this.run(proc);
+                } else if (typeof proc === 'string' && proc.startsWith('~')) {
+                    const value = this.lookupVariable(proc.substring(1));
+                    if (value === undefined) throw new Error(`Undefined variable: ${proc}`);
+                    if (Array.isArray(value)) {
+                        this.run(value);
+                    } else {
+                        this.stack.push(value);
+                    }
+                }
             },
             if: () => {
                 const proc = this.stack.pop();
@@ -129,11 +253,17 @@ class PostscriptInterpreter {
             exit: () => { throw { message: 'EXIT_LOOP', level: this.commandLoopLevel }; },
             print: () => {
                 const val = this.stack.pop();
-                this.output.push(Array.isArray(val) ? `[${val.join(' ')}]` : String(val));
+                if (typeof val === 'object' && val !== null && val.type === 'string') {
+                    this.output.push(val.value.join(''));
+                } else if (typeof val === 'string') {
+                    this.output.push(val);
+                } else {
+                    this.output.push(this.formatForOutput(val));
+                }
             },
             stack: () => {
                 [...this.stack].reverse().forEach(val => {
-                    this.output.push(Array.isArray(val) ? `[${val.join(' ')}]` : String(val));
+                    this.output.push(this.formatForOutput(val));
                 });
             },
             color: () => { 
@@ -142,51 +272,118 @@ class PostscriptInterpreter {
             }
         };
     }
+    
+    formatForOutput(val) {
+        if (val === null) return 'null';
+        if (Array.isArray(val)) {
+            return `{${val.join(' ')}}`;
+        } else if (typeof val === 'object' && val !== null && val.type) {
+            let formattedInnerValue;
+            if(val.type === 'string'){
+                formattedInnerValue = val.value.join('');
+            } else {
+                formattedInnerValue = val.value.map(innerToken => {
+                    if (typeof innerToken === 'object' && innerToken !== null) {
+                        return this.formatForOutput(innerToken);
+                    }
+                    if(Array.isArray(innerToken)){
+                         return `{${innerToken.join(' ')}}`;
+                    }
+                    return innerToken;
+                }).join(' ');
+            }
+
+            if (val.type === 'array') {
+                return `[${formattedInnerValue}]`;
+            } else if (val.type === 'dict') {
+                 const pairs = [];
+                 for(let i=0; i < val.value.length; i+=2) {
+                    pairs.push(`${this.formatForOutput(val.value[i])} ${this.formatForOutput(val.value[i+1])}`);
+                 }
+                 return `<${pairs.join(' ')}>`;
+            } else if (val.type === 'string') {
+                return `(${formattedInnerValue})`;
+            }
+        } else if (typeof val === 'string' && !(val.startsWith('~'))) {
+             return `(${val})`;
+        }
+        return String(val);
+    }
 
     parse(code) {
         const tokens = [];
-        let currentToken = '';
-        let inString = false;
-        let braceLevel = 0;
-        let parenLevel = 0;
-        for (let i = 0; i < code.length; i++) {
+        let i = 0;
+        while (i < code.length) {
             const char = code[i];
-            if (braceLevel > 0) {
-                if (char === '{') braceLevel++;
-                if (char === '}') braceLevel--;
-                currentToken += char;
-                if (braceLevel === 0) {
-                    tokens.push(this.parse(currentToken.slice(1, -1)));
-                    currentToken = '';
-                }
-            } else if (inString) {
-                currentToken += char;
-                if (char === '(') parenLevel++;
-                if (char === ')') parenLevel--;
-                if (parenLevel === 0) {
-                    tokens.push(currentToken); // かっこを付けたままトークン化
-                    currentToken = '';
-                    inString = false;
-                }
-            } else if (char === '{') {
-                braceLevel++;
-                currentToken += char;
-            } else if (char === '(') {
-                inString = true;
-                parenLevel++;
-                currentToken += char;
-            } else if (/\s/.test(char)) {
-                if (currentToken) {
-                    tokens.push(currentToken);
-                    currentToken = '';
-                }
-            } else {
-                currentToken += char;
+
+            if (/\s/.test(char)) {
+                i++;
+                continue;
             }
+
+            if (char === '{' || char === '[' || char === '<') {
+                const startBracket = char;
+                const endBracket = { '{': '}', '[': ']', '<': '>' }[startBracket];
+                let level = 1;
+                let content = '';
+                i++;
+                while (i < code.length && level > 0) {
+                    const current_char = code[i];
+                    if (current_char === '(') {
+                        let str_level = 1;
+                        content += current_char;
+                        i++;
+                         while(i < code.length && str_level > 0) {
+                            if(code[i] === '(') str_level++;
+                            if(code[i] === ')') str_level--;
+                            content += code[i];
+                            i++;
+                        }
+                        continue;
+                    }
+                    if (current_char === startBracket) level++;
+                    if (current_char === endBracket) level--;
+                    if (level > 0) content += current_char;
+                    i++;
+                }
+                if (level !== 0) throw new Error(`Mismatched brackets. Expected '${endBracket}' but not found.`);
+
+                const innerTokens = this.parse(content);
+                if (startBracket === '{') {
+                    tokens.push(innerTokens);
+                } else if (startBracket === '[') {
+                    tokens.push({ type: 'array', value: innerTokens });
+                } else {
+                    tokens.push({ type: 'dict', value: innerTokens });
+                }
+                continue;
+            }
+
+            if (char === '(') {
+                let level = 1;
+                let content = '';
+                i++;
+                while (i < code.length && level > 0) {
+                    if (code[i] === '(') level++;
+                    if (code[i] === ')') level--;
+                    if (level > 0) content += code[i];
+                    i++;
+                }
+                if (level !== 0) throw new Error("Mismatched parentheses in string literal.");
+                tokens.push(`(${content})`);
+                continue;
+            }
+
+            let currentToken = '';
+            while (i < code.length && !/[\s\{\}\[\]\<\>\(\)]/.test(code[i])) {
+                currentToken += code[i];
+                i++;
+            }
+            if(currentToken) tokens.push(currentToken);
         }
-        if (currentToken) tokens.push(currentToken);
         return tokens;
     }
+
 
     lookupVariable(key) {
         for (let i = this.dictStack.length - 1; i >= 0; i--) {
@@ -199,8 +396,10 @@ class PostscriptInterpreter {
 
     run(tokens) {
         for (const token of tokens) {
-            if (typeof token === 'string' && token.startsWith('(') && token.endsWith(')')) {
-                this.stack.push(token.slice(1, -1)); // 文字列リテラルとしてスタックに積む
+            if (token === null) {
+                this.stack.push(null);
+            } else if (typeof token === 'string' && token.startsWith('(') && token.endsWith(')')) {
+                this.stack.push({ type: 'string', value: token.slice(1, -1).split('') });
             } else if (typeof token === 'string' && this.commands[token]) {
                 this.commands[token]();
             } else if (typeof token === 'string' && token.startsWith('~')) {
@@ -208,6 +407,8 @@ class PostscriptInterpreter {
             } else if (!isNaN(parseFloat(token)) && isFinite(token)) {
                 this.stack.push(parseFloat(token));
             } else if (Array.isArray(token)) {
+                this.stack.push(token);
+            } else if (typeof token === 'object' && token !== null && token.type && (token.type === 'array' || token.type === 'dict')) {
                 this.stack.push(token);
             } else if (typeof token === 'string') {
                 const value = this.lookupVariable(token);

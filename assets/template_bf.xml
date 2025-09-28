@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MagicCircleLayout>
+ <Rings>
+  <Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="joint" value="1" />
+      <Item type="sigil" value="exec" />
+      <Item type="joint" value="2" />
+      <Item type="sigil" value="exec" />
+      <Item type="joint" value="4" />
+      <Item type="sigil" value="exec" />
+      <Item type="joint" value="8" />
+      <Item type="sigil" value="exec" />
+      <Item type="joint" value="17" />
+      <Item type="sigil" value="exec" />
+    </Items>
+  </Ring>
+  <Ring id="1" type="MagicRing" x="-309.17" y="-502.13" angle="2.5897">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="name" value="bf_code" />
+      <Item type="string_token" value="++++++++[&gt;++++[&gt;++&gt;+++&gt;+++&gt;+&lt;&lt;&lt;&lt;-]&gt;+&gt;+&gt;-&gt;&gt;+[&lt;]&lt;-]&gt;&gt;.&gt;---.+++++++..+++.&gt;&gt;.&lt;-.&lt;.+++.------.--------.&gt;&gt;+.&gt;++." />
+      <Item type="sigil" value="def" />
+      <Item type="name" value="TAPE_SIZE" />
+      <Item type="chars" value="30000" />
+      <Item type="sigil" value="def" />
+    </Items>
+  </Ring>
+  <Ring id="2" type="MagicRing" x="-544.93" y="46.38" angle="1.4859">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="name" value="tape" />
+      <Item type="chars" value="TAPE_SIZE" />
+      <Item type="sigil" value="array" />
+      <Item type="sigil" value="def" />
+      <Item type="chars" value="0" />
+      <Item type="chars" value="1" />
+      <Item type="chars" value="TAPE_SIZE" />
+      <Item type="chars" value="1" />
+      <Item type="sigil" value="sub" />
+      <Item type="joint" value="3" />
+      <Item type="sigil" value="for" />
+      <Item type="name" value="ptr" />
+      <Item type="chars" value="0" />
+      <Item type="sigil" value="def" />
+      <Item type="name" value="pc" />
+      <Item type="chars" value="0" />
+      <Item type="sigil" value="def" />
+      <Item type="name" value="code_len" />
+      <Item type="chars" value="bf_code" />
+      <Item type="sigil" value="length" />
+      <Item type="sigil" value="def" />
+    </Items>
+  </Ring>
+  <Ring id="3" type="MagicRing" x="-877.04" y="-30.11" angle="1.7972">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="chars" value="tape" />
+      <Item type="sigil" value="exch" />
+      <Item type="chars" value="0" />
+      <Item type="sigil" value="put" />
+    </Items>
+  </Ring>
+  <Ring id="4" type="MagicRing" x="-573.14" y="1426.33" angle="0.3821">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="name" value="jump_table" />
+      <Item type="chars" value="code_len" />
+      <Item type="sigil" value="array" />
+      <Item type="sigil" value="def" />
+      <Item type="name" value="jump_stack" />
+      <Item type="chars" value="64" />
+      <Item type="sigil" value="array" />
+      <Item type="sigil" value="def" />
+      <Item type="name" value="stack_ptr" />
+      <Item type="chars" value="0" />
+      <Item type="sigil" value="def" />
+      <Item type="chars" value="0" />
+      <Item type="chars" value="1" />
+      <Item type="chars" value="code_len" />
+      <Item type="chars" value="1" />
+      <Item type="sigil" value="sub" />
+      <Item type="joint" value="5" />
+      <Item type="sigil" value="for" />
+    </Items>
+  </Ring>
+  <Ring id="5" type="MagicRing" x="315.30" y="751.29" angle="4.0626">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="name" value="i" />
+      <Item type="sigil" value="exch" />
+      <Item type="sigil" value="def" />
+      <Item type="name" value="char_code" />
+      <Item type="chars" value="bf_code" />
+      <Item type="chars" value="i" />
+      <Item type="sigil" value="get" />
+      <Item type="sigil" value="cvi" />
+      <Item type="sigil" value="def" />
+      <Item type="chars" value="char_code" />
+      <Item type="chars" value="91" />
+      <Item type="sigil" value="eq" />
+      <Item type="joint" value="6" />
+      <Item type="sigil" value="if" />
+      <Item type="chars" value="char_code" />
+      <Item type="chars" value="93" />
+      <Item type="sigil" value="eq" />
+      <Item type="joint" value="7" />
+      <Item type="sigil" value="if" />
+    </Items>
+  </Ring>
+  <Ring id="6" type="MagicRing" x="232.89" y="364.98" angle="2.9314">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="chars" value="jump_stack" />
+      <Item type="chars" value="stack_ptr" />
+      <Item type="chars" value="i" />
+      <Item type="sigil" value="put" />
+      <Item type="name" value="stack_ptr" />
+      <Item type="chars" value="stack_ptr" />
+      <Item type="chars" value="1" />
+      <Item type="sigil" value="add" />
+      <Item type="sigil" value="def" />
+    </Items>
+  </Ring>
+  <Ring id="7" type="MagicRing" x="-241.06" y="823.27" angle="1.4421">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="name" value="stack_ptr" />
+      <Item type="chars" value="stack_ptr" />
+      <Item type="chars" value="1" />
+      <Item type="sigil" value="sub" />
+      <Item type="sigil" value="def" />
+      <Item type="name" value="start_pos" />
+      <Item type="chars" value="jump_stack" />
+      <Item type="chars" value="stack_ptr" />
+      <Item type="sigil" value="get" />
+      <Item type="sigil" value="def" />
+      <Item type="name" value="end_pos" />
+      <Item type="chars" value="i" />
+      <Item type="sigil" value="def" />
+      <Item type="chars" value="jump_table" />
+      <Item type="chars" value="start_pos" />
+      <Item type="chars" value="end_pos" />
+      <Item type="sigil" value="put" />
+      <Item type="chars" value="jump_table" />
+      <Item type="chars" value="end_pos" />
+      <Item type="chars" value="start_pos" />
+      <Item type="sigil" value="put" />
+    </Items>
+  </Ring>
+  <Ring id="8" type="MagicRing" x="1192.85" y="1355.34" angle="-0.7217">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="name" value="command_table" />
+      <Item type="sigil" value="dict" />
+      <Item type="sigil" value="def" />
+      <Item type="name" value="op_gt" />
+      <Item type="joint" value="9" />
+      <Item type="sigil" value="def" />
+      <Item type="name" value="op_lt" />
+      <Item type="joint" value="10" />
+      <Item type="sigil" value="def" />
+      <Item type="name" value="op_add" />
+      <Item type="joint" value="11" />
+      <Item type="sigil" value="def" />
+      <Item type="name" value="op_sub" />
+      <Item type="joint" value="12" />
+      <Item type="sigil" value="def" />
+      <Item type="name" value="op_put" />
+      <Item type="joint" value="13" />
+      <Item type="sigil" value="def" />
+      <Item type="name" value="op_get" />
+      <Item type="joint" value="14" />
+      <Item type="sigil" value="def" />
+      <Item type="name" value="op_jmp_fwd" />
+      <Item type="joint" value="15" />
+      <Item type="sigil" value="def" />
+      <Item type="name" value="op_jmp_bwd" />
+      <Item type="joint" value="16" />
+      <Item type="sigil" value="def" />
+      <Item type="chars" value="command_table" />
+      <Item type="chars" value="62" />
+      <Item type="name" value="op_gt" />
+      <Item type="sigil" value="put" />
+      <Item type="chars" value="command_table" />
+      <Item type="chars" value="60" />
+      <Item type="name" value="op_lt" />
+      <Item type="sigil" value="put" />
+      <Item type="chars" value="command_table" />
+      <Item type="chars" value="43" />
+      <Item type="name" value="op_add" />
+      <Item type="sigil" value="put" />
+      <Item type="chars" value="command_table" />
+      <Item type="chars" value="45" />
+      <Item type="name" value="op_sub" />
+      <Item type="sigil" value="put" />
+      <Item type="chars" value="command_table" />
+      <Item type="chars" value="46" />
+      <Item type="name" value="op_put" />
+      <Item type="sigil" value="put" />
+      <Item type="chars" value="command_table" />
+      <Item type="chars" value="44" />
+      <Item type="name" value="op_get" />
+      <Item type="sigil" value="put" />
+      <Item type="chars" value="command_table" />
+      <Item type="chars" value="91" />
+      <Item type="name" value="op_jmp_fwd" />
+      <Item type="sigil" value="put" />
+      <Item type="chars" value="command_table" />
+      <Item type="chars" value="93" />
+      <Item type="name" value="op_jmp_bwd" />
+      <Item type="sigil" value="put" />
+    </Items>
+  </Ring>
+  <Ring id="9" type="MagicRing" x="412.32" y="1113.61" angle="1.8711">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="name" value="ptr" />
+      <Item type="chars" value="ptr" />
+      <Item type="chars" value="1" />
+      <Item type="sigil" value="add" />
+      <Item type="sigil" value="def" />
+    </Items>
+  </Ring>
+  <Ring id="10" type="MagicRing" x="378.53" y="1288.00" angle="1.6533">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="name" value="ptr" />
+      <Item type="chars" value="ptr" />
+      <Item type="chars" value="1" />
+      <Item type="sigil" value="sub" />
+      <Item type="sigil" value="def" />
+    </Items>
+  </Ring>
+  <Ring id="11" type="MagicRing" x="364.81" y="1481.50" angle="1.4196">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="chars" value="tape" />
+      <Item type="chars" value="ptr" />
+      <Item type="chars" value="tape" />
+      <Item type="chars" value="ptr" />
+      <Item type="sigil" value="get" />
+      <Item type="chars" value="1" />
+      <Item type="sigil" value="add" />
+      <Item type="sigil" value="put" />
+    </Items>
+  </Ring>
+  <Ring id="12" type="MagicRing" x="372.97" y="1687.49" angle="1.1859">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="chars" value="tape" />
+      <Item type="chars" value="ptr" />
+      <Item type="chars" value="tape" />
+      <Item type="chars" value="ptr" />
+      <Item type="sigil" value="get" />
+      <Item type="chars" value="1" />
+      <Item type="sigil" value="sub" />
+      <Item type="sigil" value="put" />
+    </Items>
+  </Ring>
+  <Ring id="13" type="MagicRing" x="498.26" y="1849.78" angle="0.9522">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="chars" value="1" />
+      <Item type="sigil" value="string" />
+      <Item type="sigil" value="dup" />
+      <Item type="chars" value="0" />
+      <Item type="chars" value="tape" />
+      <Item type="chars" value="ptr" />
+      <Item type="sigil" value="get" />
+      <Item type="sigil" value="chr" />
+      <Item type="sigil" value="put" />
+      <Item type="sigil" value="print" />
+    </Items>
+  </Ring>
+  <Ring id="14" type="MagicRing" x="618.93" y="2011.74" angle="0.7184">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="name" value="val" />
+      <Item type="chars" value="0" />
+      <Item type="sigil" value="def" />
+      <Item type="chars" value="tape" />
+      <Item type="chars" value="ptr" />
+      <Item type="chars" value="val" />
+      <Item type="sigil" value="put" />
+    </Items>
+  </Ring>
+  <Ring id="15" type="MagicRing" x="770.10" y="2299.08" angle="0.4211">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="chars" value="tape" />
+      <Item type="chars" value="ptr" />
+      <Item type="sigil" value="get" />
+      <Item type="chars" value="0" />
+      <Item type="sigil" value="eq" />
+      <Item type="joint" value="22" />
+      <Item type="sigil" value="if" />
+    </Items>
+  </Ring>
+  <Ring id="16" type="MagicRing" x="1086.50" y="2209.55" angle="0.1239">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="chars" value="tape" />
+      <Item type="chars" value="ptr" />
+      <Item type="sigil" value="get" />
+      <Item type="chars" value="0" />
+      <Item type="sigil" value="ne" />
+      <Item type="joint" value="23" />
+      <Item type="sigil" value="if" />
+    </Items>
+  </Ring>
+  <Ring id="17" type="MagicRing" x="536.15" y="-139.60" angle="4.4577">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="joint" value="18" />
+      <Item type="sigil" value="loop" />
+    </Items>
+  </Ring>
+  <Ring id="18" type="MagicRing" x="814.60" y="209.27" angle="-0.6736">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="chars" value="pc" />
+      <Item type="chars" value="code_len" />
+      <Item type="sigil" value="ge" />
+      <Item type="joint" value="19" />
+      <Item type="sigil" value="if" />
+      <Item type="name" value="current_char_code" />
+      <Item type="chars" value="bf_code" />
+      <Item type="chars" value="pc" />
+      <Item type="sigil" value="get" />
+      <Item type="sigil" value="cvi" />
+      <Item type="sigil" value="def" />
+      <Item type="chars" value="command_table" />
+      <Item type="chars" value="current_char_code" />
+      <Item type="sigil" value="get" />
+      <Item type="sigil" value="dup" />
+      <Item type="sigil" value="null" />
+      <Item type="sigil" value="ne" />
+      <Item type="joint" value="20" />
+      <Item type="joint" value="21" />
+      <Item type="sigil" value="ifelse" />
+      <Item type="name" value="pc" />
+      <Item type="chars" value="pc" />
+      <Item type="chars" value="1" />
+      <Item type="sigil" value="add" />
+      <Item type="sigil" value="def" />
+    </Items>
+  </Ring>
+  <Ring id="19" type="MagicRing" x="397.98" y="182.23" angle="1.6356">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="sigil" value="exit" />
+    </Items>
+  </Ring>
+  <Ring id="20" type="MagicRing" x="1057.94" y="-129.98" angle="3.7638">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="sigil" value="exec" />
+    </Items>
+  </Ring>
+  <Ring id="21" type="MagicRing" x="1098.07" y="-274.51" angle="3.6716">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="sigil" value="pop" />
+    </Items>
+  </Ring>
+  <Ring id="22" type="MagicRing" x="958.67" y="2402.36" angle="-1.0697">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="name" value="pc" />
+      <Item type="chars" value="jump_table" />
+      <Item type="chars" value="pc" />
+      <Item type="sigil" value="get" />
+      <Item type="sigil" value="def" />
+    </Items>
+  </Ring>
+  <Ring id="23" type="MagicRing" x="1297.05" y="2253.06" angle="-1.3670">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="name" value="pc" />
+      <Item type="chars" value="jump_table" />
+      <Item type="chars" value="pc" />
+      <Item type="sigil" value="get" />
+      <Item type="sigil" value="def" />
+    </Items>
+  </Ring>
+ </Rings>
+ <FieldItems>
+ </FieldItems>
+</MagicCircleLayout>

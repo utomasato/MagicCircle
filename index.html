@@ -242,8 +242,8 @@
             const containerRect = mainContainer.getBoundingClientRect();
             let newLeftWidth = clientX - containerRect.left;
 
-            const minWidth = containerRect.width * 0.1;
-            const maxWidth = containerRect.width * 0.9;
+            const minWidth = containerRect.width * 0.125;
+            const maxWidth = containerRect.width * 0.95;
 
             if (newLeftWidth < minWidth) newLeftWidth = minWidth;
             if (newLeftWidth > maxWidth) newLeftWidth = maxWidth;

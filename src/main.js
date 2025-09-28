@@ -39,6 +39,37 @@ let consoleDragOffset = { x: 0, y: 0 };
 let isResizingConsole = false;
 
 
+/**
+ * インタープリタのスタック配列をコンソール表示用にフォーマットします。
+ * @param {Array} stack フォーマット対象のスタック配列
+ * @returns {string} フォーマット後の文字列
+ */
+function formatStackForDisplay(stack) {
+    const formatValue = (val) => {
+        if (Array.isArray(val)) {
+            return `{${val.join(' ')}}`;
+        } else if (typeof val === 'object' && val !== null && val.type) {
+            const formattedInnerValue = val.value.map(innerToken => {
+                if (typeof innerToken === 'object') {
+                    return formatValue(innerToken); // Recurse for nested literals
+                }
+                return innerToken; // Otherwise, it's just a string token, display as is.
+            }).join(' ');
+
+            if (val.type === 'array') {
+                return `[${formattedInnerValue}]`;
+            } else if (val.type === 'dict') {
+                return `<${formattedInnerValue}>`;
+            }
+        } else if (typeof val === 'string') {
+            return `(${val})`;
+        }
+        return String(val);
+    };
+    return `[${stack.map(formatValue).join(', ')}]`;
+}
+
+
 function Start() {
     debugMode = false;
     isUIHidden = false;
@@ -93,7 +124,7 @@ function Start() {
                     if (result.output) {
                         consoleMessage += `Output:\n${result.output}\n\n`;
                     }
-                    consoleMessage += `Final Stack:\n[${result.stack.join(', ')}]`;
+                    consoleMessage += `Final Stack:\n${formatStackForDisplay(result.stack)}`;
                     
                     updateConsolePanel(consoleMessage);
                 } catch (e) {
@@ -204,8 +235,8 @@ function DrawGrid() {
     }
 }
 
-function ZoomIn() { zoomSize = min(5, zoomSize + 0.1); }
-function ZoomOut() { zoomSize = max(0.1, zoomSize - 0.1); }
+function ZoomIn() { zoomSize = min(5, zoomSize *1.2); }
+function ZoomOut() { zoomSize = max(0.1, zoomSize /1.2); }
 function ZoomReset() { zoomSize = 1; }
 
 function updateConsolePanel(message) {
@@ -238,7 +269,9 @@ function CommitMagicSpell() {
 function GenerateSpell() {
     if (rings.length > 0) {
         const spell = rings[0].Spell();
-        return spell;
+        // return spell;
+        return spell.slice(1, -1) // 一番外側の{}を外す
     }
     return "";
 }
+

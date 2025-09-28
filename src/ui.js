@@ -218,12 +218,14 @@ function createSigilDropdown(item) {
     currentSelectElement = createSelect();
     currentSelectElement.parent(contentArea);
     
+    // --- ▼▼▼ ここから修正 ▼▼▼ ---
     const sigilOptions = [
         "pop","exch","dup","copy","index", "roll", "add", "sub","mul","div","idiv","mod","abs","neg","sqrt",
         "atan","cos","sin","rand","srand","rrand","length","get","put","getinterval","putinterval","forall",
         "dict","def","eq","ne","ge","gt","le","lt","and","not","or","xor","true","false",
-        "exec","if","ifelse","for","repeat","loop","exit", "color", "print", "stack"
+        "exec","if","ifelse","for","repeat","loop","exit", "color", "print", "stack", "cvi", "string", "null", "chr"
     ];
+    // --- ▲▲▲ ここまで ▲▲▲ ---
 
     sigilOptions.forEach(opt => { currentSelectElement.option(opt); });
     currentSelectElement.selected(item.value);
@@ -476,7 +478,6 @@ function createConsolePanel() {
     header.style('align-items', 'center');
     header.style('cursor', 'move');
 
-    // --- ▼▼▼ ドラッグ処理の開始 ▼▼▼ ---
     const startDrag = (e) => {
         if (e.target.tagName === 'SELECT' || e.target.tagName === 'OPTION') return;
         e.preventDefault();
@@ -511,7 +512,6 @@ function createConsolePanel() {
 
     header.elt.addEventListener('mousedown', startDrag);
     header.elt.addEventListener('touchstart', startDrag, { passive: false });
-    // --- ▲▲▲ ドラッグ処理の終了 ▲▲▲ ---
     
     const title = createP('Console');
     title.parent(header);
@@ -543,7 +543,6 @@ function createConsolePanel() {
     resizeHandle.style('bottom', '0');
     resizeHandle.style('cursor', 'se-resize');
 
-    // --- ▼▼▼ リサイズ処理の開始 ▼▼▼ ---
     const startResize = (e) => {
         e.stopPropagation();
         e.preventDefault();
@@ -578,7 +577,6 @@ function createConsolePanel() {
 
     resizeHandle.elt.addEventListener('mousedown', startResize);
     resizeHandle.elt.addEventListener('touchstart', startResize, { passive: false });
-    // --- ▲▲▲ リサイズ処理の終了 ▲▲▲ ---
 }
 
 /**
@@ -586,13 +584,11 @@ function createConsolePanel() {
  * @param {string} xmlContent 表示するXML文字列
  */
 function showXMLPanel(xmlContent) {
-    // 既存のUIパネルがあれば閉じる
     if (currentUiPanel) {
         currentUiPanel.remove();
         currentUiPanel = null;
     }
 
-    // 1. オーバーレイを作成
     const overlay = createDiv('');
     currentModalPanel = overlay;
     overlay.style('position', 'fixed');
@@ -606,7 +602,6 @@ function showXMLPanel(xmlContent) {
     overlay.style('align-items', 'center');
     overlay.style('z-index', '2000');
 
-    // 2. パネル本体を作成
     const panel = createDiv('');
     panel.parent(overlay);
     panel.addClass('modal-content');
@@ -621,7 +616,6 @@ function showXMLPanel(xmlContent) {
     panel.style('flex-direction', 'column');
     panel.style('padding', '15px');
     
-    // 3. ヘッダー
     const header = createDiv('');
     header.parent(panel);
     header.style('display', 'flex');
@@ -649,8 +643,8 @@ function showXMLPanel(xmlContent) {
         }
     });
 
-    // 4. テキストエリア
-    const textArea = createElement('textarea', xmlContent);
+    const textArea = createElement('textarea');
+    textArea.value(xmlContent);
     textArea.parent(panel);
     textArea.attribute('readonly', '');
     textArea.style('width', '100%');
@@ -663,7 +657,6 @@ function showXMLPanel(xmlContent) {
     textArea.style('font-size', '14px');
     textArea.style('background-color', '#fff');
 
-    // 5. フッター（コピーボタン）
     const footer = createDiv('');
     footer.parent(panel);
     footer.style('display', 'flex');
@@ -682,7 +675,6 @@ function showXMLPanel(xmlContent) {
 
     copyButton.mousePressed(() => {
         textArea.elt.select();
-        // execCommandはiframe環境での互換性のために使用
         document.execCommand('copy');
         copyButton.html('コピーしました！');
         setTimeout(() => {
@@ -690,7 +682,6 @@ function showXMLPanel(xmlContent) {
         }, 2000);
     });
 }
-// --- ▼▼▼ ここから追加 ▼▼▼ ---
 /**
  * XMLをペーストしてインポートするためのモーダルパネルを作成します。
  */
@@ -822,4 +813,4 @@ function showXMLInputPanel() {
     overwriteButton.style('cursor', 'pointer');
     overwriteButton.mousePressed(() => handleImport('overwrite'));
 }
-// --- ▲▲▲ ここまで ▲▲▲ ---
+
