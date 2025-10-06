@@ -44,29 +44,30 @@ let isResizingConsole = false;
  * @param {Array} stack フォーマット対象のスタック配列
  * @returns {string} フォーマット後の文字列
  */
-function formatStackForDisplay(stack) {
-    const formatValue = (val) => {
-        if (Array.isArray(val)) {
-            return `{${val.join(' ')}}`;
-        } else if (typeof val === 'object' && val !== null && val.type) {
-            const formattedInnerValue = val.value.map(innerToken => {
-                if (typeof innerToken === 'object') {
-                    return formatValue(innerToken); // Recurse for nested literals
-                }
-                return innerToken; // Otherwise, it's just a string token, display as is.
-            }).join(' ');
 
-            if (val.type === 'array') {
-                return `[${formattedInnerValue}]`;
-            } else if (val.type === 'dict') {
-                return `<${formattedInnerValue}>`;
-            }
-        } else if (typeof val === 'string') {
-            return `(${val})`;
-        }
-        return String(val);
-    };
-    return `[${stack.map(formatValue).join(', ')}]`;
+function formatStackForDisplay(stack) {
+  // 1. スタックが配列でない、または空である場合は、安全なメッセージを返す
+  if (!Array.isArray(stack) || stack.length === 0) {
+    return '[]';
+  }
+
+  // 2. スタックの各要素に対して、activeInterpreterのformatForOutputを呼び出して文字列に変換する
+  //    .map()は必ず配列に対して呼び出す
+  const formattedItems = stack.map(item => {
+    try {
+      // activeInterpreterとformatForOutputが存在することを確認してから呼び出す
+      if (activeInterpreter && typeof activeInterpreter.formatForOutput === 'function') {
+        return activeInterpreter.formatForOutput(item);
+      }
+      return '[Interpreter Error]';
+    } catch (e) {
+      // 万が一、formatForOutput内でエラーが発生した場合も安全に処理を続ける
+      return `[Formatting Error: ${e.message}]`;
+    }
+  });
+
+  // 3. 整形後の文字列配列を、改行で連結して返す
+  return `[${formattedItems.join(', ')}]`;
 }
 
 
@@ -114,23 +115,30 @@ function Start() {
         new Button(145, 10, 40, 40, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, 30, "string", function () { AddObjectMode = "str"; },true),
         new Button(190, 10, 40, 40, color(255, 200, 200), { x: 0, y: 0 }, { x: 0, y: 0 }, 30, "name", function () { AddObjectMode = "name"; },true),
         new Button(-5, 10, 40, 40, color(255, 200, 200), { x: 1, y: 0 }, { x: 1, y: 0 }, 17, "Run", function () {
-                if (rings.length > 0) {
+            if (rings.length > 0) {
+                const data = {isActive: true, message: "Reset", name: null, value: 0, text: null};
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
                 const mpsCode = GenerateSpell(rings[0]);
-                console.log(mpsCode);
+                //console.log(mpsCode);
                 try {
                     const result = activeInterpreter.execute(mpsCode);
                     let consoleMessage = '';
                     
                     if (result.output) {
                         consoleMessage += `Output:\n${result.output}\n\n`;
+                        console.log(`Output:\n${result.output}`);
                     }
+                    console.log("==================")
                     consoleMessage += `Final Stack:\n${formatStackForDisplay(result.stack)}`;
+                    //console.log(`Final Stack:\n${formatStackForDisplay(result.stack)}`);
                     
                     updateConsolePanel(consoleMessage);
                 } catch (e) {
                     updateConsolePanel(`Execution Error:\n${e.message}`);
+                    console.log(`Execution Error:\n${e.message}`);
                 }
             }
+            console.log(activeInterpreter.stack);
         }),
         new Button(-150, 10, 80, 40, color(220, 220, 255), { x: 1, y: 0 }, { x: 1, y: 0 }, 17, "Import", () => {
             showXMLInputPanel();

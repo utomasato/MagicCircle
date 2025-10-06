@@ -329,7 +329,8 @@ function DrawSigil(token, x, y, rotate = 0, zoom = 1)
             arc(0.35, -0.125, 0.25, 0.25, -PI*3/4, PI*3/4);
             line(0.4125, -0.25, 0.4125, -0.5);
             line(0.2875, -0.25, 0.2875, -0.5);
-            break;        case "null":
+            break;
+        case "null":
             ellipse(0, 0, 0.8);
             line(-0.4, 0.4, 0.4, -0.4);
             break;
@@ -485,6 +486,27 @@ function DrawSigil(token, x, y, rotate = 0, zoom = 1)
         case "currentcolor":
             arc(0, -0.125, 0.75, 0.75, -5/6*PI, 5/6*PI);
             sigil_parts("current");
+            break;
+        case "magicactivate":
+            ellipse(0, 0, 1);
+            line(0, 0.5, 0.433, -0.25);
+            line(0.433, -0.25, -0.433, -0.25);
+            line(-0.433, -0.25, 0, 0.5);
+            line(0, -0.5, 0.433, 0.25);
+            line(0.433, 0.25, -0.433, 0.25);
+            line(-0.433, 0.25, 0, -0.5);
+            arc(0.225, 0.225, 0.25, 0.25, PI, -HALF_PI);
+            arc(0.225, -0.025, 0.25, 0.25, HALF_PI, PI);
+            arc(-0.025, -0.025, 0.25, 0.25, 0, HALF_PI);
+            arc(-0.025, 0.225, 0.25, 0.25, -HALF_PI, 0);
+            arc(0, 0.1, 0.2, 0.2, PI, -HALF_PI);
+            arc(0, -0.1, 0.2, 0.2, HALF_PI, PI);
+            arc(-0.2, -0.1, 0.2, 0.2, 0, HALF_PI);
+            arc(-0.2, 0.1, 0.2, 0.2, -HALF_PI, 0);
+            arc(0.1, -0.1, 0.1, 0.1, PI, -HALF_PI);
+            arc(0.1, -0.2, 0.1, 0.1, HALF_PI, PI);
+            arc(0, -0.2, 0.1, 0.1, 0, HALF_PI);
+            arc(0, -0.1, 0.1, 0.1, -HALF_PI, 0);
             break;
         case "print":
             line(0.5, -0.5, 0.5, 0.5);

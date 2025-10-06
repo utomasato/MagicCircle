@@ -71,18 +71,15 @@ class PostscriptInterpreter {
                     val = collection.value[indexOrKey];
                 } else if (typeof collection === 'object' && collection !== null && collection.type === 'string' && Array.isArray(collection.value)) {
                     val = collection.value[indexOrKey].charCodeAt(0);
-                // --- ▼▼▼ ここから修正 ▼▼▼ ---
                 } else if (typeof collection === 'object' && collection !== null && collection.type === 'dict' && Array.isArray(collection.value)) {
                     const dictTokens = collection.value;
                     for (let i = 0; i < dictTokens.length; i += 2) {
                         const keyToken = dictTokens[i];
-                        // キー(文字列)を数値に変換してから比較する
                         if (parseFloat(keyToken) === indexOrKey) {
                             val = dictTokens[i + 1];
                             break;
                         }
                     }
-                // --- ▲▲▲ ここまで ▲▲▲ ---
                 } else {
                     throw new Error("`get` requires an array, dictionary, or string.");
                 }
@@ -97,12 +94,10 @@ class PostscriptInterpreter {
                     collection.value[indexOrKey] = value;
                 } else if (typeof collection === 'object' && collection !== null && collection.type === 'string' && Array.isArray(collection.value)) {
                     collection.value[indexOrKey] = String.fromCharCode(value);
-                // --- ▼▼▼ ここから修正 ▼▼▼ ---
                 } else if (typeof collection === 'object' && collection !== null && collection.type === 'dict' && Array.isArray(collection.value)) {
                     const dictTokens = collection.value;
                     let keyFound = false;
                     for (let i = 0; i < dictTokens.length; i += 2) {
-                        // キー(文字列)を数値に変換してから比較する
                         if (parseFloat(dictTokens[i]) === indexOrKey) {
                             dictTokens[i + 1] = value;
                             keyFound = true;
@@ -110,10 +105,8 @@ class PostscriptInterpreter {
                         }
                     }
                     if (!keyFound) {
-                        // 新しく追加するキーも文字列として保持する
                         dictTokens.push(String(indexOrKey), value);
                     }
-                // --- ▲▲▲ ここまで ▲▲▲ ---
                 } else {
                     throw new Error("`put` requires an array, dictionary, or string.");
                 }
@@ -178,8 +171,10 @@ class PostscriptInterpreter {
             def: () => {
                 const value = this.stack.pop();
                 let key = this.stack.pop();
-                if (key.startsWith('~')) key = key.substring(1);
-                this.dictStack[this.dictStack.length - 1][key] = value;
+                if (typeof key !== 'string' || !key.startsWith('~')) {
+                    throw new Error("`def` requires a literal name (e.g., ~myVar) as a key.");
+                }
+                this.dictStack[this.dictStack.length - 1][key.substring(1)] = value;
             },
             eq: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push(a === b); },
             ne: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push(a !== b); },
@@ -196,17 +191,22 @@ class PostscriptInterpreter {
             null: () => { this.stack.push(null); },
             exec: () => {
                 const proc = this.stack.pop();
+                if (proc === undefined) {
+                    throw new Error("`exec`: Stack underflow. Requires a procedure on the stack.");
+                }
                 if (Array.isArray(proc)) {
                     this.run(proc);
-                } else if (typeof proc === 'string' && proc.startsWith('~')) {
+                    return;
+                }
+                if (typeof proc === 'string' && proc.startsWith('~')) {
                     const value = this.lookupVariable(proc.substring(1));
-                    if (value === undefined) throw new Error(`Undefined variable: ${proc}`);
+                    if (value === undefined) throw new Error(`\`exec\`: Undefined variable ${proc}`);
                     if (Array.isArray(value)) {
                         this.run(value);
-                    } else {
-                        this.stack.push(value);
+                        return;
                     }
                 }
+                throw new Error(`\`exec\`: Requires a procedure but received a different type.`);
             },
             if: () => {
                 const proc = this.stack.pop();
@@ -249,6 +249,39 @@ class PostscriptInterpreter {
                 }
             },
             exit: () => { throw { message: 'EXIT_LOOP', level: this.commandLoopLevel }; },
+            magicactivate: () => {
+                const val = this.stack.pop();
+                let key = null;
+                if (this.stack.length > 0 && typeof this.stack[this.stack.length - 1] === 'string' && this.stack[this.stack.length - 1].startsWith('~')) {
+                    key = this.stack.pop();
+                }
+                const data = {
+                    isActive: true,
+                    message: "MagicSpell",
+                    value: 0,
+                    name: key ? key.substring(1) : "",
+                    text: this.formatForOutput(val)
+                };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+                if (key) {
+                    const objectName = key.substring(1);
+                    const unityObjectRef = { type: 'unityObject', name: objectName };
+                    this.dictStack[this.dictStack.length - 1][objectName] = unityObjectRef;
+                }
+            },
+            transform: () => {
+                const transformDict = this.stack.pop();
+                const unityObjectRef = this.stack.pop();
+                if (typeof unityObjectRef !== 'object' || unityObjectRef === null || unityObjectRef.type !== 'unityObject') {
+                    throw new Error("`transform` requires a Unity object reference on the stack.");
+                }
+                const data = {
+                    message: "TransformObject",
+                    name: unityObjectRef.name,
+                    text: this.formatForOutput(transformDict)
+                };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+            },
             print: () => {
                 const val = this.stack.pop();
                 if (typeof val === 'object' && val !== null && val.type === 'string') {
@@ -271,37 +304,50 @@ class PostscriptInterpreter {
         };
     }
     
+    /**
+     * スタック上の任意の値を、mpsコード形式の文字列に変換します。
+     * この関数は、どのようなデータ構造が渡されてもエラーを起こさないように設計されています。
+     * @param {*} val - 文字列に変換する値
+     * @returns {string} - mpsコード形式の文字列
+     */
     formatForOutput(val) {
+        // 1. nullやプリミティブ型を最初に処理
         if (val === null) return 'null';
-        if (Array.isArray(val)) {
-            return `{${val.join(' ')}}`;
-        } else if (typeof val === 'object' && val !== null && val.type) {
-            let formattedInnerValue;
-            if(val.type === 'string'){
-                formattedInnerValue = val.value.join('');
-            } else {
-                formattedInnerValue = val.value.map(innerToken => {
-                    if (typeof innerToken === 'object' && innerToken !== null) {
-                        return this.formatForOutput(innerToken);
-                    }
-                    if(Array.isArray(innerToken)){
-                         return `{${innerToken.join(' ')}}`;
-                    }
-                    return innerToken;
-                }).join(' ');
-            }
-
-            if (val.type === 'array') {
-                return `[${formattedInnerValue}]`;
-            } else if (val.type === 'dict') {
-                return `<${formattedInnerValue}>`;
-            } else if (val.type === 'string') {
-                return `(${formattedInnerValue})`;
-            }
-        } else if (typeof val === 'string' && !(val.startsWith('~'))) {
-             return `(${val})`;
+        const type = typeof val;
+        if (type !== 'object') {
+            return String(val);
         }
-        return String(val);
+
+        // 2. JavaScriptのネイティブ配列（PostScriptのプロシージャ {...} として扱う）を処理
+        if (Array.isArray(val)) {
+            return `{${val.map(item => this.formatForOutput(item)).join(' ')}}`;
+        }
+
+        // 3. この時点で、valは非null、非配列のオブジェクトであることが確定。
+        if (!val.type) {
+            return '[Malformed Object]';
+        }
+
+        // 4. typeプロパティを持つ、インタプリタ定義の特殊オブジェクトを処理
+        switch (val.type) {
+            case 'unityObject':
+                return `${val.name}(object)`;
+            case 'string':
+                const stringContent = Array.isArray(val.value) ? val.value.join('') : '';
+                return `(${stringContent})`;
+            case 'array':
+                const arrayContent = Array.isArray(val.value)
+                    ? val.value.map(item => this.formatForOutput(item)).join(' ')
+                    : '';
+                return `[${arrayContent}]`;
+            case 'dict':
+                const dictContent = Array.isArray(val.value)
+                    ? val.value.map(item => this.formatForOutput(item)).join(' ')
+                    : '';
+                return `<${dictContent}>`;
+            default:
+                return `[Unknown Type: ${val.type}]`;
+        }
     }
 
     parse(code) {
@@ -397,7 +443,7 @@ class PostscriptInterpreter {
             } else if (typeof token === 'string' && this.commands[token]) {
                 this.commands[token]();
             } else if (typeof token === 'string' && token.startsWith('~')) {
-                this.stack.push(token);
+                 this.stack.push(token);
             } else if (!isNaN(parseFloat(token)) && isFinite(token)) {
                 this.stack.push(parseFloat(token));
             } else if (Array.isArray(token)) {
@@ -407,7 +453,9 @@ class PostscriptInterpreter {
             } else if (typeof token === 'string') {
                 const value = this.lookupVariable(token);
                 if (value !== undefined) {
-                    if (Array.isArray(value)) {
+                    if (typeof value === 'object' && value !== null && value.type === 'unityObject') {
+                        this.stack.push(value);
+                    } else if (Array.isArray(value)) {
                         this.run(value);
                     } else {
                         this.stack.push(value);

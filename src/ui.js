@@ -218,14 +218,12 @@ function createSigilDropdown(item) {
     currentSelectElement = createSelect();
     currentSelectElement.parent(contentArea);
     
-    // --- ▼▼▼ ここから修正 ▼▼▼ ---
     const sigilOptions = [
         "pop","exch","dup","copy","index", "roll", "add", "sub","mul","div","idiv","mod","abs","neg","sqrt",
         "atan","cos","sin","rand","srand","rrand","array","string","length","get","put","getinterval","putinterval","forall",
         "dict","def","eq","ne","ge","gt","le","lt","and","not","or","xor","true","false",
-        "exec","if","ifelse","for","repeat","loop","exit","null", "color", "print", "stack", "cvi", "chr"
+        "exec","if","ifelse","for","repeat","loop","exit","null", "magicactivate", "print", "stack", "cvi", "chr"
     ];
-    // --- ▲▲▲ ここまで ▲▲▲ ---
 
     sigilOptions.forEach(opt => { currentSelectElement.option(opt); });
     currentSelectElement.selected(item.value);
