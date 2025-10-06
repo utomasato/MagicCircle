@@ -46,9 +46,13 @@ public class JsCallbackHandler : MonoBehaviour
         {
             systemManager.Reset();
         }
-        if (Input.GetKeyDown(KeyCode.T))
+        if (Input.GetKeyDown(KeyCode.P))
         {
             TestReceiveGeneralData();
+        }
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            TestTransform();
         }
     }
 
@@ -67,7 +71,7 @@ public class JsCallbackHandler : MonoBehaviour
 
     void TestTransform()
     {
-        string transformText = "< ~position [2 1 0] ~rotation [0 90 0] ~scale [2 2 2] >";
+        string transformText = "< ~position [0 0 0] ~rotation [-90 0 0] ~scale [2 2 2] >";
         string transformName = "testEffect1";
         systemManager.TransformNamedObject(transformName, transformText);
     }
@@ -97,11 +101,9 @@ public class JsCallbackHandler : MonoBehaviour
             case "MagicSpell":
                 systemManager.CreateAndSpawnParticleFromMps(data.text, data.name);
                 break;
-            // --- ▼▼▼ ここから追加 ▼▼▼ ---
             case "TransformObject":
                 systemManager.TransformNamedObject(data.name, data.text);
                 break;
-                // --- ▲▲▲ ここまで追加 ▲▲▲ ---
         }
     }
 }
