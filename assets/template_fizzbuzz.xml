@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MagicCircleLayout>
+ <Rings>
+  <Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="chars" value="1" />
+      <Item type="chars" value="1" />
+      <Item type="chars" value="30" />
+      <Item type="joint" value="1" />
+      <Item type="sigil" value="for" />
+    </Items>
+  </Ring>
+  <Ring id="1" type="MagicRing" x="273.92" y="465.39" angle="-0.5320">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="name" value="flag1" />
+      <Item type="name" value="flag2" />
+      <Item type="sigil" value="false" />
+      <Item type="sigil" value="dup" />
+      <Item type="chars" value="3" />
+      <Item type="chars" value="1" />
+      <Item type="sigil" value="roll" />
+      <Item type="sigil" value="def" />
+      <Item type="sigil" value="def" />
+      <Item type="sigil" value="dup" />
+      <Item type="chars" value="3" />
+      <Item type="sigil" value="mod" />
+      <Item type="chars" value="0" />
+      <Item type="sigil" value="eq" />
+      <Item type="name" value="flag1" />
+      <Item type="sigil" value="exch" />
+      <Item type="sigil" value="def" />
+      <Item type="sigil" value="dup" />
+      <Item type="chars" value="5" />
+      <Item type="sigil" value="mod" />
+      <Item type="chars" value="0" />
+      <Item type="sigil" value="eq" />
+      <Item type="name" value="flag2" />
+      <Item type="sigil" value="exch" />
+      <Item type="sigil" value="def" />
+      <Item type="chars" value="flag1" />
+      <Item type="chars" value="flag2" />
+      <Item type="sigil" value="not" />
+      <Item type="sigil" value="and" />
+      <Item type="joint" value="2" />
+      <Item type="joint" value="3" />
+      <Item type="sigil" value="ifelse" />
+    </Items>
+  </Ring>
+  <Ring id="2" type="MagicRing" x="245.28" y="18.43" angle="3.0776">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="string_token" value="Fizz" />
+      <Item type="sigil" value="print" />
+      <Item type="sigil" value="pop" />
+    </Items>
+  </Ring>
+  <Ring id="3" type="MagicRing" x="114.39" y="-523.29" angle="2.9816">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="chars" value="flag1" />
+      <Item type="sigil" value="not" />
+      <Item type="chars" value="flag2" />
+      <Item type="sigil" value="and" />
+      <Item type="joint" value="4" />
+      <Item type="joint" value="5" />
+      <Item type="sigil" value="ifelse" />
+    </Items>
+  </Ring>
+  <Ring id="4" type="MagicRing" x="-272.32" y="-588.02" angle="1.7366">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="string_token" value="Buzz" />
+      <Item type="sigil" value="print" />
+      <Item type="sigil" value="pop" />
+    </Items>
+  </Ring>
+  <Ring id="5" type="MagicRing" x="-98.26" y="-475.02" angle="1.3476">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="chars" value="flag1" />
+      <Item type="chars" value="flag2" />
+      <Item type="sigil" value="and" />
+      <Item type="joint" value="6" />
+      <Item type="joint" value="7" />
+      <Item type="sigil" value="ifelse" />
+    </Items>
+  </Ring>
+  <Ring id="6" type="MagicRing" x="-178.16" y="-291.02" angle="0.4096">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="string_token" value="FizzBuzz" />
+      <Item type="sigil" value="print" />
+      <Item type="sigil" value="pop" />
+    </Items>
+  </Ring>
+  <Ring id="7" type="MagicRing" x="-85.46" y="-173.09" angle="-0.0424">
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="sigil" value="print" />
+    </Items>
+  </Ring>
+ </Rings>
+ <FieldItems>
+ </FieldItems>
+</MagicCircleLayout>
