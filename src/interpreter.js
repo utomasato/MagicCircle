@@ -245,34 +245,37 @@ class PostscriptInterpreter {
                     key = this.stack.pop();
                 }
                 
+                const id = crypto.randomUUID(); // Generate a unique ID
                 const resolvedVal = this.resolveVariablesInStructure(val);
-                console.log(resolvedVal);
+                
                 const data = {
                     isActive: true,
                     message: "MagicSpell",
                     value: 0,
-                    name: key ? key.substring(1) : "",
+                    id: id, // Changed from 'name'
                     text: this.formatForOutput(resolvedVal)
                 };
 
                 sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
                 if (key) {
-                    const objectName = key.substring(1);
-                    const unityObjectRef = { type: 'unityObject', name: objectName };
-                    this.dictStack[this.dictStack.length - 1][objectName] = unityObjectRef;
+                    const variableName = key.substring(1);
+                    // Store the reference with the ID
+                    const unityObjectRef = { type: 'unityObject', value: id }; 
+                    this.dictStack[this.dictStack.length - 1][variableName] = unityObjectRef;
                 }
             },
             transform: () => {
                 const transformDict = this.stack.pop();
                 const unityObjectRef = this.stack.pop();
-                if (typeof unityObjectRef !== 'object' || unityObjectRef === null || unityObjectRef.type !== 'unityObject') {
+                if (typeof unityObjectRef !== 'object' || unityObjectRef === null || unityObjectRef.type !== 'unityObject' || !unityObjectRef.value) {
                     throw new Error("`transform` requires a Unity object reference on the stack.");
                 }
 
                 const resolvedDict = this.resolveVariablesInStructure(transformDict);
                 const data = {
                     message: "TransformObject",
-                    name: unityObjectRef.name,
+                    id: unityObjectRef.value, // Use the ID from the object reference
                     text: this.formatForOutput(resolvedDict)
                 };
 
@@ -352,7 +355,8 @@ class PostscriptInterpreter {
         }
         switch (val.type) {
             case 'unityObject':
-                return val.name;
+                //return "unity";
+                return `UnityObject: ${val.value}`;
             case 'string':
                 const stringContent = Array.isArray(val.value) ? val.value.join('') : '';
                 return `(${stringContent})`;
@@ -494,10 +498,8 @@ class PostscriptInterpreter {
             } else if (Array.isArray(token)) {
                 this.stack.push(token);
             } else if (typeof token === 'object' && token !== null && token.type && (token.type === 'array' || token.type === 'dict')) {
-                // --- ▼▼▼ MODIFIED PART ▼▼▼ ---
                 const resolvedToken = this.resolveVariablesInStructure(token);
                 this.stack.push(resolvedToken);
-                // --- ▲▲▲ MODIFIED PART ▲▲▲ ---
             } else if (typeof token === 'string') {
                 const value = this.lookupVariable(token);
                 if (value !== undefined) {

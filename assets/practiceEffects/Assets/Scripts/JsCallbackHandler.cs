@@ -6,7 +6,7 @@ public class GeneralData
 {
     public bool isActive;
     public string message;
-    public string name;
+    public string id; // Changed from 'name'
     public float value;
     public string text;
 }
@@ -55,24 +55,20 @@ public class JsCallbackHandler : MonoBehaviour
         }
     }
 
+    // Note: Test methods will use name-based logic, update them if needed for ID-based testing.
     void TestReceiveGeneralData()
     {
-        // --- Test for MagicSpell ---
         string spellText = " <~main <~startLifetime [0.5 2] ~startSpeed 0.5 ~startSize [0.2 0.4] ~startRotation [0 360]> ~emission <~rateOverTime 50> ~shape <~angle 5 ~radius 0.0001> ~colorOverLifetime <~gradient <~colorKeys [[1.0 0.6 0.0 1.0 0.0] [1.0 0.0 0.0 1.0 0.6] [1.0 0.0 0.0 1.0 1.0]] ~alphaKeys [[0.0 0.0] [1.0 0.5] [0.0 1.0]]>> ~rotationOverLifetime <~z [-45 45]> ~renderer <~materialName (Fire_1)>>";
-        string spellName = "testEffect1";
-        systemManager.CreateAndSpawnParticleFromMps(spellText, spellName);
-
-        // --- Test for TransformObject ---
-        // Note: This requires an object named "testEffect1" to exist.
-        // It's called after a short delay to simulate a separate command.
-        //Invoke("TestTransform", 2.0f);
+        // ID is now generated in JS, so we pass an empty string or a test ID here.
+        string testId = "test-id-from-csharp-1";
+        systemManager.CreateAndSpawnParticleFromMps(spellText, testId);
     }
 
     void TestTransform()
     {
         string transformText = "< ~position [0 0 0] ~rotation [-90 0 0] ~scale [2 2 2] >";
-        string transformName = "testEffect1";
-        systemManager.TransformNamedObject(transformName, transformText);
+        string testId = "test-id-from-csharp-1";
+        systemManager.TransformObjectById(testId, transformText);
     }
 
 
@@ -82,7 +78,7 @@ public class JsCallbackHandler : MonoBehaviour
 
         Debug.Log("====== JavaScriptからのデータ受信 ======");
         Debug.Log("message: " + data.message);
-        Debug.Log("name: " + data.name);
+        Debug.Log("id: " + data.id); // Changed from 'name'
         Debug.Log("text: " + data.text);
         Debug.Log("=====================================");
 
@@ -98,12 +94,11 @@ public class JsCallbackHandler : MonoBehaviour
                 systemManager.Reset();
                 break;
             case "MagicSpell":
-                systemManager.CreateAndSpawnParticleFromMps(data.text, data.name);
+                systemManager.CreateAndSpawnParticleFromMps(data.text, data.id); // Pass ID
                 break;
             case "TransformObject":
-                systemManager.TransformNamedObject(data.name, data.text);
+                systemManager.TransformObjectById(data.id, data.text); // Use new method and pass ID
                 break;
         }
     }
 }
-
