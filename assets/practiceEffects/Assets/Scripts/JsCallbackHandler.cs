@@ -74,10 +74,20 @@ public class JsCallbackHandler : MonoBehaviour
     // Note: Test methods will use name-based logic, update them if needed for ID-based testing.
     void TestReceiveGeneralData()
     {
-        string spellText = " <~main <~startLifetime [0.5 2] ~startSpeed 0.5 ~startSize [0.2 0.4] ~startRotation [0 360] ~simulationSpace (World)> ~emission <~rateOverTime 50> ~shape <~angle 5 ~radius 0.0001> ~colorOverLifetime <~gradient <~colorKeys [[1.0 0.6 0.0 1.0 0.0] [1.0 0.0 0.0 1.0 0.6] [1.0 0.0 0.0 1.0 1.0]] ~alphaKeys [[0.0 0.0] [1.0 0.5] [0.0 1.0]]>> ~rotationOverLifetime <~z [-45 45]> ~renderer <~materialName (Fire_1)>>";
-        // ID is now generated in JS, so we pass an empty string or a test ID here.
+        //string spellText = "< ~main < ~startLifetime[0.5 2] ~startSpeed 0.5 ~startSize[0.2 0.4] ~startRotation[0 360] > ~emission < ~rateOverTime 50 > ~shape < ~angle 5 ~radius 0.0001 > ~colorOverLifetime < ~gradient < ~colorKeys[[1.0 0.6 0.0 1.0 0.0][1.0 0.0 0.0 1.0 0.6][1.0 0.0 0.0 1.0 1.0]] ~alphaKeys[[0.0 0.0][1.0 0.5][0.0 1.0]] >> ~rotationOverLifetime < ~z[-45 45] > ~renderer < ~materialName(Fire_1) >>";
+
+        string spellText = "<~main <~duration 1 ~startLifetime 2 ~startSpeed 10 ~startSize [30 30 75] ~startColor [1 0.5 0 1] > ~emission <~rateOverTime 0 ~burstCount 2> ~colorOverLifetime <~gradient<~alphaKeys [[0 0] [1 0.05] [1 0.95] [0 1]]>> ~renderer <~renderMode (Mesh) ~meshDistribution (NonUniformRandom) ~meshes (Bullet) ~materialName (Cross) ~alignment (Local)>>";
         string testId = "test-id-from-csharp-1";
         systemManager.CreateAndSpawnParticleFromMps(spellText, testId);
+
+        spellText = "<~main <~duration 1 ~startLifetime 2 ~startSpeed 10 ~startSize [30 30 75] ~startColor [1 0.5 0 1] > ~emission <~rateOverTime 0 ~burstCount 2> ~colorOverLifetime <~gradient<~alphaKeys [[0 0] [1 0.05] [1 0.95] [0 1]]>> ~rotationOverLifetime <~z 500> ~renderer <~renderMode (Mesh) ~meshDistribution (NonUniformRandom) ~meshes (Bullet) ~materialName (Grow_2) ~alignment(Local) >> ";
+        testId = "test-id-from-csharp-2";
+        systemManager.CreateAndSpawnParticleFromMps(spellText, testId);
+
+        spellText = "<~main <~duration 1 ~startLifetime 2 ~startSpeed 10 ~startSize [15 15 200] ~startColor [1 0.5 0 1] > ~emission <~rateOverTime 0 ~burstCount 2> ~colorOverLifetime <~gradient <~alphaKeys [[0 0] [1 0.05] [1 0.95] [0 1]]>> ~rotationOverLifetime <~z -800> ~renderer <~renderMode (Mesh) ~meshDistribution (NonUniformRandom) ~meshes (Cylinder) ~materialName (Spiral) ~alignment (Local)>>";
+        testId = "test-id-from-csharp-3";
+        systemManager.CreateAndSpawnParticleFromMps(spellText, testId);
+
     }
 
     void TestTransform()

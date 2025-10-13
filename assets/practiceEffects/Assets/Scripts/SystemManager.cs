@@ -54,7 +54,6 @@ public class SystemManager : MonoBehaviour
                 }
             }
         }
-        // --- ▼▼▼ ここから修正 ▼▼▼ ---
         meshDictionary = new Dictionary<string, Mesh>();
         foreach (var entry in meshList)
         {
@@ -66,7 +65,6 @@ public class SystemManager : MonoBehaviour
                 }
             }
         }
-        // --- ▲▲▲ ここまで修正 ▲▲▲ ---
     }
 
     /// <summary>
@@ -84,7 +82,9 @@ public class SystemManager : MonoBehaviour
 
         try
         {
-            ParticlePreset preset = MpsParser.Parse(mpsCode, materialDictionary);
+            // --- ▼▼▼ ここから修正 ▼▼▼ ---
+            ParticlePreset preset = MpsParser.Parse(mpsCode, materialDictionary, meshDictionary);
+            // --- ▲▲▲ ここまで修正 ▲▲▲ ---
 
             if (particleGenerator != null)
             {
@@ -116,7 +116,6 @@ public class SystemManager : MonoBehaviour
         }
     }
 
-    // --- ▼▼▼ ここから修正 ▼▼▼ ---
     /// <summary>
     /// mpsコードに基づいてGameObjectを生成します。
     /// </summary>
@@ -192,9 +191,7 @@ public class SystemManager : MonoBehaviour
             Debug.LogError($"Error parsing object creation code: {e.Message}\n{e.StackTrace}");
         }
     }
-    // --- ▲▲▲ ここまで修正 ▲▲▲ ---
 
-    // --- ▼▼▼ ここから追加 ▼▼▼ ---
     /// <summary>
     /// 指定されたIDのオブジェクトを、別の指定されたIDのオブジェクトの子にします。
     /// </summary>
@@ -238,7 +235,6 @@ public class SystemManager : MonoBehaviour
         childObject.transform.SetParent(parentObject.transform);
         Debug.Log($"Attached object '{childId}' to parent '{parentId}'.");
     }
-    // --- ▲▲▲ ここまで追加 ▲▲▲ ---
 
     /// <summary>
     /// Updates the Transform of a GameObject specified by its ID.
@@ -326,4 +322,3 @@ public class SystemManager : MonoBehaviour
         managedObjectsById.Clear();
     }
 }
-
