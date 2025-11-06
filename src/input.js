@@ -66,8 +66,12 @@ function MouseDownEvent()
 
 
     if (GetMouseX() > GetScreenSize()[0]) return;
-    if (AddObjectMode != "") return;
     const ClickObj = CheckMouseObject();
+    if (AddObjectMode != "") 
+    {
+        if(ClickObj[0]=="button") ClickObj[1].pressed();
+        return;
+    }
     switch (cursormode)
     {
         case "grad":
@@ -75,6 +79,7 @@ function MouseDownEvent()
             {
                 case "menu":
                 case "button":
+                    ClickObj[1].pressed();
                     break;
                 case "ring":
                     selectRing = ClickObj[1][0];
@@ -134,7 +139,8 @@ function MouseDownEvent()
             switch (ClickObj[0])
             {
                 case "menu":
-                case "button": break;
+                case "button": 
+                    break;
                 case "ring": 
                     const ringObject = ClickObj[1][0];
                     const clickLocation = ClickObj[1][1];
@@ -169,7 +175,6 @@ function MouseHoldEvent()
 {
     if (isUIHidden) return;
     if (GetMouseX() > GetScreenSize()[0]) return;
-    //console.log(CheckMouseObject(false));
     if (!CheckMouseOnMenu())
     {
         let newItem;
@@ -248,9 +253,10 @@ function MouseUpEvent()
 }
 
 
-function CheckMouseObject(buttonActive = true)
+function CheckMouseObject()
 {
-    if (CheckButtons(buttonActive)) { return ["button"]; }
+    const button = CheckButtons();
+    if (button) {return ["button", button]; }
     if (CheckMouseOnMenu()) { return ["menu"]; }
     const ring = CheckMouseOnRing();
     if (ring) { return ["ring", ring]; }
@@ -290,14 +296,15 @@ function DrawButtons()
     buttons.forEach (btn => { btn.Draw(); })
 }
 
-function CheckButtons(active = true)
+function CheckButtons()
 {   
     let isbutton = false;
-    buttons.forEach (btn => {    
-        const result = btn.CheckPressed(active);
-        if (result) isbutton = true;
-    });
-    return isbutton;
+    let result = null;
+    for (const btn of buttons) {    
+        result = btn.CheckPressed();
+        if (result) break;
+    }
+    return result;
 }
 
 function StartDragRing(ring, pos)

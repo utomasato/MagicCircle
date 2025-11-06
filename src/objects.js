@@ -914,19 +914,14 @@ class Button
         DrawIcon(this.text, x + this.w/2, y + this.h/2, this.size);
     }
     
-    CheckPressed(active = true)
+    CheckPressed()
     {
         let [width, height] = GetScreenSize();
         const x = width * this.anchor.x + this.x - this.w * this.pivot.x;
         const y = height * this.anchor.y + this.y - this.h * this.pivot.y;
         if (x < GetMouseX() && GetMouseX() < x + this.w && y < GetMouseY() && GetMouseY() < y + this.h)
         {
-            if (active)
-            {
-                AddObjectMode = "";
-                this.pressed();
-            }
-            return true;
+            return this;
         }
         return false;
     }
