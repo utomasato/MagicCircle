@@ -69,15 +69,16 @@ function MouseDownEvent()
     const ClickObj = CheckMouseObject();
     if (AddObjectMode != "") 
     {
-        if(ClickObj[0]=="button") ClickObj[1].pressed();
+        if (ClickObj[0] == "button") ClickObj[1].pressed();
         return;
-    }
-    switch (cursormode)
+    }
+    switch (cursormode)
     {
         case "grad":
             switch (ClickObj[0])
             {
                 case "menu":
+                    break;
                 case "button":
                     ClickObj[1].pressed();
                     break;
@@ -139,7 +140,9 @@ function MouseDownEvent()
             switch (ClickObj[0])
             {
                 case "menu":
-                case "button": 
+                    break;
+                case "button":
+                    ClickObj[1].pressed();
                     break;
                 case "ring": 
                     const ringObject = ClickObj[1][0];

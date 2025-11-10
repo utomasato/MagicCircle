@@ -244,6 +244,7 @@ function Draw() {
             DrawText(12, "MousePos: (" + mousePos.x.toFixed(2) + ", " + mousePos.y.toFixed(2) + ")", width - 10, height - 50, color(0, 0, 0), RIGHT);
             DrawText(12, "CameraPos: (" + cameraPos.x.toFixed(2) + ", " + cameraPos.y.toFixed(2) + ")", width - 10, height - 70, color(0, 0, 0), RIGHT);
             DrawText(12, "AddObjectMode: (" + AddObjectMode + ")", width - 10, height - 90, color(0, 0, 0), RIGHT);
+            DrawText(12, "CursorMode: (" + cursormode + ")", width - 10, height - 110, color(0, 0, 0), RIGHT);
         }
     }
     else if (screenshotRequest) 
