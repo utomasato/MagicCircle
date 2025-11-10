@@ -28,7 +28,10 @@ function itemToXML(item, ringIdMap) {
         });
     };
 
-    let attributes = `type="${item.type}" value="${escapeXML(value)}"`;
+    let attributes = `type="${item.type}" value="${escapeXML(value)}"`;    
+    if (item.type === 'joint') {
+        attributes += ` isExecute="${item.isExecute}"`;
+    }
     // フィールドアイテム（親リングがない）の場合、座標も保存
     if (!item.parentRing) {
         attributes += ` x="${item.pos.x.toFixed(2)}" y="${item.pos.y.toFixed(2)}"`;
@@ -174,6 +177,12 @@ function importFromXML(xmlString, mode) {
             case 'joint':
                 // Jointの接続先(value)は後のステップで解決する
                 newItem = new Joint(x, y, value, parentRing);
+                const isExecuteAttr = itemEl.getAttribute('isExecute');
+                if (isExecuteAttr === 'true') {
+                    newItem.isExecute = true;
+                } else {
+                    newItem.isExecute = false; // デフォルトは false
+                }
                 allNewJoints.push(newItem); // 解決待ちリストに追加
                 break;
             default: return null;

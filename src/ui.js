@@ -424,6 +424,51 @@ function createJointPanel(item) {
     if (!panelResult) return;
     editingItem = item;
 
+    // --- isExecute トグルを追加 ---
+    const executeContainer = createDiv('');
+    executeContainer.parent(panelResult.contentArea);
+    executeContainer.style('display', 'flex');
+    executeContainer.style('align-items', 'center');
+    executeContainer.style('gap', '8px');
+    executeContainer.style('margin-bottom', '8px'); // 他要素との間隔
+
+    const executeCheckbox = createInput(null, 'checkbox');
+    executeCheckbox.parent(executeContainer);
+    executeCheckbox.style('cursor', 'pointer');
+    
+    // 修正: .checked() メソッドではなく .elt.checked プロパティを使用して初期値を設定
+    executeCheckbox.elt.checked = item.isExecute;
+    
+    executeCheckbox.elt.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+    });
+
+    executeCheckbox.changed(() => {
+        // 修正: .checked() メソッドではなく .elt.checked プロパティを使用して値を取得
+        item.isExecute = executeCheckbox.elt.checked;
+        // isExecute が変わると GetLength() が変わる可能性があるため、親リングのレイアウトを再計算
+        if (item.parentRing) {
+            item.parentRing.CalculateLayout();
+        }
+    });
+
+    const executeLabel = createP('Execute (exec)');
+    executeLabel.parent(executeContainer);
+    executeLabel.style('margin', '0');
+    executeLabel.style('font-size', '14px');
+    executeLabel.style('cursor', 'pointer');
+    // ラベルクリックでもチェックボックスがトグルするようにする
+    executeLabel.elt.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        item.isExecute = !item.isExecute;
+        // 修正: .checked() メソッドではなく .elt.checked プロパティを使用して値を設定
+        executeCheckbox.elt.checked = item.isExecute;
+        if (item.parentRing) {
+            item.parentRing.CalculateLayout();
+        }
+    });
+    // ----------------------------
+
     const connectedRing = item.value;
     const parentRing = item.parentRing;
 
@@ -433,6 +478,9 @@ function createJointPanel(item) {
         buttonContainer.style('display', 'flex');
         buttonContainer.style('flex-direction', 'column');
         buttonContainer.style('gap', '5px');
+        buttonContainer.style('border-top', '1px solid #ddd'); // 区切り線
+        buttonContainer.style('padding-top', '8px');      // 区切り線との間隔
+        buttonContainer.style('margin-top', '8px');       // isExecute との間隔
 
         const goToButton = createButton('接続先へ移動');
         goToButton.parent(buttonContainer);
@@ -488,6 +536,9 @@ function createJointPanel(item) {
         message.parent(panelResult.contentArea);
         message.style('margin', '0');
         message.style('color', '#888');
+        message.style('border-top', '1px solid #ddd'); // 区切り線
+        message.style('padding-top', '8px');      // 区切り線との間隔
+        message.style('margin-top', '8px');       // isExecute との間隔
     }
 }
 

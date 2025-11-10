@@ -751,6 +751,7 @@ class Joint extends RingItem {
     {
         super(x, y, value, parentRing); 
         this.type = "joint";
+        this.isExecute = false;
     }
 
     clone(clonedMap) {
@@ -759,11 +760,13 @@ class Joint extends RingItem {
             clonedValue = this.value.clone(clonedMap);
         }
         const newJoint = new Joint(this.pos.x, this.pos.y, clonedValue, null);
+        newJoint.isExecute = this.isExecute; // isExecute の状態もコピー
         return newJoint;
     }
     
     GetLength()
     {
+        if (this.isExecute) return config.sigilWidth;
         return config.jointWidth;
     }
     
@@ -772,6 +775,7 @@ class Joint extends RingItem {
         PushTransform();
         Rotate(angle);
         DrawSigil("joint", 0, -radius);
+        if (this.isExecute) DrawSigil("exec", 0, -radius);
         PopTransform();
     }
     
@@ -820,10 +824,12 @@ class Joint extends RingItem {
             const ring = ClickObj[1][0];
             const mouseAngle = Math.atan2(ring.pos.x - mousePos.x, ring.pos.y - mousePos.y);
             DrawSigil("joint", GetMouseX(), GetMouseY(), -mouseAngle, zoomSize);
+            if (this.isExecute) DrawSigil("exec", GetMouseX(), GetMouseY(), -mouseAngle, zoomSize);
         }
         else
         {
             DrawSigil("joint", GetMouseX(), GetMouseY(), PI, zoomSize);
+            if (this.isExecute) DrawSigil("exec", GetMouseX(), GetMouseY(), PI, zoomSize);
         }
     }
     
@@ -860,6 +866,7 @@ class Joint extends RingItem {
             DrawRect(this.pos.x-this.GetLength()*PI, this.pos.y-config.sigilSize/2, this.GetLength()*TWO_PI, config.sigilSize, color(0,255,0));
         }
         DrawSigil("joint", this.pos.x, this.pos.y, PI);
+        if (this.isExecute) DrawSigil("exec", this.pos.x, this.pos.y, PI);
     }
     
     CheckPosIsOn(pos)
@@ -879,6 +886,7 @@ class Joint extends RingItem {
     {
         if (this.value && typeof this.value.Spell === 'function') {
             const spell = this.value.Spell();
+            if (this.isExecute) return spell + " exec";
             return spell;
         }
         return "joint";
