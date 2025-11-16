@@ -166,16 +166,57 @@ function createTextInput(item) {
     
     editButton.elt.addEventListener('mousedown', (e) => {
         e.stopPropagation();
-        const newValue = prompt("新しい値を入力してください:", item.value || "");
+        
+        let newValue = prompt("新しい値を入力してください:", item.value || "");
+        
+        // item のクラス名を取得
+        const itemClassName = item.constructor.name;
+        const isStringToken = (itemClassName === 'StringToken');
 
+        // newValue が null (キャンセル) になるまでループ
+        while (newValue !== null) {
+            
+            // StringToken 以外の場合のみ検証
+            if (!isStringToken) {
+                // 1. 空文字列のチェック
+                if (newValue === "") {
+                    newValue = prompt("値が入力されていません。再度入力してください:", item.value || "");
+                    continue; // ループの最初に戻る
+                }
+                
+                // 2. 空白文字のチェック
+                if (/\s/.test(newValue)) {
+                    newValue = prompt("空白文字は使用できません。再度入力してください:", newValue);
+                    continue; // ループの最初に戻る
+                }
+            }
+            
+            // 検証OK (StringToken は常にOK)
+            break;
+        }
+
+        // キャンセルされなかった (newValue が null でない) 場合のみ値を更新
         if (newValue !== null) {
+            
+            // --- 変更：入力時のエスケープ処理を削除 ---
+            // let finalValue = newValue;
+            // if (!isStringToken) {
+            //    const specialChars = /[~{}<>()\[\]\\]/g; 
+            //    finalValue = newValue.replace(specialChars, (match) => '\\' + match);
+            // }
+            // item.value = finalValue;
+            // valueDisplay.html(finalValue); 
+            // ---
+
+            // --- 変更：エスケープされていない元の値をそのまま保存・表示 ---
             item.value = newValue;
-            valueDisplay.html(newValue);
+            valueDisplay.html(newValue); // 表示もエスケープされていない値にする
             if (item.parentRing) {
                 item.parentRing.CalculateLayout();
             }
         }
         
+        // 最終的にパネルを閉じる
         closePanel();
     });
 }

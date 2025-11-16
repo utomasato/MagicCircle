@@ -469,15 +469,43 @@ class PostscriptInterpreter {
                 i++;
                 while (i < code.length && level > 0) {
                     const current_char = code[i];
+                    
+                    if (current_char === '\\') { // エスケープ文字
+                         if (i + 1 < code.length) {
+                            content += current_char; // \ も content に含める
+                            content += code[i + 1]; // 次の文字も content に含める
+                            i += 2;
+                        } else {
+                            throw new Error("Parse error: Escape character (\\) at end of procedure/array.");
+                        }
+                        continue;
+                    }
+
                     if (current_char === '(') {
                         let str_level = 1;
                         content += current_char;
                         i++;
                          while(i < code.length && str_level > 0) {
-                            if(code[i] === '(') str_level++;
-                            if(code[i] === ')') str_level--;
-                            content += code[i];
-                            i++;
+                            if (code[i] === '\\') { // 文字列内のエスケープ
+                                if (i + 1 < code.length) {
+                                    content += code[i];
+                                    content += code[i+1];
+                                    i += 2;
+                                } else {
+                                    throw new Error("Parse error: Escape character (\\) at end of string in procedure/array.");
+                                }
+                            } else if(code[i] === '(') {
+                                str_level++;
+                                content += code[i];
+                                i++;
+                            } else if(code[i] === ')') {
+                                str_level--;
+                                content += code[i];
+                                i++;
+                            } else {
+                                content += code[i];
+                                i++;
+                            }
                         }
                         continue;
                     }
@@ -528,22 +556,114 @@ class PostscriptInterpreter {
                 let content = '';
                 i++;
                 while (i < code.length && level > 0) {
-                    if (code[i] === '(') level++;
-                    if (code[i] === ')') level--;
-                    if (level > 0) content += code[i];
-                    i++;
+                    if (code[i] === '\\') { // エスケープ文字
+                        if (i + 1 < code.length) {
+                            content += code[i]; // '\' を content に追加
+                            content += code[i + 1]; // エスケープ対象文字を content に追加
+                            i += 2;
+                        } else {
+                             throw new Error("Parse error: Escape character (\\) at end of string literal.");
+                        }
+                    } else if (code[i] === '(') {
+                        level++;
+                        content += code[i]; // '(' を content に追加
+                        i++;
+                    } else if (code[i] === ')') {
+                        level--;
+                        if (level > 0) content += code[i]; // ')' を content に追加 (最後の ')' 以外)
+                        i++;
+                    } else {
+                        content += code[i]; // 通常文字を content に追加
+                        i++;
+                    }
                 }
                 if (level !== 0) throw new Error("Mismatched parentheses in string literal.");
-                tokens.push(`(${content})`);
+                tokens.push(`(${content})`); // content にはエスケープ文字が含まれたまま
                 continue;
             }
 
             let currentToken = '';
-            while (i < code.length && !/[\s\{\}\[\]\<\>\(\)]/.test(code[i])) {
-                currentToken += code[i];
+            
+            // --- 修正： \、$、~ で始まるトークンのパース処理 ---
+            
+            if (code[i] === '\\') { // エスケープされたリテラル名
+                i++; // \ をスキップ
+                while (i < code.length && !/[\s\{\}\[\]\<\>\(\)]/.test(code[i])) {
+                     if (code[i] === '\\') { // トークン途中のエスケープ
+                        if (i + 1 < code.length) {
+                            currentToken += code[i + 1]; // \ は含めず、次の文字だけ
+                            i += 2;
+                        } else {
+                            throw new Error("Parse error: Escape character (\\) at end of code in token.");
+                        }
+                    } else {
+                        currentToken += code[i];
+                        i++;
+                    }
+                }
+                if (currentToken) tokens.push({ type: 'literal_name', value: currentToken }); // \add -> { type: 'literal_name', value: 'add' }
+
+            } else if (code[i] === '$') { // Chars由来の変数名
+                i++; // $ をスキップ
+                while (i < code.length && !/[\s\{\}\[\]\<\>\(\)]/.test(code[i])) {
+                     if (code[i] === '\\') { // トークン途中のエスケープ
+                        if (i + 1 < code.length) {
+                            currentToken += code[i + 1]; // \ は含めず、次の文字だけ
+                            i += 2;
+                        } else {
+                            throw new Error("Parse error: Escape character (\\) at end of code in token.");
+                        }
+                    } else {
+                        currentToken += code[i];
+                        i++;
+                    }
+                }
+                if (currentToken) tokens.push({ type: 'variable_name', value: currentToken }); // $add -> { type: 'variable_name', value: 'add' }
+
+            } else if (code[i] === '~') { // Name由来の変数名 (def用)
+                currentToken += code[i]; // ~ を含める
                 i++;
+                 while (i < code.length && !/[\s\{\}\[\]\<\>\(\)]/.test(code[i])) {
+                     if (code[i] === '\\') { // トークン途中のエスケープ
+                        if (i + 1 < code.length) {
+                            currentToken += '\\'; // \ も含める
+                            currentToken += code[i+1]; // 次の文字も
+                            i += 2;
+                        } else {
+                            throw new Error("Parse error: Escape character (\\) at end of code in token.");
+                        }
+                    } else {
+                        currentToken += code[i];
+                        i++;
+                    }
+                }
+                
+                if (currentToken.length > 1) { // ~add や ~\\~
+                    // def で処理するために、エスケープを解決したキーを ~ につけて渡す
+                    let key = currentToken.substring(1).replace(/\\(.)/g, '$1');
+                    tokens.push("~" + key);
+                } else if (currentToken === '~') {
+                    // ~ 単体はリテラル名として扱う (\~ と同じ)
+                     tokens.push({ type: 'literal_name', value: '~' });
+                }
+
+            } else { // 通常のトークン（コマンド、数値、エスケープなしリテラル）
+                 while (i < code.length && !/[\s\{\}\[\]\<\>\(\)]/.test(code[i])) {
+                    if (code[i] === '\\') { // トークン途中のエスケープ
+                        if (i + 1 < code.length) {
+                            currentToken += code[i + 1]; // \ は含めず、次の文字だけ
+                            i += 2;
+                        } else {
+                            throw new Error("Parse error: Escape character (\\) at end of code in token.");
+                        }
+                    } else {
+                        currentToken += code[i];
+                        i++;
+                    }
+                }
+                if(currentToken) tokens.push(currentToken);
             }
-            if(currentToken) tokens.push(currentToken);
+            // --- 修正ここまで ---
         }
         return tokens;
     }
@@ -564,9 +684,34 @@ class PostscriptInterpreter {
             if (token === null) {
                 this.stack.push(null);
             } else if (typeof token === 'string' && token.startsWith('(') && token.endsWith(')')) {
-                this.stack.push({ type: 'string', value: token.slice(1, -1).split('') });
-            } else if (typeof token === 'string' && this.commands[token]) {
-                this.commands[token]();
+                let strContent = token.slice(1, -1);
+                // エスケープ文字 (\( \_ \) \\ など) を解決
+                strContent = strContent.replace(/\\(.)/g, '$1'); 
+                this.stack.push({ type: 'string', value: strContent.split('') });
+            
+            // ★ literal_name (\add や \~ など)
+            } else if (typeof token === 'object' && token !== null && token.type === 'literal_name') {
+                // \ でエスケープされたものは、リテラル値 (文字列) を積む
+                this.stack.push(token.value); 
+
+            // ★ variable_name (Chars由来 $add) の処理
+            } else if (typeof token === 'object' && token !== null && token.type === 'variable_name') {
+                // Chars (例: $add) は、変数としてのみ検索する
+                const value = this.lookupVariable(token.value);
+                if (value !== undefined) {
+                    // 変数が見つかった
+                    if (typeof value === 'object' && value !== null && value.type === 'unityObject') {
+                        this.stack.push(value);
+                    } else if (Array.isArray(value)) {
+                        this.run(value); // プロシージャ実行
+                    } else {
+                        this.stack.push(value); // 値を積む (例: 1)
+                    }
+                } else {
+                    // 変数が見つからない場合、コマンド検索は *せず* エラー
+                    throw new Error(`Undefined variable: ${token.value}`);
+                }
+
             } else if (typeof token === 'string' && token.startsWith('~')) {
                  this.stack.push(token);
             } else if (!isNaN(parseFloat(token)) && isFinite(token)) {
@@ -576,19 +721,19 @@ class PostscriptInterpreter {
             } else if (typeof token === 'object' && token !== null && token.type && (token.type === 'array' || token.type === 'dict')) {
                 const resolvedToken = this.resolveVariablesInStructure(token);
                 this.stack.push(resolvedToken);
+                
+            // --- ★ Sigil (または数値以外) の処理 ---
             } else if (typeof token === 'string') {
-                const value = this.lookupVariable(token);
-                if (value !== undefined) {
-                    if (typeof value === 'object' && value !== null && value.type === 'unityObject') {
-                        this.stack.push(value);
-                    } else if (Array.isArray(value)) {
-                        this.run(value);
-                    } else {
-                        this.stack.push(value);
-                    }
+                // Sigil (例: add) は、コマンドとしてのみ検索する
+                if (this.commands[token]) {
+                    this.commands[token](); // コマンド実行
                 } else {
-                    throw new Error(`Undefined command or variable: ${token}`);
+                    // Sigil由来のトークンがコマンドにも変数にもない場合
+                    // (※変数検索はしないのがユーザーの要望)
+                    throw new Error(`Undefined command: ${token}`);
                 }
+            // --- ★ 変更ここまで ---
+
             } else {
                  this.stack.push(token);
             }

@@ -565,6 +565,31 @@ class Chars extends RingItem {
         }
         return false;
     }
+
+    // --- 修正：Chars の SpellToken を $ プレフィックスと数値対応に変更 ---
+    SpellToken()
+    {
+        const value = this.value;
+
+        // 1. 値が null や空文字列、空白でないかチェックし、
+        //    さらに isFinite() で純粋な数値 ( "1", "-0.5" ) かどうかを判定
+        //    ( isFinite("1a") や isFinite("add") は false になる )
+        if (value !== null && value.trim() !== "" && isFinite(value)) {
+            // 数値の場合は、 $ をつけずにそのまま返す
+            // (interpreter.js の run ループが !isNaN で数値として処理する)
+            return value;
+        }
+
+        // 2. 数値でない場合 ( "add", "x", "1a" など) は、変数として扱う
+        //    \ と PostScript構文文字 ($ も含む) をエスケープ
+        let escapedValue = this.value.replace(/[\\~{}<>()\[\]$]/g, (match) => '\\' + match);
+        
+        // $ を先頭につけて変数名として扱う
+        // (Charsの 'add' は '$add' となり、Sigilの 'add' と区別される)
+        escapedValue = "$" + escapedValue; 
+        
+        return escapedValue;
+    }
 }
 
 class StringToken extends RingItem {
@@ -666,7 +691,9 @@ class StringToken extends RingItem {
     
     SpellToken()
     {
-        return "(" + this.value + ")";
+        // \ と ( と ) と $ をエスケープ
+        const escapedValue = this.value.replace(/[\\()$]/g, (match) => '\\' + match);
+        return "(" + escapedValue + ")";
     }
 }
 
@@ -742,7 +769,9 @@ class Name extends RingItem {
     
     SpellToken()
     {
-        return "~" + this.value;
+        // \ と PostScript構文文字 ($ も含む) をエスケープ
+        const escapedValue = this.value.replace(/[\\~{}<>()\[\]$]/g, (match) => '\\' + match);
+        return "~" + escapedValue;
     }
 }
 
