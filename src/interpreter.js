@@ -378,41 +378,67 @@ class PostscriptInterpreter {
         };
     }
     
+    // --- 修正された resolveVariablesInStructure ---
     resolveVariablesInStructure(structure) {
-        if (typeof structure !== 'object' || structure === null) {
-            if (typeof structure === 'string' && !structure.startsWith('~') && isNaN(parseFloat(structure))) {
-                 const lookedUpValue = this.lookupVariable(structure);
-                 return lookedUpValue !== undefined ? lookedUpValue : structure;
-            }
-            return structure;
-        }
-
-        if (Array.isArray(structure)) {
-            return structure.map(item => this.resolveVariablesInStructure(item));
-        }
-
-        if (structure.type === 'array') {
-            if (Array.isArray(structure.value)) {
-                const newStructure = { ...structure };
-                newStructure.value = structure.value.map(item => this.resolveVariablesInStructure(item));
-                return newStructure;
+        
+        // 1. { type: 'variable_name', value: 'x' } の処理
+        if (typeof structure === 'object' && structure !== null && structure.type === 'variable_name') {
+            const value = this.lookupVariable(structure.value);
+            if (value !== undefined) {
+                // 変数が見つかった (例: value = 1 や value = [1, 2, {type: 'variable_name', value: 'a'}])
+                // 返ってきた値 (value) も解決が必要な可能性があるため、再帰呼び出しする
+                return this.resolveVariablesInStructure(value);
+            } else {
+                // 変数が見つからない
+                return null; // または undefined
             }
         }
         
+        // 2. プリミティブ型 (string, number, boolean) はそのまま返す
+        if (typeof structure !== 'object' || structure === null) {
+            // 'add' や 1 や '~pos' など。
+            // これらは変数解決の対象外 (string 'add' は run ループでコマンドとして処理される)
+            return structure;
+        }
+
+        // 3. 生の配列 (JSの配列)
+        if (Array.isArray(structure)) {
+            // (例: { type: 'array' } の .value や、プロシージャ { ... } )
+            // 配列の各アイテムを再帰的に解決
+            return structure.map(item => this.resolveVariablesInStructure(item));
+        }
+
+        // 4. { type: 'array', ... } オブジェクト
+        if (structure.type === 'array') {
+            if (Array.isArray(structure.value)) {
+                const newStructure = { ...structure };
+                // value (トークンの配列) の各要素を解決
+                newStructure.value = structure.value.map(item => this.resolveVariablesInStructure(item)); 
+                return newStructure;
+            }
+            // value が配列でない場合は、そのまま返す (またはエラー)
+            return structure;
+        }
+        
+        // 5. { type: 'dict', ... } オブジェクト
         if (structure.type === 'dict') {
             const newStructure = { ...structure, value: {} };
             for (const key in structure.value) {
                 if (Object.hasOwnProperty.call(structure.value, key)) {
-                    // キーは変数解決しない（通常はリテラルのため）
-                    const resolvedValue = this.resolveVariablesInStructure(structure.value[key]);
+                    // キーは解決しない
+                    // 値を解決
+                    const resolvedValue = this.resolveVariablesInStructure(structure.value[key]); 
                     newStructure.value[key] = resolvedValue;
                 }
             }
             return newStructure;
         }
         
+        // 6. その他のオブジェクト (例: { type: 'unityObject', ... } )
+        //    これらは変更せずにそのまま返す
         return structure;
     }
+    // --- 修正ここまで ---
     
     formatForOutput(val) {
         if (val === null) return 'null';
@@ -445,6 +471,10 @@ class PostscriptInterpreter {
                     .map(([key, value]) => `${key} ${this.formatForOutput(value)}`)
                     .join(' ');
                 return `<${dictContent}>`;
+            // --- 追加: variable_name を表示できるように (デバッグ用) ---
+            case 'variable_name':
+                return `($${val.value})`;
+            // --- 追加ここまで ---
             default:
                 return `[Unknown Type: ${val.type}]`;
         }
@@ -520,7 +550,12 @@ class PostscriptInterpreter {
                 if (startBracket === '{') {
                     tokens.push(innerTokens);
                 } else { // '['
+                    // --- 修正: 配列リテラルをパースする際、中身のトークンも渡す ---
+                    // (以前は innerTokens をそのまま value にしていたが、
+                    //  PostScript の配列は実行時に評価されるのではなく、
+                    //  リテラルとして中身 (数値や変数名トークン) を保持すべき)
                     tokens.push({ type: 'array', value: innerTokens });
+                    // --- 修正ここまで ---
                 }
                 continue;
             }
@@ -545,7 +580,16 @@ class PostscriptInterpreter {
                 }
                 for (let j = 0; j < innerTokens.length; j += 2) {
                     let key = innerTokens[j];
-                    dictObject[String(key)] = innerTokens[j + 1];
+                    // --- 修正: 辞書リテラルのキーの ~ を削除しない ---
+                    if (typeof key === 'string' && key.startsWith('~')) {
+                         // dictObject[key.substring(1)] = innerTokens[j + 1]; // 旧: キーは ~ を除外
+                         dictObject[key] = innerTokens[j + 1]; // 新: キーの ~ を保持
+                    } else if (typeof key === 'object' && key.type === 'literal_name') {
+                         dictObject[key.value] = innerTokens[j + 1]; // キーは \ を除外
+                    } else {
+                         // 数値や文字列キーも許可 (PostScript準拠)
+                         dictObject[String(key)] = innerTokens[j + 1];
+                    }
                 }
                 tokens.push({ type: 'dict', value: dictObject });
                 continue;
@@ -719,8 +763,10 @@ class PostscriptInterpreter {
             } else if (Array.isArray(token)) {
                 this.stack.push(token);
             } else if (typeof token === 'object' && token !== null && token.type && (token.type === 'array' || token.type === 'dict')) {
+                // --- 修正: 配列や辞書リテラルは、中身の変数を解決してから積む ---
                 const resolvedToken = this.resolveVariablesInStructure(token);
                 this.stack.push(resolvedToken);
+                // --- 修正ここまで ---
                 
             // --- ★ Sigil (または数値以外) の処理 ---
             } else if (typeof token === 'string') {
