@@ -305,6 +305,51 @@ function createRingPanel(ring) {
 
     editingItem = ring;
 
+    // --- Marker Input (Modified to use Prompt) ---
+    const markerContainer = createDiv('');
+    markerContainer.parent(contentArea);
+    markerContainer.style('display', 'flex');
+    markerContainer.style('align-items', 'center');
+    markerContainer.style('gap', '8px');
+    markerContainer.style('margin-top', '10px');
+    markerContainer.style('border-top', '1px solid #ddd');
+    markerContainer.style('padding-top', '8px');
+
+    const markerLabel = createP('Marker:');
+    markerLabel.parent(markerContainer);
+    markerLabel.style('margin', '0');
+    markerLabel.style('font-size', '14px');
+
+    // Display current value (Read-only)
+    const markerDisplay = createP(ring.marker || '');
+    markerDisplay.parent(markerContainer);
+    markerDisplay.style('flex-grow', '1');
+    markerDisplay.style('border', '1px solid #ccc');
+    markerDisplay.style('border-radius', '4px');
+    markerDisplay.style('padding', '4px');
+    markerDisplay.style('background', '#f9f9f9'); // Read-only appearance
+    markerDisplay.style('min-height', '1.5em'); // Ensure height even if empty
+    markerDisplay.style('white-space', 'nowrap');
+    markerDisplay.style('overflow', 'hidden');
+    markerDisplay.style('text-overflow', 'ellipsis');
+
+    // Edit Button triggers Prompt
+    const editMarkerButton = createButton('編集');
+    editMarkerButton.parent(markerContainer);
+    editMarkerButton.style('cursor', 'pointer');
+    
+    editMarkerButton.elt.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        const newValue = prompt("マーカー名を入力してください:", ring.marker || "");
+        
+        if (newValue !== null) {
+            ring.marker = newValue;
+            markerDisplay.html(newValue);
+            closePanel(); // パネルを閉じる
+        }
+    });
+    // --------------------
+
     const buttonContainer = createDiv('');
     buttonContainer.parent(contentArea);
     buttonContainer.style('display', 'flex');
@@ -454,6 +499,7 @@ function createRingPanel(ring) {
                 newRing.isNew = false; // isNew フラグを倒す
                 newRing.angle = ring.angle; // 角度を引き継ぐ
                 newRing.isStartPoint = ring.isStartPoint; // 開始点フラグを引き継ぐ
+                newRing.marker = ring.marker; // マーカーを引き継ぐ
 
                 rings[ringIndex] = newRing; // 配列内のインスタンスを置き換え
                 
@@ -588,29 +634,7 @@ function createJointPanel(item) {
 
              straightenButton.elt.addEventListener('mousedown', e => {
                 e.stopPropagation();
-                
-                const jointIndex = parentRing.items.indexOf(item);
-                if (jointIndex === -1 || !parentRing.layouts[jointIndex]) {
-                    closePanel();
-                    return;
-                }
-                
-                const direction = globalIsClockwise ? -1 : 1;
-                const jointLocalAngle = parentRing.layouts[jointIndex].angle;
-
-                const jointGlobalAngle = parentRing.angle + jointLocalAngle * direction;
-
-                const currentDistance = dist(parentRing.pos.x, parentRing.pos.y, connectedRing.pos.x, connectedRing.pos.y);
-                
-                const p5Angle = jointGlobalAngle - HALF_PI;
-                const newChildX = parentRing.pos.x + currentDistance * cos(p5Angle);
-                const newChildY = parentRing.pos.y + currentDistance * sin(p5Angle);
-
-                const angleToParent = atan2(parentRing.pos.y - newChildY, parentRing.pos.x - newChildX);
-                const newChildAngle = angleToParent + HALF_PI;
-
-                transformSubtree(connectedRing, newChildX, newChildY, newChildAngle);
-
+                item.Straighten();
                 closePanel();
             });
         }

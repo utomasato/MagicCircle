@@ -1,4 +1,20 @@
 /**
+ * XMLエスケープが必要な文字を処理するヘルパー関数
+ */
+function escapeXML(str) {
+    if (typeof str !== 'string') return str;
+    return str.replace(/[<>&'"]/g, (c) => {
+        switch (c) {
+            case '<': return '&lt;';
+            case '>': return '&gt;';
+            case '&': return '&amp;';
+            case '\'': return '&apos;';
+            case '"': return '&quot;';
+        }
+    });
+}
+
+/**
  * リングやアイテムの情報をXML文字列に変換する
  * @param {RingItem} item - 対象のアイテム
  * @param {Map<MagicRing, number>} ringIdMap - リングとそのIDのマップ
@@ -13,20 +29,6 @@ function itemToXML(item, ringIdMap) {
         value = ringIdMap.get(item.value);
         if (value === undefined) value = -1; // 念のため、見つからない場合は-1
     }
-
-    // XMLエスケープが必要な文字を処理
-    const escapeXML = (str) => {
-        if (typeof str !== 'string') return str;
-        return str.replace(/[<>&'"]/g, (c) => {
-            switch (c) {
-                case '<': return '&lt;';
-                case '>': return '&gt;';
-                case '&': return '&amp;';
-                case '\'': return '&apos;';
-                case '"': return '&quot;';
-            }
-        });
-    };
 
     let attributes = `type="${item.type}" value="${escapeXML(value)}"`;    
     if (item.type === 'joint') {
@@ -50,7 +52,10 @@ function ringToXML(ring, ringIdMap) {
     const ringId = ringIdMap.get(ring);
     const ringType = ring.constructor.name; // MagicRing, ArrayRing, DictRing
 
-    let xml = `  <Ring id="${ringId}" type="${ringType}" x="${ring.pos.x.toFixed(2)}" y="${ring.pos.y.toFixed(2)}" angle="${ring.angle.toFixed(4)}">\n`;
+    // Markerがあれば属性に追加
+    const markerAttr = ring.marker ? ` marker="${escapeXML(ring.marker)}"` : '';
+
+    let xml = `  <Ring id="${ringId}" type="${ringType}" x="${ring.pos.x.toFixed(2)}" y="${ring.pos.y.toFixed(2)}" angle="${ring.angle.toFixed(4)}"${markerAttr}>\n`;
     xml += `    <Items>\n`;
     ring.items.forEach(item => {
         xml += `  ` + itemToXML(item, ringIdMap);
@@ -132,6 +137,7 @@ function importFromXML(xmlString, mode) {
         const x = parseFloat(ringEl.getAttribute('x'));
         const y = parseFloat(ringEl.getAttribute('y'));
         const angle = parseFloat(ringEl.getAttribute('angle'));
+        const marker = ringEl.getAttribute('marker'); // マーカー属性の読み込み
 
         let newRing;
         switch (type) {
@@ -151,6 +157,8 @@ function importFromXML(xmlString, mode) {
         }
 
         newRing.angle = angle;
+        if (marker) newRing.marker = marker; // マーカーを設定
+
         newRing.items = []; // デフォルトのアイテムを一旦クリア
 
         rings.push(newRing);

@@ -923,11 +923,36 @@ class Joint extends RingItem {
         }
         return "joint";
     }
+    
+    Straighten()
+    {
+        const connectedRing = this.value;
+        const jointIndex = this.parentRing.items.indexOf(this);
+        if (jointIndex === -1 || !this.parentRing.layouts[jointIndex]) {
+            return;
+        }
+                
+        const direction = globalIsClockwise ? -1 : 1;
+        const jointLocalAngle = this.parentRing.layouts[jointIndex].angle;
+
+        const jointGlobalAngle = this.parentRing.angle + jointLocalAngle * direction;
+
+        const currentDistance = dist(this.parentRing.pos.x, this.parentRing.pos.y, connectedRing.pos.x, connectedRing.pos.y);
+                
+        const p5Angle = jointGlobalAngle - HALF_PI;
+        const newChildX = this.parentRing.pos.x + currentDistance * cos(p5Angle);
+        const newChildY = this.parentRing.pos.y + currentDistance * sin(p5Angle);
+
+        const angleToParent = atan2(this.parentRing.pos.y - newChildY, this.parentRing.pos.x - newChildX);
+        const newChildAngle = angleToParent + HALF_PI;
+
+        transformSubtree(connectedRing, newChildX, newChildY, newChildAngle);
+    }
 }
 
 class Button
 {
-    constructor(x, y, w, h, colorFunc, anchor, pivot, size, text, pressedFunc, isIcon = false, shouldDrawRect = true, textPosition = CENTER)
+    constructor(x, y, w, h, colorFunc, anchor, pivot, size, text, textColor, pressedFunc, isIcon = false, shouldDrawRect = true, align = CENTER)
     {
         this.x = x;
         this.y = y;
@@ -938,11 +963,12 @@ class Button
         this.pivot = pivot;
         this.size = size;
         this.text = text;
+        this.textColor = textColor;
         this.pressedFunc = pressedFunc;
         this.isIcon = isIcon;
         this.isPressed = false;
         this.shouldDrawRect = shouldDrawRect;
-        this.textPosition = textPosition;
+        this.align = align;
     }
     
     Draw()
@@ -955,10 +981,15 @@ class Button
             DrawRoundRect(x, y, this.w, this.h, 10, color(0,0,0), 3); 
             FillRoundRect(x, y, this.w, this.h, 10, this.colorFunc(this));
         }
+        if(debugMode) DrawRect (x, y, this.w, this.h, color(0,255,0));
         if (this.isIcon)
+        {
             DrawIcon(this.text, x + this.w/2, y + this.h/2, this.size);
+        }
         else
-            DrawText(this.size, this.text, x + this.w/2, y + this.h/2, color(0,0,0), this.textPosition);
+        {
+            DrawText(this.size, this.text, x + this.w/2, y + this.h/2, this.textColor, this.align);
+        }
     }
     
     CheckPressed()

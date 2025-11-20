@@ -4,6 +4,7 @@ let zoomSize;
 let rings = [];
 let fieldItems = [];
 let buttons = [];
+let staticButtons = []; // 追加: 静的なボタンを保持
 let cursormode = "grad";
 let debugMode;
 let isUIHidden;
@@ -132,14 +133,14 @@ function Start() {
         ringRotateHandleWidth: 20,
     };
 
-    buttons = [
-        new Button(10, 10, 40, 40, () => { return AddObjectMode == "ring" ? color(128,100,100) : color(255, 200, 200); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 30, "ring", () => { AddObjectMode = "ring"; }, true),
-        new Button(55, 10, 40, 40, () => { return AddObjectMode == "sigil" ? color(128,100,100) : color(255, 200, 200); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 30, "sigil", () => { AddObjectMode = "sigil"; }, true),
-        new Button(100, 10, 40, 40, () => { return AddObjectMode == "num" ? color(128,100,100) : color(255, 200, 200); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 30, "num", () => { AddObjectMode = "num"; }, true),
-        new Button(145, 10, 40, 40, () => { return AddObjectMode == "str" ? color(128,100,100) : color(255, 200, 200); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 30, "string", () => { AddObjectMode = "str"; }, true),
-        new Button(190, 10, 40, 40, () => { return AddObjectMode == "name" ? color(128,100,100) : color(255, 200, 200); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 30, "name", () => { AddObjectMode = "name"; }, true),
-        new Button(235, 10, 40, 40, () => { return AddObjectMode == "tRing" ? color(128,100,100) : color(255, 200, 200); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 30, "・", () => { AddObjectMode = "tRing"; }, true),
-        new Button(-5, 10, 40, 40, (instance) => { return instance.isPressed ? color(128, 100, 100) : color(255, 200, 200); }, { x: 1, y: 0 }, { x: 1, y: 0 }, 17, "Run", () => {
+    staticButtons = [
+        new Button(10, 10, 40, 40, () => { return AddObjectMode == "ring" ? color(128,100,100) : color(255, 200, 200); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 30, "ring",null, () => { AddObjectMode = "ring"; }, true),
+        new Button(55, 10, 40, 40, () => { return AddObjectMode == "sigil" ? color(128,100,100) : color(255, 200, 200); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 30, "sigil",null, () => { AddObjectMode = "sigil"; }, true),
+        new Button(100, 10, 40, 40, () => { return AddObjectMode == "num" ? color(128,100,100) : color(255, 200, 200); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 30, "num",null, () => { AddObjectMode = "num"; }, true),
+        new Button(145, 10, 40, 40, () => { return AddObjectMode == "str" ? color(128,100,100) : color(255, 200, 200); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 30, "string",null, () => { AddObjectMode = "str"; }, true),
+        new Button(190, 10, 40, 40, () => { return AddObjectMode == "name" ? color(128,100,100) : color(255, 200, 200); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 30, "name",null, () => { AddObjectMode = "name"; }, true),
+        new Button(235, 10, 40, 40, () => { return AddObjectMode == "tRing" ? color(128,100,100) : color(255, 200, 200); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 30, "・",null, () => { AddObjectMode = "tRing"; }, true),
+        new Button(-5, 10, 40, 40, (instance) => { return instance.isPressed ? color(128, 100, 100) : color(255, 200, 200); }, { x: 1, y: 0 }, { x: 1, y: 0 }, 17, "Run",color(0,0,0), () => {
             if (startRing) {
                 const data = {isActive: true, message: "Reset", name: null, value: 0, text: null};
                 sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
@@ -165,28 +166,28 @@ function Start() {
             }
             console.log(activeInterpreter.stack);
         }),
-        new Button(-150, 10, 80, 40, (instance) => { return instance.isPressed ? color(110, 110, 128) : color(220, 220, 255); }, { x: 1, y: 0 }, { x: 1, y: 0 }, 17, "Import", () => {
+        new Button(-150, 10, 80, 40, (instance) => { return instance.isPressed ? color(110, 110, 128) : color(220, 220, 255); }, { x: 1, y: 0 }, { x: 1, y: 0 }, 17, "Import",color(0,0,0), () => {
             showXMLInputPanel();
         }),
-        new Button(-65, 10, 80, 40, (instance) => { return instance.isPressed ? color(100, 128, 110) : color(200, 255, 220); }, { x: 1, y: 0 }, { x: 1, y: 0 }, 17, "Export", () => {
+        new Button(-65, 10, 80, 40, (instance) => { return instance.isPressed ? color(100, 128, 110) : color(200, 255, 220); }, { x: 1, y: 0 }, { x: 1, y: 0 }, 17, "Export",color(0,0,0), () => {
             exportToXML();
         }),
-        new Button(10, -10, 40, 40, (instance) => { return instance.isPressed ? color(100, 100, 100) : color(200, 200, 200); }, { x: 0, y: 1 }, { x: 0, y: 1 }, 25, "-", () => { ZoomOut(); }),
-        new Button(10, -55, 40, 40, (instance) => { return instance.isPressed ? color(100, 100, 100) : color(200, 200, 200); }, { x: 0, y: 1 }, { x: 0, y: 1 }, 25, "=", () => { ZoomReset(); }),
-        new Button(10, -100, 40, 40, (instance) => { return instance.isPressed ? color(100, 100, 100) : color(200, 200, 200); }, { x: 0, y: 1 }, { x: 0, y: 1 }, 25, "+", () => { ZoomIn(); }),
-        new Button(10, 60, 40, 40, () => { return cursormode == "grad" ? color(100, 100, 100) : color(200, 200, 200); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "🖐️", () => { cursormode = "grad"; SetMouseCursor('grab'); }),
-        new Button(55, 60, 40, 40, () => { return cursormode == "edit" ? color(100, 100, 100) : color(200, 200, 200); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "🪶", () => { cursormode = "edit"; SetMouseCursor('default'); }),
-        new Button(100, 60, 65, 40, (instance) => { return instance.isPressed ? color(100, 110, 128) : color(200, 220, 255); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "Align", () => {
+        new Button(10, -10, 40, 40, (instance) => { return instance.isPressed ? color(100, 100, 100) : color(200, 200, 200); }, { x: 0, y: 1 }, { x: 0, y: 1 }, 25, "-",color(0,0,0), () => { ZoomOut(); }),
+        new Button(10, -55, 40, 40, (instance) => { return instance.isPressed ? color(100, 100, 100) : color(200, 200, 200); }, { x: 0, y: 1 }, { x: 0, y: 1 }, 25, "=",color(0,0,0), () => { ZoomReset(); }),
+        new Button(10, -100, 40, 40, (instance) => { return instance.isPressed ? color(100, 100, 100) : color(200, 200, 200); }, { x: 0, y: 1 }, { x: 0, y: 1 }, 25, "+",color(0,0,0), () => { ZoomIn(); }),
+        new Button(10, 60, 40, 40, () => { return cursormode == "grad" ? color(100, 100, 100) : color(200, 200, 200); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "🖐️",color(0,0,0), () => { cursormode = "grad"; SetMouseCursor('grab'); }),
+        new Button(55, 60, 40, 40, () => { return cursormode == "edit" ? color(100, 100, 100) : color(200, 200, 200); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "🪶",color(0,0,0), () => { cursormode = "edit"; SetMouseCursor('default'); }),
+        new Button(100, 60, 65, 40, (instance) => { return instance.isPressed ? color(100, 110, 128) : color(200, 220, 255); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "Align",color(0,0,0), () => {
             if (startRing) {
                 alignConnectedRings(startRing);
             }
         }),
-        new Button(-10, 60, 40, 40, (instance) => { return instance.isPressed ? color(100, 100, 100) : color(200, 200, 200); }, { x: 1, y: 0 }, { x: 1, y: 0 }, 20, "👁️", () => { isUIHidden = true; }),
-        new Button(-55, 60, 40, 40, (instance) => { return instance.isPressed ? color(100, 100, 100) : color(200, 200, 200); }, { x: 1, y: 0 }, { x: 1, y: 0 }, 20, "📷", () => {
+        new Button(-10, 60, 40, 40, () => { return color(200, 200, 200); }, { x: 1, y: 0 }, { x: 1, y: 0 }, 20, "👁️",color(0,0,0), () => { isUIHidden = true; }),
+        new Button(-55, 60, 40, 40, (instance) => { return instance.isPressed ? color(100, 100, 100) : color(200, 200, 200); }, { x: 1, y: 0 }, { x: 1, y: 0 }, 20, "📷",color(0,0,0), () => {
             isUIHidden = true;       // UIを非表示に設定
             screenshotRequest = true; // 次の描画フレームで撮影をリクエスト
         }),
-        new Button(10, 120, 20, 20, () => {return color(100,100,100)}, {x:0,y:0}, {x:0,y:0}, 12, "> Start", 
+        new Button(5, 105, 30, 15, () => {return color(0,250,0)}, {x:0,y:0}, {x:0,y:0}, 12, "> Start",color(100,100,100), 
         () => {
             if (startRing) {
                 cameraPos.x = startRing.pos.x;
@@ -195,6 +196,8 @@ function Start() {
         }, false, false, LEFT),
     ];
     
+    buttons = [...staticButtons];
+
     zoomSize = 1;
     cameraPos = { x: 0, y: 0 };
 
@@ -210,8 +213,34 @@ function Start() {
     createConsolePanel(); // ui.jsで定義された関数を呼び出す
 }
 
+function UpdateMarkerButtons() {
+    buttons = [...staticButtons]; // 静的ボタンでリセット
+
+    // マーカー付きリングを検索
+    const markedRings = rings.filter(r => r.marker && r.marker.trim() !== "");
+    
+    // 必要であればソート（ここではマーカー名順）
+    markedRings.sort((a, b) => a.marker.localeCompare(b.marker));
+
+    let yPos = 125; // Startボタンの下から配置開始
+
+    markedRings.forEach(ring => {
+        buttons.push(
+            new Button(5, yPos, 30, 15, () => {return color(0,250,0)}, {x:0,y:0}, {x:0,y:0}, 12, "> " + ring.marker, color(100,100,100),
+            () => {
+                cameraPos.x = ring.pos.x;
+                cameraPos.y = ring.pos.y;
+            }, false, false, LEFT)
+        );
+        yPos += 20; // 次のボタンの位置
+    });
+}
+
 function Update() {
     let [width, height] = GetScreenSize();
+    
+    UpdateMarkerButtons();
+
     mousePos = {
         x: (GetMouseX() - width / 2) / zoomSize + cameraPos.x,
         y: (GetMouseY() - height / 2) / zoomSize + cameraPos.y

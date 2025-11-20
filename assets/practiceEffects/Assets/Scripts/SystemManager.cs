@@ -43,6 +43,8 @@ public class SystemManager : MonoBehaviour
     private Dictionary<string, GameObject> managedObjectsById = new Dictionary<string, GameObject>();
 
     private bool isTimeActive = true;
+    [SerializeField] private GameObject grid;
+    private bool isGridRendering = true;
 
     void Awake()
     {
@@ -346,5 +348,11 @@ public class SystemManager : MonoBehaviour
     public void ReloadScene()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    public void SwitchGridView()
+    {
+        isGridRendering = !isGridRendering;
+        grid.GetComponent<MeshRenderer>().enabled = isGridRendering;
     }
 }
