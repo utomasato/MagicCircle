@@ -139,7 +139,7 @@ function Start() {
         new Button(100, 10, 40, 40, () => { return AddObjectMode == "num" ? color(128,100,100) : color(255, 200, 200); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 30, "num",null, () => { AddObjectMode = "num"; }, true),
         new Button(145, 10, 40, 40, () => { return AddObjectMode == "str" ? color(128,100,100) : color(255, 200, 200); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 30, "string",null, () => { AddObjectMode = "str"; }, true),
         new Button(190, 10, 40, 40, () => { return AddObjectMode == "name" ? color(128,100,100) : color(255, 200, 200); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 30, "name",null, () => { AddObjectMode = "name"; }, true),
-        new Button(235, 10, 40, 40, () => { return AddObjectMode == "tRing" ? color(128,100,100) : color(255, 200, 200); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 30, "・",null, () => { AddObjectMode = "tRing"; }, true),
+        new Button(235, 10, 40, 40, () => { return AddObjectMode == "tRing" ? color(128,100,100) : color(255, 200, 200); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 30, "tRing",null, () => { AddObjectMode = "tRing"; }, true),
         new Button(-5, 10, 40, 40, (instance) => { return instance.isPressed ? color(128, 100, 100) : color(255, 200, 200); }, { x: 1, y: 0 }, { x: 1, y: 0 }, 17, "Run",color(0,0,0), () => {
             if (startRing) {
                 const data = {isActive: true, message: "Reset", name: null, value: 0, text: null};
