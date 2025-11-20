@@ -339,7 +339,23 @@ function EndDragRing()
 {
     if (CheckMouseObject()[0] == "menu")
     {
+        rings.forEach(r => {
+            r.items.forEach(item => {
+                if (item && item.type === 'joint' && item.value === selectRing) {
+                    item.value = null;
+                }
+            });
+        });
         rings = rings.filter(item => item !== selectRing);
+        if (selectRing === startRing) {
+            startRing = rings.find(r => isRingStartable(r)) || (selectRingrings.length > 0 ? rings[0] : null);
+            if(startRing) startRing.isStartPoint = true;
+        }
+        fieldItems.forEach(item => {
+            if (item && item.type === 'joint' && item.value === selectRing) {
+                item.value = null;
+            }
+        });
     }
     inputMode = "";
     if (selectRing && selectRing.isNew) {

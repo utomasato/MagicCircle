@@ -918,10 +918,10 @@ class Joint extends RingItem {
     {
         if (this.value && typeof this.value.Spell === 'function') {
             const spell = this.value.Spell();
-            if (this.isExecute) return spell + " exec";
-            return spell;
+            return spell + this.isExecute ? " exec" : "";
+            //return spell;
         }
-        return "joint";
+        return "";
     }
     
     Straighten()

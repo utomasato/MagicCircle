@@ -292,6 +292,11 @@ function createRingPanel(ring) {
             startRing = rings.find(r => isRingStartable(r)) || (rings.length > 0 ? rings[0] : null);
             if(startRing) startRing.isStartPoint = true;
         }
+        fieldItems.forEach(item => {
+            if (item && item.type === 'joint' && item.value === ring) {
+                item.value = null;
+            }
+        });
         closePanel();
     };
     const handleDuplicate = () => {
