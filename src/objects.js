@@ -807,7 +807,12 @@ class Joint extends RingItem {
         PushTransform();
         Rotate(angle);
         DrawSigil("joint", 0, -radius);
-        if (this.isExecute) DrawSigil("exec", 0, -radius);
+        if (this.isExecute)
+        {
+            const direction = globalIsClockwise ? 1 : -1;
+            if (globalIsClockwise) Rotate(PI);
+            DrawSigil("exec", 0, direction * radius);
+        }
         PopTransform();
     }
     
@@ -918,7 +923,7 @@ class Joint extends RingItem {
     {
         if (this.value && typeof this.value.Spell === 'function') {
             const spell = this.value.Spell();
-            return spell + this.isExecute ? " exec" : "";
+            return spell + (this.isExecute ? " exec" : "");
             //return spell;
         }
         return "";

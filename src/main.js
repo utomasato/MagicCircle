@@ -177,11 +177,8 @@ function Start() {
         new Button(10, -100, 40, 40, (instance) => { return instance.isPressed ? color(100, 100, 100) : color(200, 200, 200); }, { x: 0, y: 1 }, { x: 0, y: 1 }, 25, "+",color(0,0,0), () => { ZoomIn(); }),
         new Button(10, 60, 40, 40, () => { return cursormode == "grad" ? color(100, 100, 100) : color(200, 200, 200); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "🖐️",color(0,0,0), () => { cursormode = "grad"; SetMouseCursor('grab'); }),
         new Button(55, 60, 40, 40, () => { return cursormode == "edit" ? color(100, 100, 100) : color(200, 200, 200); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "🪶",color(0,0,0), () => { cursormode = "edit"; SetMouseCursor('default'); }),
-        new Button(100, 60, 65, 40, (instance) => { return instance.isPressed ? color(100, 110, 128) : color(200, 220, 255); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "Align",color(0,0,0), () => {
-            if (startRing) {
-                alignConnectedRings(startRing);
-            }
-        }),
+        new Button(100, 60, 60, 40, (instance) => { return instance.isPressed ? color(100, 110, 128) : color(200, 220, 255); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "Align",color(0,0,0), () => { if (startRing) { alignConnectedRings(startRing); } }),
+        new Button(165, 60, 85, 40, (instance) => { return instance.isPressed ? color(100, 110, 128) : color(200, 220, 255); }, { x: 0, y: 0 }, { x: 0, y: 0 }, 17, "Straight",color(0,0,0), () => { if (startRing) { StraightenConnectedJoints(startRing); } }),
         new Button(-10, 60, 40, 40, () => { return color(200, 200, 200); }, { x: 1, y: 0 }, { x: 1, y: 0 }, 20, "👁️",color(0,0,0), () => { isUIHidden = true; }),
         new Button(-55, 60, 40, 40, (instance) => { return instance.isPressed ? color(100, 100, 100) : color(200, 200, 200); }, { x: 1, y: 0 }, { x: 1, y: 0 }, 20, "📷",color(0,0,0), () => {
             isUIHidden = true;       // UIを非表示に設定
@@ -313,7 +310,7 @@ function DrawGrid() {
 }
 
 function ZoomIn() { zoomSize = min(5, zoomSize *1.2); }
-function ZoomOut() { zoomSize = max(0.1, zoomSize /1.2); }
+function ZoomOut() { zoomSize = zoomSize /1.2; }
 function ZoomReset() { zoomSize = 1; }
 
 function updateConsolePanel(message) {

@@ -213,3 +213,13 @@ function transformSubtree(ringToUpdate, newX, newY, newAngle) {
     
     ringToUpdate.angle = newAngle;
 }
+
+function StraightenConnectedJoints(startRing) {
+    if (!startRing) return;
+    startRing.items.forEach(item => {
+        if (item && item.type === 'joint' && item.value) {
+            item.Straighten();
+            StraightenConnectedJoints(item.value);
+        }
+    });
+}

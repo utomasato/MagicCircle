@@ -396,6 +396,17 @@ function createRingPanel(ring) {
         alignConnectedRings(ring);
         closePanel();
     });
+    
+    const straightenButton = createButton('このリングから直線化');
+    straightenButton.parent(buttonContainer);
+    straightenButton.style('width', '100%');
+    straightenButton.style('padding', '5px');
+    straightenButton.style('cursor', 'pointer');
+    straightenButton.elt.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        StraightenConnectedJoints(ring);
+        closePanel();
+    });
 
     const jointButton = createButton('Create Joint');
     jointButton.parent(buttonContainer);
