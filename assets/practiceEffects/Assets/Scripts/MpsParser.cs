@@ -81,7 +81,6 @@ public static class MpsParser
                 throw new Exception($"Parse Error: Expected '{token}' but got '{consumed}'.");
         }
 
-        // ▼▼▼ 修正 ▼▼▼
         /// <summary>
         /// トークンをfloatとして消費します。パースに失敗した場合は警告を出し、0.0fを返します。
         /// </summary>
@@ -127,8 +126,6 @@ public static class MpsParser
                 return false; // デフォルト値を返す
             }
         }
-        // ▲▲▲ 修正 ▲▲▲
-
 
         /// <summary>
         /// '(' から ')' までのトークンを連結して1つの文字列として消費します。スペースを含む文字列に対応します。
@@ -163,11 +160,9 @@ public static class MpsParser
                     data.objectType = scanner.ConsumeStringInParens();
                     break;
                 default:
-                    // ▼▼▼ 修正 ▼▼▼ (不明なキーをスキップ)
                     Debug.LogWarning($"Unknown object creation key: '~{key}'. Skipping.");
                     SkipUnknownValue(scanner); // このキーの値をスキップ
                     break;
-                    // ▲▲▲ 修正 ▲▲▲
             }
         }
         scanner.Expect(">");
@@ -208,11 +203,9 @@ public static class MpsParser
                     }
                     break;
                 default:
-                    // ▼▼▼ 修正 ▼▼▼ (不明なキーをスキップ)
                     Debug.LogWarning($"Unknown transform key: '~{key}'. Skipping.");
                     SkipUnknownValue(scanner); // このキーの値をスキップ
                     break;
-                    // ▲▲▲ 修正 ▲▲▲
             }
         }
         scanner.Expect(">");
@@ -263,11 +256,9 @@ public static class MpsParser
                     scanner.Expect(">");
                     break;
                 default:
-                    // ▼▼▼ 修正 ▼▼▼ (不明なキーをスキップ)
                     Debug.LogWarning($"Unknown animation key: '~{key}'. Skipping.");
                     SkipUnknownValue(scanner); // このキーの値をスキップ
                     break;
-                    // ▲▲▲ 修正 ▲▲▲
             }
         }
         scanner.Expect(">");
@@ -292,11 +283,9 @@ public static class MpsParser
                 case "easeIn": animData.easeIn = scanner.ConsumeBool(); break;
                 case "easeOut": animData.easeOut = scanner.ConsumeBool(); break;
                 default:
-                    // ▼▼▼ 修正 ▼▼▼ (不明なキーをスキップ)
                     Debug.LogWarning($"Unknown animation module key: '~{key}'. Skipping.");
                     SkipUnknownValue(scanner); // このキーの値をスキップ
                     break;
-                    // ▲▲▲ 修正 ▲▲▲
             }
         }
         // scanner.Expect(">"); // 呼び出し元で > を消費
@@ -352,20 +341,16 @@ public static class MpsParser
                 case "trails": preset.trails = ParseTrailsModule(scanner); break;
                 case "customData": preset.customData = new CustomDataModuleData { enabled = true }; SkipModuleContent(scanner); break; // 同上
                 case "renderer": preset.renderer = ParseRendererModule(scanner, materialDict, meshDict); break;
-                // ▼▼▼ 修正 ▼▼▼
-                // default: throw new Exception($"Unknown preset key: {key}");
                 default:
                     // 例外をスローせず、警告を出して不明なモジュールをスキップする
                     Debug.LogWarning($"Unknown MPS module key: '~{key}'. Skipping this module.");
                     SkipModuleContent(scanner); // このモジュールの < ... > の中身を読み飛ばす
                     break;
-                    // ▲▲▲ 修正 ▲▲▲
             }
             scanner.Expect(">");
         }
     }
 
-    // ▼▼▼ 追加 ▼▼▼
     /// <summary>
     /// 不明なキーに続く値を安全に読み飛ばします。
     /// 値がブロック（<...> or [...] or (...)）の場合はそれを読み飛ばし、
@@ -460,7 +445,6 @@ public static class MpsParser
         }
         Debug.LogWarning("Parse Error: Reached end of code while skipping bracket content. Missing ']'.");
     }
-    // ▲▲▲ 追加 ▲▲▲
 
 
     private static MainModuleData ParseMainModule(Scanner scanner)
@@ -1126,9 +1110,24 @@ public static class MpsParser
         while (scanner.Peek() == "[")
         {
             scanner.Expect("[");
-            float time = scanner.ConsumeFloat();
-            float value = scanner.ConsumeFloat();
-            keyList.Add(new KeyframeData { time = time, value = value });
+
+            // ブロック内の数値をすべて読み取る
+            List<float> values = new List<float>();
+            while (scanner.Peek() != "]" && scanner.Peek() != null)
+            {
+                values.Add(scanner.ConsumeFloat());
+            }
+
+            // time, value の2つが必要
+            if (values.Count == 2)
+            {
+                keyList.Add(new KeyframeData { time = values[0], value = values[1] });
+            }
+            else
+            {
+                Debug.LogWarning($"Parse Warning: Invalid Keyframe data. Expected 2 values (time, value), but got {values.Count}. Skipping this key.");
+            }
+
             scanner.Expect("]");
         }
         scanner.Expect("]");
@@ -1142,12 +1141,28 @@ public static class MpsParser
         while (scanner.Peek() == "[")
         {
             scanner.Expect("[");
-            float r = scanner.ConsumeFloat();
-            float g = scanner.ConsumeFloat();
-            float b = scanner.ConsumeFloat();
-            float a = scanner.ConsumeFloat();
-            float time = scanner.ConsumeFloat();
-            keyList.Add(new ColorKeyData { color = new Color(r, g, b, a), time = time });
+
+            // ブロック内の数値をすべて読み取る
+            List<float> values = new List<float>();
+            while (scanner.Peek() != "]" && scanner.Peek() != null)
+            {
+                values.Add(scanner.ConsumeFloat());
+            }
+
+            // r, g, b, a, time の5つが必要
+            if (values.Count == 5)
+            {
+                keyList.Add(new ColorKeyData
+                {
+                    color = new Color(values[0], values[1], values[2], values[3]),
+                    time = values[4]
+                });
+            }
+            else
+            {
+                Debug.LogWarning($"Parse Warning: Invalid ColorKey data. Expected 5 values (r, g, b, a, time), but got {values.Count}. Skipping this key.");
+            }
+
             scanner.Expect("]");
         }
         scanner.Expect("]");
@@ -1161,9 +1176,24 @@ public static class MpsParser
         while (scanner.Peek() == "[")
         {
             scanner.Expect("[");
-            float alpha = scanner.ConsumeFloat();
-            float time = scanner.ConsumeFloat();
-            keyList.Add(new AlphaKeyData { alpha = alpha, time = time });
+
+            // ブロック内の数値をすべて読み取る
+            List<float> values = new List<float>();
+            while (scanner.Peek() != "]" && scanner.Peek() != null)
+            {
+                values.Add(scanner.ConsumeFloat());
+            }
+
+            // alpha, time の2つが必要
+            if (values.Count == 2)
+            {
+                keyList.Add(new AlphaKeyData { alpha = values[0], time = values[1] });
+            }
+            else
+            {
+                Debug.LogWarning($"Parse Warning: Invalid AlphaKey data. Expected 2 values (alpha, time), but got {values.Count}. Skipping this key.");
+            }
+
             scanner.Expect("]");
         }
         scanner.Expect("]");

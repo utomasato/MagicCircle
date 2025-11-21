@@ -115,10 +115,8 @@ public class SystemManager : MonoBehaviour
         }
         catch (System.Exception e)
         {
-            // ▼▼▼ 修正 ▼▼▼
             // LogErrorからLogWarningに変更し、WebGLビルドでの実行停止を防ぐ
             Debug.LogWarning($"Error parsing MPS code: {e.Message}\n{e.StackTrace}");
-            // ▲▲▲ 修正 ▲▲▲
         }
     }
 
@@ -194,10 +192,8 @@ public class SystemManager : MonoBehaviour
         }
         catch (System.Exception e)
         {
-            // ▼▼▼ 修正 ▼▼▼
             // LogErrorからLogWarningに変更し、WebGLビルドでの実行停止を防ぐ
             Debug.LogWarning($"Error parsing object creation code: {e.Message}\n{e.StackTrace}");
-            // ▲▲▲ 修正 ▲▲▲
         }
     }
 
@@ -285,10 +281,8 @@ public class SystemManager : MonoBehaviour
         }
         catch (System.Exception e)
         {
-            // ▼▼▼ 修正 ▼▼▼
             // LogErrorからLogWarningに変更し、WebGLビルドでの実行停止を防ぐ
             Debug.LogWarning($"Error parsing Transform code: {e.Message}\n{e.StackTrace}");
-            // ▲▲▲ 修正 ▲▲▲
         }
     }
 
@@ -320,10 +314,8 @@ public class SystemManager : MonoBehaviour
         }
         catch (System.Exception e)
         {
-            // ▼▼▼ 修正 ▼▼▼
             // LogErrorからLogWarningに変更し、WebGLビルドでの実行停止を防ぐ
             Debug.LogWarning($"Error parsing Animation code: {e.Message}\n{e.StackTrace}");
-            // ▲▲▲ 修正 ▲▲▲
         }
     }
 

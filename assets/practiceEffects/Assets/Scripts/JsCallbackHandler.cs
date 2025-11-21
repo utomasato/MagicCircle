@@ -40,7 +40,7 @@ public class JsCallbackHandler : MonoBehaviour
         //TestReceiveGeneralData();
     }
 
-    /*
+    //*
     void Update()
     {
         // "R"キーを押すとシーンがリロードされる例
@@ -145,7 +145,6 @@ public class JsCallbackHandler : MonoBehaviour
 
     public void ReceiveGeneralData(string jsonString)
     {
-        // ▼▼▼ 修正 ▼▼▼
         // メソッド全体をtry...catchで囲み、JSONのパースエラーや
         // SystemManagerで捕捉されなかった予期せぬエラーをキャッチする
         try
@@ -208,6 +207,5 @@ public class JsCallbackHandler : MonoBehaviour
                 SceneManager.LoadScene(SceneManager.GetActiveScene().name);
             }
         }
-        // ▲▲▲ 修正 ▲▲▲
     }
 }
