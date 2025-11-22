@@ -45,7 +45,7 @@ class MagicRing
             }
             return null;
         });
-        newRing.comments = [...this.comments];
+        newRing.comments = this.comments.map(comment => ({ ...comment }));
         newRing.CalculateLayout();
         return newRing;
     }
