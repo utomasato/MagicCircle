@@ -21,7 +21,7 @@ function magicTemplates(magic, spell)
 {
     const [prms, prmfgs] = code2parameters(magic, spell)
     console.log(prms);
-    
+
     let convertedSpell = "";
     switch (magic)
     {
@@ -35,7 +35,7 @@ function magicTemplates(magic, spell)
     }
     return convertedSpell;
 }
-//
+
 function code2parameters(magic, spell)
 {
     const tokens = activeInterpreter.parse(spell);

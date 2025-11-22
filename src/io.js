@@ -50,12 +50,18 @@ function itemToXML(item, ringIdMap) {
  */
 function ringToXML(ring, ringIdMap) {
     const ringId = ringIdMap.get(ring);
-    const ringType = ring.constructor.name; // MagicRing, ArrayRing, DictRing
+    const ringType = ring.constructor.name; // MagicRing, ArrayRing, DictRing, TemplateRing
 
     // Markerがあれば属性に追加
     const markerAttr = ring.marker ? ` marker="${escapeXML(ring.marker)}"` : '';
+    
+    // TemplateRingの場合、magicプロパティを属性に追加
+    let magicAttr = '';
+    if (ringType === 'TemplateRing' && ring.magic) {
+        magicAttr = ` magic="${escapeXML(ring.magic)}"`;
+    }
 
-    let xml = `  <Ring id="${ringId}" type="${ringType}" x="${ring.pos.x.toFixed(2)}" y="${ring.pos.y.toFixed(2)}" angle="${ring.angle.toFixed(4)}"${markerAttr}>\n`;
+    let xml = `  <Ring id="${ringId}" type="${ringType}" x="${ring.pos.x.toFixed(2)}" y="${ring.pos.y.toFixed(2)}" angle="${ring.angle.toFixed(4)}"${markerAttr}${magicAttr}>\n`;
     
     // コメントの保存
     if (ring.comments && Array.isArray(ring.comments)) {
@@ -148,6 +154,7 @@ function importFromXML(xmlString, mode) {
         const y = parseFloat(ringEl.getAttribute('y'));
         const angle = parseFloat(ringEl.getAttribute('angle'));
         const marker = ringEl.getAttribute('marker'); // マーカー属性の読み込み
+        const magic = ringEl.getAttribute('magic');   // magic属性の読み込み (TemplateRing用)
 
         let newRing;
         switch (type) {
@@ -159,6 +166,7 @@ function importFromXML(xmlString, mode) {
                 break;
             case 'TemplateRing':
                 newRing = new TemplateRing({ x, y });
+                if (magic) newRing.magic = magic; // magic属性があれば設定
                 break;
             case 'MagicRing':
             default:

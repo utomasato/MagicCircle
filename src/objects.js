@@ -432,9 +432,14 @@ class TemplateRing extends MagicRing {
         this.CalculateLayout();
     }
     
+    clone(clonedMap = new Map()) {
+        const newRing = super.clone(clonedMap);
+        newRing.magic = this.magic;
+        return newRing;
+    }
+    
     DrawRingStar() {
         //super.DrawRingStar();
-        // "fire" ハードコードをやめ、this.magic を使用する
         DrawElement(this.magic, 0, 0, this.innerradius/30)
     }
     
