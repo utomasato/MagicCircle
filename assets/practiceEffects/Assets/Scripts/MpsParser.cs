@@ -1014,6 +1014,14 @@ public static class MpsParser
                         Debug.LogWarning($"Unknown alignment '{aligStr}'. Defaulting to Triangle.");
                     }
                     break;
+                case "shader": // "~shader (Additive)" のように指定
+                case "blendMode": // "~blendMode (Additive)" でも可
+                    renderer.blendMode = scanner.ConsumeStringInParens();
+                    break;
+                // ★ Sorting Fudge のパース処理を追加
+                case "sortingFudge":
+                    renderer.sortingFudge = scanner.ConsumeFloat();
+                    break;
                 default:
                     Debug.LogWarning($"Unknown renderer module key: '~{key}'. Skipping.");
                     SkipUnknownValue(scanner);

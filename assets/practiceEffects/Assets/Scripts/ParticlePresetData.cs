@@ -486,6 +486,9 @@ public class RendererModuleData
     public ParticleSystemMeshDistribution meshDistribution = ParticleSystemMeshDistribution.UniformRandom;
     public bool useCustomVertexStreams = false;
     public int vertexStreamCount = 0;
+
+    // ★ Additive や AlphaBlended を指定するための文字列フィールドを追加
+    public string blendMode;
 }
 
 #endregion

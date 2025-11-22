@@ -331,10 +331,112 @@ public class ParticleController : MonoBehaviour
                 renderer.trailMaterial = preset.renderer.trailMaterial;
             }
             renderer.alignment = preset.renderer.alignment;
+            renderer.sortingFudge = preset.renderer.sortingFudge;
+
+            // ★ シェーダー（ブレンドモード）の適用
+            if (!string.IsNullOrEmpty(preset.renderer.blendMode))
+            {
+                string mode = preset.renderer.blendMode.ToLower();
+
+                // メインマテリアルへ適用
+                if (renderer.material != null)
+                {
+                    Material mat = renderer.material;
+                    ApplyBlendModeToMaterial(mat, mode);
+                    renderer.material = mat; // 変更を反映
+                }
+
+                // トレイルマテリアルへ適用
+                if (renderer.trailMaterial != null)
+                {
+                    Material trailMat = renderer.trailMaterial;
+                    ApplyBlendModeToMaterial(trailMat, mode);
+                    renderer.trailMaterial = trailMat; // 変更を反映
+                }
+            }
         }
 
         // --- 設定を適用して再生 ---
         ps.Play();
     }
-}
 
+    /// <summary>
+    /// 指定されたマテリアルにブレンドモード（シェーダー変更含む）を適用するヘルパー関数
+    /// </summary>
+    private void ApplyBlendModeToMaterial(Material mat, string mode)
+    {
+        Debug.Log($"Applying Blend Mode: {mode} to material: {mat.name} (Shader: {mat.shader.name})");
+
+        // 現在のシェーダーがレガシー系（Mobile/Particles/〜）かどうか判定
+        bool isMobileShader = mat.shader.name.Contains("Mobile/Particles");
+        bool isLegacyShader = mat.shader.name.Contains("Legacy Shaders/Particles");
+
+        // レガシー系シェーダーの場合はプロパティ変更ではなくシェーダーを差し替える
+        if (isMobileShader || isLegacyShader)
+        {
+            Shader newShader = null;
+            string prefix = isMobileShader ? "Mobile/Particles/" : "Legacy Shaders/Particles/";
+
+            if (mode == "additive")
+            {
+                newShader = Shader.Find(prefix + "Additive");
+            }
+            else if (mode == "alphablended")
+            {
+                newShader = Shader.Find(prefix + "Alpha Blended");
+            }
+
+            if (newShader != null)
+            {
+                mat.shader = newShader;
+            }
+            else
+            {
+                // 同等のレガシーシェーダーが見つからない場合、Standard Unlitへのフォールバックを試みる
+                Debug.LogWarning($"Requested legacy shader for mode '{mode}' not found. Falling back to Standard Unlit.");
+                var standardShader = Shader.Find("Particles/Standard Unlit");
+                if (standardShader != null)
+                {
+                    mat.shader = standardShader;
+                    ApplyStandardBlendProperties(mat, mode);
+                }
+            }
+        }
+        else
+        {
+            // Standard Particle Shader などの場合はプロパティで制御
+            ApplyStandardBlendProperties(mat, mode);
+        }
+    }
+
+    /// <summary>
+    /// Standard Particle Shader向けのブレンド設定を適用するヘルパー関数
+    /// </summary>
+    private void ApplyStandardBlendProperties(Material mat, string mode)
+    {
+        if (mode == "additive")
+        {
+            // Additive設定
+            if (mat.HasProperty("_Mode")) mat.SetFloat("_Mode", 4.0f); // 4: Additive
+            mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.One);
+            mat.SetInt("_ZWrite", 0);
+            mat.DisableKeyword("_ALPHATEST_ON");
+            mat.DisableKeyword("_ALPHABLEND_ON");
+            mat.EnableKeyword("_ALPHAPREMULTIPLY_ON");
+            mat.renderQueue = 3000;
+        }
+        else if (mode == "alphablended")
+        {
+            // Alpha Blended設定
+            if (mat.HasProperty("_Mode")) mat.SetFloat("_Mode", 2.0f); // 2: Fade / AlphaBlend
+            mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            mat.SetInt("_ZWrite", 0);
+            mat.DisableKeyword("_ALPHATEST_ON");
+            mat.EnableKeyword("_ALPHABLEND_ON");
+            mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+            mat.renderQueue = 3000;
+        }
+    }
+}

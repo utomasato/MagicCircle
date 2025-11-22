@@ -46,6 +46,10 @@ public class SystemManager : MonoBehaviour
     [SerializeField] private GameObject grid;
     private bool isGridRendering = true;
 
+    //[SerializeField] private Camera targetCamera;
+    [SerializeField] private Material[] skyMaterials;
+    private int currentSkyIndex = 0;
+
     void Awake()
     {
         materialDictionary = new Dictionary<string, Material>();
@@ -346,5 +350,11 @@ public class SystemManager : MonoBehaviour
     {
         isGridRendering = !isGridRendering;
         grid.GetComponent<MeshRenderer>().enabled = isGridRendering;
+    }
+
+    public void SwitchSkyBox()
+    {
+        currentSkyIndex = (currentSkyIndex + 1) % skyMaterials.Length;
+        RenderSettings.skybox = skyMaterials[currentSkyIndex];
     }
 }

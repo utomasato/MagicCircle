@@ -40,7 +40,7 @@ public class JsCallbackHandler : MonoBehaviour
         //TestReceiveGeneralData();
     }
 
-    //*
+    /*
     void Update()
     {
         // "R"キーを押すとシーンがリロードされる例
@@ -75,40 +75,71 @@ public class JsCallbackHandler : MonoBehaviour
     // Note: Test methods will use name-based logic, update them if needed for ID-based testing.
     void TestReceiveGeneralData()
     {
-        //string spellText = "< ~main < ~startLifetime[0.5 2] ~startSpeed 0.5 ~startSize[0.2 0.4] ~startRotation[0 360] > ~emission < ~rateOverTime 50 > ~shape < ~angle 5 ~radius 0.0001 > ~colorOverLifetime < ~gradient < ~colorKeys[[1.0 0.6 0.0 1.0 0.0][1.0 0.0 0.0 1.0 0.6][1.0 0.0 0.0 1.0 1.0]] ~alphaKeys[[0.0 0.0][1.0 0.5][0.0 1.0]] >> ~rotationOverLifetime < ~z[-45 45] > ~renderer < ~materialName(Fire_1) >>";
-
+        //* fire
         string spellText = "<~shape (empty)>";
         string testId = "test-id-from-csharp-0";
         systemManager.CreateObjectFromMps(spellText, testId);
 
-        spellText = "<~main <~duration 1 ~startLifetime 2 ~startSpeed 10 ~startSize [30 30 75] ~startColor [1 0.5 0 1] > ~emission <~rateOverTime 0 ~burstCount 2> ~colorOverLifetime <~gradient<~alphaKeys [[0 0] [1 0.05] [1 0.95] [0 1]]>> ~renderer <~renderMode (Mesh) ~meshDistribution (NonUniformRandom) ~meshes (Bullet) ~materialName (Cross) ~alignment (Local)>>";
+        spellText = "<~main <~startLifetime [0.5 2] ~startSpeed 0.5 ~startSize [0.2 0.4] ~startRotation [0 360]> ~emission <~rateOverTime 50> ~shape <~angle 5 ~radius 0.0001> ~colorOverLifetime <~gradient <~colorKeys [[1.0 0.6 0.0 1.0 0.0] [1.0 0.0 0.0 1.0 0.6] [1.0 0.0 0.0 1.0 1.0]] ~alphaKeys [[0.0 0.0] [1.0 0.5] [0.0 1.0]]>> ~rotationOverLifetime <~z [-45 45]> ~renderer <~materialName (Fire_1)>>";
         testId = "test-id-from-csharp-1";
         systemManager.CreateAndSpawnParticleFromMps(spellText, testId);
         string parentId = "test-id-from-csharp-0";
         string childId = "test-id-from-csharp-1";
         systemManager.AttachToParent(childId, parentId);
 
+        spellText = "<~main <~startLifetime [0.5 2] ~startSpeed 0.5 ~startSize [0.2 0.4] ~startRotation [0 360]> ~emission <~rateOverTime 50> ~shape <~angle 5 ~radius 0.0001> ~colorOverLifetime <~gradient <~colorKeys [[1.0 0.6 0.0 1.0 0.0] [1.0 0.0 0.0 1.0 0.6] [1.0 0.0 0.0 1.0 1.0]] ~alphaKeys [[0.0 0.0] [1.0 0.5] [0.0 1.0]]>> ~rotationOverLifetime <~z [-45 45]> ~renderer <~materialName (Fire_1) ~shader (alphablended) ~sortingFudge 10>>";
+        testId = "test-id-from-csharp-2";
+        systemManager.CreateAndSpawnParticleFromMps(spellText, testId);
+        childId = "test-id-from-csharp-2";
+        systemManager.AttachToParent(childId, parentId);
+        spellText = "<~scale 2>";
+        systemManager.TransformObjectById(parentId, spellText);
+        //*/
+
+        /* bullet
+        string spellText = "<~shape (empty)>";
+        string testId = "test-id-from-csharp-0";
+        systemManager.CreateObjectFromMps(spellText, testId);
+        // cross
+        spellText = "<~main <~duration 1 ~startLifetime 2 ~startSpeed 10 ~startSize [30 30 75] ~startColor [1 0.5 0 1] > ~emission <~rateOverTime 0 ~burstCount 2> ~colorOverLifetime <~gradient<~alphaKeys [[0 0] [1 0.05] [1 0.95] [0 1]]>> ~renderer <~renderMode (Mesh) ~meshDistribution (NonUniformRandom) ~meshes (Bullet) ~materialName (Cross) ~alignment (Local)>>";
+        testId = "test-id-from-csharp-1";
+        systemManager.CreateAndSpawnParticleFromMps(spellText, testId);
+        string parentId = "test-id-from-csharp-0";
+        string childId = "test-id-from-csharp-1";
+        systemManager.AttachToParent(childId, parentId);
+        // wave
         spellText = "<~main <~duration 1 ~startLifetime 2 ~startSpeed 10 ~startSize [30 30 75] ~startColor [1 0.5 0 1] > ~emission <~rateOverTime 0 ~burstCount 2> ~colorOverLifetime <~gradient<~alphaKeys [[0 0] [1 0.05] [1 0.95] [0 1]]>> ~rotationOverLifetime <~z 500> ~renderer <~renderMode (Mesh) ~meshDistribution (NonUniformRandom) ~meshes (Bullet) ~materialName (Grow_2) ~alignment (Local) >> ";
         testId = "test-id-from-csharp-2";
         systemManager.CreateAndSpawnParticleFromMps(spellText, testId);
         childId = "test-id-from-csharp-2";
         systemManager.AttachToParent(childId, parentId);
-
+        //spiral
         spellText = "<~main <~duration 1 ~startLifetime 2 ~startSpeed 10 ~startSize [15 15 200] ~startColor [1 0.5 0 1] > ~emission <~rateOverTime 0 ~burstCount 2> ~colorOverLifetime <~gradient <~alphaKeys [[0 0] [1 0.05] [1 0.95] [0 1]]>> ~rotationOverLifetime <~z -800> ~renderer <~renderMode (Mesh) ~meshDistribution (NonUniformRandom) ~meshes (Cylinder) ~materialName (Spiral) ~alignment (Local)>>";
         testId = "test-id-from-csharp-3";
         systemManager.CreateAndSpawnParticleFromMps(spellText, testId);
         childId = "test-id-from-csharp-3";
         systemManager.AttachToParent(childId, parentId);
-        // col.enabled = scanner.ConsumeBool(); break;
-
-        spellText = "< ~main < ~duration 1 ~startLifetime 2 ~startSpeed 10 ~startSize 0.1 ~startColor [1 0.5 0 1] > ~emission < ~rateOverTime 0 ~burstCount 2> ~colorOverLifetime < ~gradient < ~alphaKeys [[0 0] [1 0.05] [1 0.95] [0 1]]>> ~trail < ~lifetime 0.2 > ~renderer < ~materialName (Grow_1) ~trailMaterialName (Trail) >>";
+        // trail
+        spellText = "< ~main < ~duration 1 ~startLifetime 2 ~startSpeed 10 ~startSize 0.1 ~startColor [1 0.5 0 1] > ~emission < ~rateOverTime 0 ~burstCount 2> ~colorOverLifetime < ~gradient < ~alphaKeys [[0 0] [1 0.05] [1 0.95] [0 1]]>> ~trails < ~lifetime 0.2 > ~renderer < ~materialName (Grow_1) ~trailMaterialName (Trail) >>";
         testId = "test-id-from-csharp-4";
         systemManager.CreateAndSpawnParticleFromMps(spellText, testId);
         childId = "test-id-from-csharp-4";
         systemManager.AttachToParent(childId, parentId);
-
+        // wave alp
+        spellText = "<~main <~duration 1 ~startLifetime 2 ~startSpeed 10 ~startSize [30 30 75] ~startColor [1 0.5 0 1] > ~emission <~rateOverTime 0 ~burstCount 2> ~colorOverLifetime <~gradient<~alphaKeys [[0 0] [1 0.05] [1 0.95] [0 1]]>> ~rotationOverLifetime <~z 500> ~renderer <~renderMode (Mesh) ~meshDistribution (NonUniformRandom) ~meshes (Bullet) ~materialName (Grow_2) ~shader (alphablended) ~sortingFudge 10 ~alignment (Local) >> ";
+        testId = "test-id-from-csharp-5";
+        systemManager.CreateAndSpawnParticleFromMps(spellText, testId);
+        childId = "test-id-from-csharp-5";
+        systemManager.AttachToParent(childId, parentId);
+        // trail alp
+        spellText = "< ~main < ~duration 1 ~startLifetime 2 ~startSpeed 10 ~startSize 0.1 ~startColor [1 0.5 0 1] > ~emission < ~rateOverTime 0 ~burstCount 2> ~colorOverLifetime < ~gradient < ~alphaKeys [[0 0] [1 0.05] [1 0.95] [0 1]]>> ~trails < ~lifetime 0.2 > ~renderer < ~materialName (Grow_1) ~shader (alphablended) ~sortingFudge 10 ~trailMaterialName (Trail) >>";
+        testId = "test-id-from-csharp-6";
+        systemManager.CreateAndSpawnParticleFromMps(spellText, testId);
+        childId = "test-id-from-csharp-6";
+        systemManager.AttachToParent(childId, parentId);
         spellText = "<~scale 2>";
         systemManager.TransformObjectById(parentId, spellText);
+        //*/
     }
 
     void TestTransform()
