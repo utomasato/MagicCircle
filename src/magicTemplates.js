@@ -112,20 +112,14 @@ function code2parameters(magicData, spell)
                         }
                         break
                     case "color":
-                        const colors = { 
-                            black: "0.0 0.0 0.0", white: "1.0 1.0 1.0", red: "1.0 0.0 0.0", green: "0.0 1.0 0.0",
-                            blue: "0.0 0.0 1.0", yellow: "1.0 1.0 0.0", cyan: "0.0 1.0 1.0", magenta: "1.0 0.0 1.0",
-                            gray: "0.5 0.5 0.5", orange: "1.0 0.5 0.0", purple: "0.5 0.0 0.5", brown: "0.6 0.4 0.2"
-                        };
-                        
                         if (typeof token == "object" && token.type == "array" && token.value.length >= 3)
                         {
                             prms[lastName] = token.value.slice(0,min(4,token.value.length)).join(" ") + (token.value.length == 3 ? " 1.0" : "");
                             prmfgs[lastName] = true;
                         }
-                        else if (typeof token == "string" && token.match(/^\(.*\)$/) && colors[token.slice(1,-1).toLowerCase()])
+                        else if (typeof token == "string" && token.match(/^\(.*\)$/) && colorsDict[token.slice(1,-1).toLowerCase()])
                         {
-                            prms[lastName] = colors[token.slice(1,-1).toLowerCase()] + " 1.0";
+                            prms[lastName] = colorsDict[token.slice(1,-1).toLowerCase()] + " 1.0";
                             prmfgs[lastName] = true;
                         }
                         break;
