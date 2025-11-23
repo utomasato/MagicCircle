@@ -280,7 +280,11 @@ public class ColorBySpeedModuleData
 public class SizeOverLifetimeModuleData
 {
     public bool enabled;
+    public bool separateAxes = false; // 追加
     public MinMaxCurveData size = new MinMaxCurveData { min = 1f, max = 1f };
+    public MinMaxCurveData x = new MinMaxCurveData { min = 1f, max = 1f }; // 追加
+    public MinMaxCurveData y = new MinMaxCurveData { min = 1f, max = 1f }; // 追加
+    public MinMaxCurveData z = new MinMaxCurveData { min = 1f, max = 1f }; // 追加
 }
 
 [System.Serializable]
@@ -433,15 +437,25 @@ public class TrailsModuleData
     public float ratio = 1f;
     public MinMaxCurveData lifetime = new MinMaxCurveData { min = 1f, max = 1f };
     public float minVertexDistance = 0.1f;
-    public ParticleSystemTrailTextureMode textureMode = ParticleSystemTrailTextureMode.Stretch;
     public bool worldSpace = false;
     public bool dieWithParticles = true;
+
+    // Ribbon options
+    public int ribbonCount = 1;
+    public bool splitSubEmitterRibbons = false;
+
+    public ParticleSystemTrailTextureMode textureMode = ParticleSystemTrailTextureMode.Stretch;
+
     public bool sizeAffectsWidth = true;
-    public bool sizeAffectsColor = true;
+    public bool sizeAffectsLifetime = false;
+
     public bool inheritParticleColor = true;
     public GradientData colorOverLifetime = new GradientData();
+
     public MinMaxCurveData widthOverTrail = new MinMaxCurveData { min = 1f, max = 1f };
     public GradientData colorOverTrail = new GradientData();
+
+    public bool generateLightingData = false;
 }
 
 [System.Serializable]

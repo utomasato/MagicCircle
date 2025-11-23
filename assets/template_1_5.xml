@@ -176,10 +176,10 @@
     <Items>
       <Item type="sigil" value="COMPLETE" />
       <Item type="chars" value="0.0" />
+      <Item type="chars" value="0.0" />
       <Item type="chars" value="0.6" />
       <Item type="chars" value="1.0" />
       <Item type="chars" value="1.0" />
-      <Item type="chars" value="0.0" />
     </Items>
   </Ring>
   <Ring id="16" type="ArrayRing" x="-972.37" y="230.47" angle="-0.9969">
@@ -196,8 +196,8 @@
     </Comments>
     <Items>
       <Item type="sigil" value="COMPLETE" />
-      <Item type="chars" value="1.0" />
       <Item type="chars" value="0.5" />
+      <Item type="chars" value="1.0" />
     </Items>
   </Ring>
   <Ring id="18" type="ArrayRing" x="-1197.63" y="11.93" angle="2.5374">
@@ -205,8 +205,8 @@
     </Comments>
     <Items>
       <Item type="sigil" value="COMPLETE" />
-      <Item type="chars" value="0.0" />
       <Item type="chars" value="1.0" />
+      <Item type="chars" value="0.0" />
     </Items>
   </Ring>
   <Ring id="19" type="DictRing" x="207.03" y="-801.64" angle="2.6119">
@@ -235,9 +235,9 @@
     </Comments>
     <Items>
       <Item type="sigil" value="COMPLETE" />
-      <Item type="chars" value="0.0" />
-      <Item type="chars" value="0.0" />
       <Item type="chars" value="1.0" />
+      <Item type="chars" value="0.0" />
+      <Item type="chars" value="0.0" />
       <Item type="chars" value="1.0" />
       <Item type="chars" value="1.0" />
     </Items>
@@ -247,11 +247,11 @@
     </Comments>
     <Items>
       <Item type="sigil" value="COMPLETE" />
-      <Item type="chars" value="1.0" />
-      <Item type="chars" value="0.0" />
-      <Item type="chars" value="0.0" />
-      <Item type="chars" value="1.0" />
       <Item type="chars" value="0.6" />
+      <Item type="chars" value="1.0" />
+      <Item type="chars" value="0.0" />
+      <Item type="chars" value="0.0" />
+      <Item type="chars" value="1.0" />
     </Items>
   </Ring>
   <Ring id="23" type="MagicRing" x="-609.04" y="779.41" angle="0.6633" marker="SpawnMagic">
@@ -352,11 +352,11 @@
     </Comments>
     <Items>
       <Item type="sigil" value="COMPLETE" />
+      <Item type="chars" value="0.0" />
       <Item type="chars" value="1.0" />
       <Item type="chars" value="0.6" />
       <Item type="chars" value="0.0" />
       <Item type="chars" value="1.0" />
-      <Item type="chars" value="0.0" />
     </Items>
   </Ring>
   <Ring id="30" type="ArrayRing" x="448.37" y="475.17" angle="1.6209">
@@ -365,9 +365,9 @@
     <Items>
       <Item type="sigil" value="COMPLETE" />
       <Item type="chars" value="1.0" />
-      <Item type="chars" value="0.0" />
-      <Item type="chars" value="0.0" />
       <Item type="chars" value="1.0" />
+      <Item type="chars" value="0.0" />
+      <Item type="chars" value="0.0" />
       <Item type="chars" value="1.0" />
     </Items>
   </Ring>
@@ -376,11 +376,11 @@
     </Comments>
     <Items>
       <Item type="sigil" value="COMPLETE" />
-      <Item type="chars" value="1.0" />
-      <Item type="chars" value="0.0" />
-      <Item type="chars" value="0.0" />
-      <Item type="chars" value="1.0" />
       <Item type="chars" value="0.6" />
+      <Item type="chars" value="1.0" />
+      <Item type="chars" value="0.0" />
+      <Item type="chars" value="0.0" />
+      <Item type="chars" value="1.0" />
     </Items>
   </Ring>
   <Ring id="32" type="MagicRing" x="670.75" y="884.67" angle="-0.6487" marker="EditPreset">

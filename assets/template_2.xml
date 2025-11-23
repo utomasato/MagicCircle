@@ -145,8 +145,8 @@
     </Comments>
     <Items>
       <Item type="sigil" value="COMPLETE" />
-      <Item type="chars" value="1.0" />
       <Item type="chars" value="0.05" />
+      <Item type="chars" value="1.0" />
     </Items>
   </Ring>
   <Ring id="11" type="ArrayRing" x="-1358.39" y="693.44" angle="1.6120">
@@ -154,8 +154,8 @@
     </Comments>
     <Items>
       <Item type="sigil" value="COMPLETE" />
-      <Item type="chars" value="0.0" />
       <Item type="chars" value="1.0" />
+      <Item type="chars" value="0.0" />
     </Items>
   </Ring>
   <Ring id="12" type="ArrayRing" x="-1559.84" y="104.74" angle="0.6017">
@@ -174,8 +174,8 @@
     </Comments>
     <Items>
       <Item type="sigil" value="COMPLETE" />
-      <Item type="chars" value="1.0" />
       <Item type="chars" value="0.95" />
+      <Item type="chars" value="1.0" />
     </Items>
   </Ring>
   <Ring id="14" type="MagicRing" x="-404.59" y="659.66" angle="0.5502" marker="wave">

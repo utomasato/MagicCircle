@@ -176,11 +176,11 @@
     </Comments>
     <Items>
       <Item type="sigil" value="COMPLETE" />
+      <Item type="chars" value="0.0" />
       <Item type="chars" value="1.0" />
       <Item type="chars" value="0.6" />
       <Item type="chars" value="0.0" />
       <Item type="chars" value="1.0" />
-      <Item type="chars" value="0.0" />
     </Items>
   </Ring>
   <Ring id="16" type="ArrayRing" x="266.45" y="907.05" angle="3.6430">
@@ -197,8 +197,8 @@
     </Comments>
     <Items>
       <Item type="sigil" value="COMPLETE" />
-      <Item type="chars" value="1.0" />
       <Item type="chars" value="0.5" />
+      <Item type="chars" value="1.0" />
     </Items>
   </Ring>
   <Ring id="18" type="ArrayRing" x="103.04" y="1102.60" angle="0.8941">
@@ -206,8 +206,8 @@
     </Comments>
     <Items>
       <Item type="sigil" value="COMPLETE" />
-      <Item type="chars" value="0.0" />
       <Item type="chars" value="1.0" />
+      <Item type="chars" value="0.0" />
     </Items>
   </Ring>
   <Ring id="19" type="DictRing" x="192.26" y="-245.98" angle="3.8050">
@@ -247,9 +247,9 @@
     <Items>
       <Item type="sigil" value="COMPLETE" />
       <Item type="chars" value="1.0" />
-      <Item type="chars" value="0.0" />
-      <Item type="chars" value="0.0" />
       <Item type="chars" value="1.0" />
+      <Item type="chars" value="0.0" />
+      <Item type="chars" value="0.0" />
       <Item type="chars" value="1.0" />
     </Items>
   </Ring>
@@ -258,11 +258,11 @@
     </Comments>
     <Items>
       <Item type="sigil" value="COMPLETE" />
-      <Item type="chars" value="1.0" />
-      <Item type="chars" value="0.0" />
-      <Item type="chars" value="0.0" />
-      <Item type="chars" value="1.0" />
       <Item type="chars" value="0.6" />
+      <Item type="chars" value="1.0" />
+      <Item type="chars" value="0.0" />
+      <Item type="chars" value="0.0" />
+      <Item type="chars" value="1.0" />
     </Items>
   </Ring>
   <Ring id="24" type="DictRing" x="-195.35" y="-229.02" angle="2.4354">

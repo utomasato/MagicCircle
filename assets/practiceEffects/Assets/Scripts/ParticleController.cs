@@ -38,6 +38,33 @@ public class ParticleController : MonoBehaviour
         }
     }
 
+    // --- ▼▼▼ 追加: Orbital Velocityのエラー回避用ヘルパーメソッド ▼▼▼ ---
+
+    // データがカーブモードかどうかを判定
+    private bool IsCurve(MinMaxCurveData data)
+    {
+        return data.curve != null && data.curve.keys.Count > 0;
+    }
+
+    // 定数であっても強制的に「平坦なカーブ」としてMinMaxCurveを生成する
+    private ParticleSystem.MinMaxCurve CreateCurveMode(MinMaxCurveData data, float multiplier = 1.0f)
+    {
+        if (IsCurve(data))
+        {
+            return CreatePsMinMaxCurveFromData(data, multiplier);
+        }
+        else
+        {
+            // 定数値をカーブ（始点と終点が同じ値の直線）に変換
+            AnimationCurve curve = new AnimationCurve();
+            float val = data.min * multiplier;
+            curve.AddKey(0.0f, val);
+            curve.AddKey(1.0f, val);
+            return new ParticleSystem.MinMaxCurve(1.0f, curve);
+        }
+    }
+    // --- ▲▲▲ 追加ここまで ▲▲▲ ---
+
 
     public void CustomizeAndPlay(ParticlePreset preset)
     {
@@ -53,6 +80,9 @@ public class ParticleController : MonoBehaviour
         if (preset.main != null && preset.main.enabled)
         {
             main.duration = preset.main.duration;
+            // ▼追加: Start Delayの設定
+            main.startDelay = CreatePsMinMaxCurveFromData(preset.main.startDelay);
+            // ▲追加
             main.startLifetime = CreatePsMinMaxCurveFromData(preset.main.startLifetime);
             main.startSpeed = CreatePsMinMaxCurveFromData(preset.main.startSpeed);
 
@@ -85,12 +115,10 @@ public class ParticleController : MonoBehaviour
             // Start Color
             if (preset.main.startColor != null && preset.main.startColor.colorKeys.Count > 0)
             {
-                // カラーキーが1つの場合は単色として扱う
                 if (preset.main.startColor.colorKeys.Count == 1)
                 {
                     main.startColor = preset.main.startColor.colorKeys[0].color;
                 }
-                // カラーキーが複数の場合はグラデーションとして扱う
                 else
                 {
                     Gradient grad = new Gradient();
@@ -102,7 +130,7 @@ public class ParticleController : MonoBehaviour
             }
             else
             {
-                main.startColor = Color.white; // デフォルトは白
+                main.startColor = Color.white;
             }
         }
 
@@ -126,9 +154,10 @@ public class ParticleController : MonoBehaviour
         shape.enabled = preset.shape != null && preset.shape.enabled;
         if (shape.enabled)
         {
-            shape.shapeType = preset.shape.shapeType; // ★ プリセットから形状タイプを設定
+            shape.shapeType = preset.shape.shapeType;
             shape.angle = preset.shape.angle;
             shape.radius = preset.shape.radius;
+            shape.radiusThickness = preset.shape.radiusThickness;
         }
 
         // --- Velocity over Lifetime Module ---
@@ -136,9 +165,42 @@ public class ParticleController : MonoBehaviour
         velocityOverLifetime.enabled = preset.velocityOverLifetime != null && preset.velocityOverLifetime.enabled;
         if (velocityOverLifetime.enabled)
         {
+            // Linear XYZ はモードが混在しても問題ないため通常通り設定
             velocityOverLifetime.x = CreatePsMinMaxCurveFromData(preset.velocityOverLifetime.x);
             velocityOverLifetime.y = CreatePsMinMaxCurveFromData(preset.velocityOverLifetime.y);
             velocityOverLifetime.z = CreatePsMinMaxCurveFromData(preset.velocityOverLifetime.z);
+
+            velocityOverLifetime.space = preset.velocityOverLifetime.space;
+
+            // --- ▼▼▼ 修正: Orbital Velocityのモード統一処理 ▼▼▼ ---
+            // Orbital X, Y, Z のいずれかがカーブを使っているか確認
+            bool useCurveForOrbital = IsCurve(preset.velocityOverLifetime.orbitalX) ||
+                                      IsCurve(preset.velocityOverLifetime.orbitalY) ||
+                                      IsCurve(preset.velocityOverLifetime.orbitalZ);
+
+            if (useCurveForOrbital)
+            {
+                // どれかがカーブなら、全てをカーブモード（定数は平坦なカーブ）として設定
+                velocityOverLifetime.orbitalX = CreateCurveMode(preset.velocityOverLifetime.orbitalX);
+                velocityOverLifetime.orbitalY = CreateCurveMode(preset.velocityOverLifetime.orbitalY);
+                velocityOverLifetime.orbitalZ = CreateCurveMode(preset.velocityOverLifetime.orbitalZ);
+            }
+            else
+            {
+                // 全て定数なら通常通り設定
+                velocityOverLifetime.orbitalX = CreatePsMinMaxCurveFromData(preset.velocityOverLifetime.orbitalX);
+                velocityOverLifetime.orbitalY = CreatePsMinMaxCurveFromData(preset.velocityOverLifetime.orbitalY);
+                velocityOverLifetime.orbitalZ = CreatePsMinMaxCurveFromData(preset.velocityOverLifetime.orbitalZ);
+            }
+            // --- ▲▲▲ 修正ここまで ▲▲▲ ---
+
+            // Offsetは定数として適用
+            velocityOverLifetime.orbitalOffsetX = new ParticleSystem.MinMaxCurve(preset.velocityOverLifetime.orbitalOffset.x);
+            velocityOverLifetime.orbitalOffsetY = new ParticleSystem.MinMaxCurve(preset.velocityOverLifetime.orbitalOffset.y);
+            velocityOverLifetime.orbitalOffsetZ = new ParticleSystem.MinMaxCurve(preset.velocityOverLifetime.orbitalOffset.z);
+
+            velocityOverLifetime.radial = CreatePsMinMaxCurveFromData(preset.velocityOverLifetime.radial);
+            velocityOverLifetime.speedModifier = CreatePsMinMaxCurveFromData(preset.velocityOverLifetime.speedModifier);
         }
 
         // --- Limit Velocity over Lifetime Module ---
@@ -226,7 +288,19 @@ public class ParticleController : MonoBehaviour
         sizeOverLifetime.enabled = preset.sizeOverLifetime != null && preset.sizeOverLifetime.enabled;
         if (sizeOverLifetime.enabled)
         {
-            sizeOverLifetime.size = CreatePsMinMaxCurveFromData(preset.sizeOverLifetime.size);
+            // --- ▼▼▼ 修正: 3Dサイズの適用 ▼▼▼ ---
+            sizeOverLifetime.separateAxes = preset.sizeOverLifetime.separateAxes;
+            if (sizeOverLifetime.separateAxes)
+            {
+                sizeOverLifetime.x = CreatePsMinMaxCurveFromData(preset.sizeOverLifetime.x);
+                sizeOverLifetime.y = CreatePsMinMaxCurveFromData(preset.sizeOverLifetime.y);
+                sizeOverLifetime.z = CreatePsMinMaxCurveFromData(preset.sizeOverLifetime.z);
+            }
+            else
+            {
+                sizeOverLifetime.size = CreatePsMinMaxCurveFromData(preset.sizeOverLifetime.size);
+            }
+            // --- ▲▲▲ 修正ここまで ▲▲▲ ---
         }
 
         // --- Rotation over Lifetime Module ---
@@ -237,14 +311,12 @@ public class ParticleController : MonoBehaviour
             rotationOverLifetime.separateAxes = preset.rotationOverLifetime.separateAxes;
             if (rotationOverLifetime.separateAxes)
             {
-                // 3D (XYZ分離)
                 rotationOverLifetime.x = CreatePsMinMaxCurveFromData(preset.rotationOverLifetime.x, Mathf.Deg2Rad);
                 rotationOverLifetime.y = CreatePsMinMaxCurveFromData(preset.rotationOverLifetime.y, Mathf.Deg2Rad);
                 rotationOverLifetime.z = CreatePsMinMaxCurveFromData(preset.rotationOverLifetime.z, Mathf.Deg2Rad);
             }
             else
             {
-                // 1D (Z軸のみ)
                 rotationOverLifetime.z = CreatePsMinMaxCurveFromData(preset.rotationOverLifetime.z, Mathf.Deg2Rad);
             }
         }
@@ -264,7 +336,7 @@ public class ParticleController : MonoBehaviour
         collision.enabled = preset.collision != null && preset.collision.enabled;
         if (collision.enabled)
         {
-            collision.type = ParticleSystemCollisionType.World; // World固定
+            collision.type = ParticleSystemCollisionType.World;
             collision.mode = ParticleSystemCollisionMode.Collision3D;
             collision.dampen = CreatePsMinMaxCurveFromData(preset.collision.dampen);
             collision.bounce = CreatePsMinMaxCurveFromData(preset.collision.bounce);
@@ -299,8 +371,42 @@ public class ParticleController : MonoBehaviour
         trails.enabled = preset.trails != null && preset.trails.enabled;
         if (trails.enabled)
         {
+            trails.mode = preset.trails.mode;
+            trails.ratio = preset.trails.ratio;
             trails.lifetime = CreatePsMinMaxCurveFromData(preset.trails.lifetime);
+            trails.minVertexDistance = preset.trails.minVertexDistance;
+            trails.worldSpace = preset.trails.worldSpace;
+            trails.dieWithParticles = preset.trails.dieWithParticles;
+
+            trails.ribbonCount = preset.trails.ribbonCount;
+            trails.splitSubEmitterRibbons = preset.trails.splitSubEmitterRibbons;
+
+            trails.textureMode = preset.trails.textureMode;
+            trails.sizeAffectsWidth = preset.trails.sizeAffectsWidth;
+            trails.sizeAffectsLifetime = preset.trails.sizeAffectsLifetime;
+            trails.inheritParticleColor = preset.trails.inheritParticleColor;
+
+            if (preset.trails.colorOverLifetime != null && preset.trails.colorOverLifetime.colorKeys.Count > 0)
+            {
+                Gradient grad = new Gradient();
+                var colorKeys = preset.trails.colorOverLifetime.colorKeys.Select(k => new GradientColorKey(k.color, k.time)).ToArray();
+                var alphaKeys = preset.trails.colorOverLifetime.alphaKeys.Select(k => new GradientAlphaKey(k.alpha, k.time)).ToArray();
+                grad.SetKeys(colorKeys, alphaKeys);
+                trails.colorOverLifetime = new ParticleSystem.MinMaxGradient(grad);
+            }
+
             trails.widthOverTrail = CreatePsMinMaxCurveFromData(preset.trails.widthOverTrail);
+
+            if (preset.trails.colorOverTrail != null && preset.trails.colorOverTrail.colorKeys.Count > 0)
+            {
+                Gradient grad = new Gradient();
+                var colorKeys = preset.trails.colorOverTrail.colorKeys.Select(k => new GradientColorKey(k.color, k.time)).ToArray();
+                var alphaKeys = preset.trails.colorOverTrail.alphaKeys.Select(k => new GradientAlphaKey(k.alpha, k.time)).ToArray();
+                grad.SetKeys(colorKeys, alphaKeys);
+                trails.colorOverTrail = new ParticleSystem.MinMaxGradient(grad);
+            }
+
+            trails.generateLightingData = preset.trails.generateLightingData;
         }
 
         // --- CustomData Module ---
@@ -318,49 +424,38 @@ public class ParticleController : MonoBehaviour
             if (renderer.renderMode == ParticleSystemRenderMode.Mesh && preset.renderer.meshes.Count > 0)
             {
                 renderer.meshDistribution = preset.renderer.meshDistribution;
-                // SetMeshesは配列を受け取るため、ListをArrayに変換
                 renderer.SetMeshes(preset.renderer.meshes.ToArray());
             }
 
             if (preset.renderer.material != null)
             {
-                // 【修正】元のアセットを書き換えないように、マテリアルのコピー（インスタンス）を作成して割り当てる
                 renderer.material = new Material(preset.renderer.material);
             }
             if (preset.renderer.trailMaterial != null)
             {
-                // 【修正】元のアセットを書き換えないように、マテリアルのコピー（インスタンス）を作成して割り当てる
                 renderer.trailMaterial = new Material(preset.renderer.trailMaterial);
             }
             renderer.alignment = preset.renderer.alignment;
             renderer.sortingFudge = preset.renderer.sortingFudge;
 
-            // ★ シェーダー（ブレンドモード）の適用
             if (!string.IsNullOrEmpty(preset.renderer.blendMode))
             {
                 string mode = preset.renderer.blendMode.ToLower();
-
-                // メインマテリアルへ適用
-                // 既にコピーされているので、安全に変更可能
                 if (renderer.material != null)
                 {
                     Material mat = renderer.material;
                     ApplyBlendModeToMaterial(mat, mode);
-                    renderer.material = mat; // 変更を反映
+                    renderer.material = mat;
                 }
-
-                // トレイルマテリアルへ適用
-                // 既にコピーされているので、安全に変更可能
                 if (renderer.trailMaterial != null)
                 {
                     Material trailMat = renderer.trailMaterial;
                     ApplyBlendModeToMaterial(trailMat, mode);
-                    renderer.trailMaterial = trailMat; // 変更を反映
+                    renderer.trailMaterial = trailMat;
                 }
             }
         }
 
-        // --- 設定を適用して再生 ---
         ps.Play();
     }
 
@@ -371,11 +466,9 @@ public class ParticleController : MonoBehaviour
     {
         Debug.Log($"Applying Blend Mode: {mode} to material: {mat.name} (Shader: {mat.shader.name})");
 
-        // 現在のシェーダーがレガシー系（Mobile/Particles/〜）かどうか判定
         bool isMobileShader = mat.shader.name.Contains("Mobile/Particles");
         bool isLegacyShader = mat.shader.name.Contains("Legacy Shaders/Particles");
 
-        // レガシー系シェーダーの場合はプロパティ変更ではなくシェーダーを差し替える
         if (isMobileShader || isLegacyShader)
         {
             Shader newShader = null;
@@ -396,7 +489,6 @@ public class ParticleController : MonoBehaviour
             }
             else
             {
-                // 同等のレガシーシェーダーが見つからない場合、Standard Unlitへのフォールバックを試みる
                 Debug.LogWarning($"Requested legacy shader for mode '{mode}' not found. Falling back to Standard Unlit.");
                 var standardShader = Shader.Find("Particles/Standard Unlit");
                 if (standardShader != null)
@@ -408,7 +500,6 @@ public class ParticleController : MonoBehaviour
         }
         else
         {
-            // Standard Particle Shader などの場合はプロパティで制御
             ApplyStandardBlendProperties(mat, mode);
         }
     }
@@ -420,8 +511,7 @@ public class ParticleController : MonoBehaviour
     {
         if (mode == "additive")
         {
-            // Additive設定
-            if (mat.HasProperty("_Mode")) mat.SetFloat("_Mode", 4.0f); // 4: Additive
+            if (mat.HasProperty("_Mode")) mat.SetFloat("_Mode", 4.0f);
             mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
             mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.One);
             mat.SetInt("_ZWrite", 0);
@@ -432,8 +522,7 @@ public class ParticleController : MonoBehaviour
         }
         else if (mode == "alphablended")
         {
-            // Alpha Blended設定
-            if (mat.HasProperty("_Mode")) mat.SetFloat("_Mode", 2.0f); // 2: Fade / AlphaBlend
+            if (mat.HasProperty("_Mode")) mat.SetFloat("_Mode", 2.0f);
             mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
             mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
             mat.SetInt("_ZWrite", 0);
