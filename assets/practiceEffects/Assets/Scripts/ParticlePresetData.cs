@@ -35,14 +35,20 @@ public class CurveData
 
 
 /// <summary>
-/// 2つの定数間のランダムな値、またはカーブを表現するためのクラス。
+/// 定数、MinMax(2定数)、カーブ、MinMaxカーブ(2カーブ)を表現するためのクラス。
 /// </summary>
 [System.Serializable]
 public class MinMaxCurveData
 {
+    // 定数・MinMax用
     public float min;
     public float max;
+
+    // カーブ用 (Single Curveモード、またはDouble CurveモードのMax側)
     public CurveData curve;
+
+    // Double CurveモードのMin側
+    public CurveData minCurve;
 }
 
 
@@ -76,6 +82,22 @@ public class GradientData
     public List<AlphaKeyData> alphaKeys = new List<AlphaKeyData>();
 }
 
+/// <summary>
+/// 高度なStartColor指定（2色、2グラディエント、ランダム等）を表現するクラス。
+/// </summary>
+[System.Serializable]
+public class MinMaxGradientData
+{
+    // モード: "Color", "TwoColors", "Gradient", "TwoGradients", "RandomColor"
+    public string mode = "Color";
+
+    public Color colorMin = Color.white;
+    public Color colorMax = Color.white;
+
+    public GradientData gradientMin;
+    public GradientData gradientMax;
+}
+
 
 /// <summary>
 /// EmissionモジュールのBurst設定を格納するクラス。
@@ -92,7 +114,6 @@ public class BurstData
 
 /// <summary>
 /// UnityのParticleSystemShapeEmitFromを再現するカスタムenum。
-/// コンパイルエラーを回避するために使用します。
 /// </summary>
 [System.Serializable]
 public enum ShapeEmitFrom
@@ -140,7 +161,13 @@ public class MainModuleData
     public MinMaxCurveData startRotationX = new MinMaxCurveData();
     public MinMaxCurveData startRotationY = new MinMaxCurveData();
     public float flipRotation = 0f;
-    public GradientData startColor = new GradientData();
+
+    // 削除: public string gravitySource;
+
+    // StartColorを拡張型に変更
+    public MinMaxGradientData startColor = new MinMaxGradientData();
+    public bool randomColor = false;
+
     public MinMaxCurveData gravityModifier = new MinMaxCurveData();
     public ParticleSystemSimulationSpace simulationSpace = ParticleSystemSimulationSpace.Local;
     public Transform customSimulationSpace = null;
@@ -162,7 +189,6 @@ public class EmissionModuleData
     public MinMaxCurveData rateOverTime = new MinMaxCurveData { min = 10f, max = 10f };
     public MinMaxCurveData rateOverDistance = new MinMaxCurveData();
     public List<BurstData> bursts = new List<BurstData>();
-    // ★ コントローラーのロジックに合わせてBurstCount関連の変数を追加
     public int minBurstCount = 0;
     public int maxBurstCount = 0;
 }
@@ -206,7 +232,7 @@ public class ShapeModuleData
 
     // Texture
     public Texture2D texture;
-    public ParticleSystemShapeTextureChannel textureChannel = ParticleSystemShapeTextureChannel.Red; // Changed from non-existent RGBA to Red (default)
+    public ParticleSystemShapeTextureChannel textureChannel = ParticleSystemShapeTextureChannel.Red;
     public int textureUVChannel = 0;
     public float textureColorAffectsParticles = 1f;
     public float textureAlphaAffectsParticles = 1f;
@@ -280,11 +306,11 @@ public class ColorBySpeedModuleData
 public class SizeOverLifetimeModuleData
 {
     public bool enabled;
-    public bool separateAxes = false; // 追加
+    public bool separateAxes = false;
     public MinMaxCurveData size = new MinMaxCurveData { min = 1f, max = 1f };
-    public MinMaxCurveData x = new MinMaxCurveData { min = 1f, max = 1f }; // 追加
-    public MinMaxCurveData y = new MinMaxCurveData { min = 1f, max = 1f }; // 追加
-    public MinMaxCurveData z = new MinMaxCurveData { min = 1f, max = 1f }; // 追加
+    public MinMaxCurveData x = new MinMaxCurveData { min = 1f, max = 1f };
+    public MinMaxCurveData y = new MinMaxCurveData { min = 1f, max = 1f };
+    public MinMaxCurveData z = new MinMaxCurveData { min = 1f, max = 1f };
 }
 
 [System.Serializable]
@@ -392,7 +418,6 @@ public class SubEmittersModuleData
     public List<ParticleSystem> birth = new List<ParticleSystem>();
     public List<ParticleSystem> collision = new List<ParticleSystem>();
     public List<ParticleSystem> death = new List<ParticleSystem>();
-    // Note: Applying properties requires custom logic.
 }
 
 [System.Serializable]
@@ -474,7 +499,7 @@ public class CustomDataModuleData
 [System.Serializable]
 public class RendererModuleData
 {
-    public bool enabled = true; // ★ enabled を追加
+    public bool enabled = true;
     public ParticleSystemRenderMode renderMode = ParticleSystemRenderMode.Billboard;
     public Material material;
     public Material trailMaterial;
@@ -501,7 +526,6 @@ public class RendererModuleData
     public bool useCustomVertexStreams = false;
     public int vertexStreamCount = 0;
 
-    // ★ Additive や AlphaBlended を指定するための文字列フィールドを追加
     public string blendMode;
 }
 
@@ -513,30 +537,30 @@ public class RendererModuleData
 [System.Serializable]
 public class ParticlePreset
 {
-    public string name; // プリセット名 ("Fire", "Water"など)
+    public string name;
 
     // 各モジュールの設定を保持
     public MainModuleData main;
     public EmissionModuleData emission;
     public ShapeModuleData shape;
     public VelocityOverLifetimeModuleData velocityOverLifetime;
-    public LimitVelocityOverLifetimeModuleData limitVelocityOverLifetime; // ★
-    public InheritVelocityModuleData inheritVelocity;                   // ★
+    public LimitVelocityOverLifetimeModuleData limitVelocityOverLifetime;
+    public InheritVelocityModuleData inheritVelocity;
     public ForceOverLifetimeModuleData forceOverLifetime;
     public ColorOverLifetimeModuleData colorOverLifetime;
-    public ColorBySpeedModuleData colorBySpeed;                         // ★
+    public ColorBySpeedModuleData colorBySpeed;
     public SizeOverLifetimeModuleData sizeOverLifetime;
-    public SizeBySpeedModuleData sizeBySpeed;                           // ★
+    public SizeBySpeedModuleData sizeBySpeed;
     public RotationOverLifetimeModuleData rotationOverLifetime;
-    public RotationBySpeedModuleData rotationBySpeed;                   // ★
-    public ExternalForcesModuleData externalForces;                     // ★
+    public RotationBySpeedModuleData rotationBySpeed;
+    public ExternalForcesModuleData externalForces;
     public NoiseModuleData noise;
-    public CollisionModuleData collision;                               // ★
-    public TriggersModuleData triggers;                                 // ★
-    public SubEmittersModuleData subEmitters;                           // ★
+    public CollisionModuleData collision;
+    public TriggersModuleData triggers;
+    public SubEmittersModuleData subEmitters;
     public TextureSheetAnimationModuleData textureSheetAnimation;
-    public LightsModuleData lights;                                     // ★
+    public LightsModuleData lights;
     public TrailsModuleData trails;
-    public CustomDataModuleData customData;                             // ★
+    public CustomDataModuleData customData;
     public RendererModuleData renderer;
 }

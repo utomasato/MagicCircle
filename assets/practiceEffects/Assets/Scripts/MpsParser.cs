@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System;
 using System.Globalization;
 
-
-
 /// <summary>
-/// Transform情報を格納するための構造体。Nullable型を使い、指定されなかった項目は更新しないようにする。
+/// Transform情報を格納するための構造体。
 /// </summary>
 public struct TransformData
 {
@@ -22,7 +20,6 @@ public struct ObjectCreationData
 {
     public string objectType;
 }
-
 
 [System.Serializable]
 public class AnimationDatas
@@ -47,6 +44,17 @@ public class AnimationData
     public bool easeOut = false;
 }
 
+/// <summary>
+/// 1Dまたは3DのMinMaxCurveデータをまとめて保持するヘルパークラス
+/// </summary>
+public class AxisSeparatedCurveData
+{
+    public bool isSeparated; // 3Dモード（separateAxes）かどうか
+    public MinMaxCurveData uniform; // 1Dの場合の値
+    public MinMaxCurveData x;
+    public MinMaxCurveData y;
+    public MinMaxCurveData z;
+}
 
 /// <summary>
 /// p5.jsから送られてくるmpsコードを解析し、ParticlePresetオブジェクトに変換する静的クラスです。
@@ -72,8 +80,14 @@ public static class MpsParser
             _position = 0;
         }
 
-        public string Peek() => _position < _tokens.Length ? _tokens[_position] : null;
+        public string Peek(int offset = 0)
+        {
+            if (_position + offset < _tokens.Length) return _tokens[_position + offset];
+            return null;
+        }
+
         public string Consume() => _position < _tokens.Length ? _tokens[_position++] : null;
+
         public void Expect(string token)
         {
             var consumed = Consume();
@@ -81,13 +95,10 @@ public static class MpsParser
                 throw new Exception($"Parse Error: Expected '{token}' but got '{consumed}'.");
         }
 
-        /// <summary>
-        /// トークンをfloatとして消費します。パースに失敗した場合は警告を出し、0.0fを返します。
-        /// </summary>
         public float ConsumeFloat()
         {
             string token = Consume();
-            if (token == null) // コードの終端に達した場合
+            if (token == null)
             {
                 Debug.LogWarning($"Parse Warning: Expected a number (float) but reached end of code. Defaulting to 0.0f.");
                 return 0.0f;
@@ -100,17 +111,14 @@ public static class MpsParser
             else
             {
                 Debug.LogWarning($"Parse Warning: Expected a number (float) but got '{token}'. Defaulting to 0.0f.");
-                return 0.0f; // デフォルト値を返す
+                return 0.0f;
             }
         }
 
-        /// <summary>
-        /// トークンをboolとして消費します。パースに失敗した場合は警告を出し、falseを返します。
-        /// </summary>
         public bool ConsumeBool()
         {
             string token = Consume();
-            if (token == null) // コードの終端に達した場合
+            if (token == null)
             {
                 Debug.LogWarning($"Parse Warning: Expected a boolean (true/false) but reached end of code. Defaulting to false.");
                 return false;
@@ -123,13 +131,10 @@ public static class MpsParser
             else
             {
                 Debug.LogWarning($"Parse Warning: Expected a boolean (true/false) but got '{token}'. Defaulting to false.");
-                return false; // デフォルト値を返す
+                return false;
             }
         }
 
-        /// <summary>
-        /// '(' から ')' までのトークンを連結して1つの文字列として消費します。スペースを含む文字列に対応します。
-        /// </summary>
         public string ConsumeStringInParens()
         {
             Expect("(");
@@ -142,9 +147,204 @@ public static class MpsParser
             return content.Trim();
         }
     }
+
+    // ----------------------------------------------------------------------------------
+    // 新しい汎用パース関数群
+    // ----------------------------------------------------------------------------------
+
     /// <summary>
-    /// オブジェクト生成用のmpsコードを解析します。
+    /// "< ... >" なら3Dモードとして各軸(~x, ~y, ~z)を読み込み、それ以外なら1Dモードとして読み込みます。
     /// </summary>
+    private static AxisSeparatedCurveData ParseAxisSeparatedCurve(Scanner scanner)
+    {
+        var result = new AxisSeparatedCurveData();
+
+        // 次のトークンが '<' なら 3D (Separated) モード
+        if (scanner.Peek() == "<")
+        {
+            result.isSeparated = true;
+            scanner.Consume(); // '<' 消費
+
+            while (scanner.Peek() != ">" && scanner.Peek() != null)
+            {
+                string axis = scanner.Consume(); // ~x, ~y, ~z などのタグ
+
+                // タグの次にある「値」を汎用関数で読み込む
+                var val = ParseUniversalMinMaxCurve(scanner);
+
+                if (axis == "~x") result.x = val;
+                else if (axis == "~y") result.y = val;
+                else if (axis == "~z") result.z = val;
+                else
+                {
+                    Debug.LogWarning($"Unknown axis tag '{axis}' inside <...>. Expected ~x, ~y, or ~z.");
+                }
+            }
+            scanner.Expect(">");
+        }
+        else
+        {
+            // 1D (Uniform) モード
+            result.isSeparated = false;
+            result.uniform = ParseUniversalMinMaxCurve(scanner);
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// 定数、MinMax([min max])、カーブ([[time value]...])、TwoCurves([[Curve] [Curve]])、混合([[Curve] [min max]])
+    /// すべてをよしなに解釈してパースします。
+    /// </summary>
+    private static MinMaxCurveData ParseUniversalMinMaxCurve(Scanner scanner)
+    {
+        string nextToken = scanner.Peek();
+
+        // --- ▼▼▼ 不正データのスキップ処理 ▼▼▼ ---
+        // 1. 次のトークンがキーワード(~)またはブロック終了(>)の場合 -> 値が欠落しているとみなし、デフォルト値を返して消費しない
+        if (nextToken != null && (nextToken.StartsWith("~") || nextToken == ">"))
+        {
+            Debug.LogWarning($"Parse Warning: Expected value for curve but found '{nextToken}'. Using default 0.");
+            return new MinMaxCurveData { min = 0f, max = 0f };
+        }
+
+        // 2. 次のトークンが数値でも構造開始記号([, <)でもない場合 -> ゴミデータとみなし、スキップしてデフォルト値を返す
+        if (nextToken != null && nextToken != "[" && nextToken != "<" && !IsNumber(nextToken))
+        {
+            Debug.LogWarning($"Parse Warning: Expected number or curve start but got '{nextToken}'. Skipping invalid token.");
+            SkipUnknownValue(scanner); // 不正なトークンを消費して進める
+            return new MinMaxCurveData { min = 0f, max = 0f };
+        }
+        // --- ▲▲▲ スキップ処理ここまで ▲▲▲ ---
+
+        // 1. 定数 ( '[' で始まらない場合 )
+        if (scanner.Peek() != "[")
+        {
+            // 古い形式: <~keys ...> (Single Curve) の対応
+            if (scanner.Peek() == "<")
+            {
+                var data = new MinMaxCurveData();
+                data.curve = ParseCurve(scanner);
+                return data;
+            }
+
+            float val = scanner.ConsumeFloat();
+            return new MinMaxCurveData { min = val, max = val };
+        }
+
+        // '[' で始まる場合
+        scanner.Consume(); // '[' 消費
+
+        // 次が数値なら -> [min max] (MinMax定数)
+        // 次が '[' なら -> [[...]] (カーブ または 2カーブ)
+
+        nextToken = scanner.Peek();
+        bool isCurveStart = (nextToken == "[");
+
+        if (!isCurveStart)
+        {
+            // --- MinMax Constant: [min max] ---
+            float min = scanner.ConsumeFloat();
+
+            // 要素が1つだけ [val] の場合も考慮
+            float max = min;
+            if (scanner.Peek() != "]")
+            {
+                max = scanner.ConsumeFloat();
+            }
+            scanner.Expect("]");
+            return new MinMaxCurveData { min = min, max = max };
+        }
+        else
+        {
+            // --- Curve Mode ---
+            // ここで Single Curve か Two Curves (Mixed含む) かを判定
+            // Single: [[t v] [t v] ...]  -> 次は '[' のあと数値
+            // Two:    [[[t v]...] [Element2]] -> 次は '[' のあと '['
+
+            // ScannerにPeek(offset)がないため、「要素を1つ読み、それが終わった後にまだ要素があるか」で判定します。
+
+            // まず1つ目の要素（Min側、またはSingleカーブそのもの）を読み込む
+            var firstElementCurve = ParseSingleElementAsCurve(scanner);
+
+            // もし閉じカッコ ']' が来ていたら、それは Single Curve モード
+            if (scanner.Peek() == "]")
+            {
+                scanner.Consume(); // ']' 消費
+                return new MinMaxCurveData { curve = firstElementCurve };
+            }
+            else
+            {
+                // まだ続きがある -> Two Curves (Mixed) モード
+                var data = new MinMaxCurveData();
+                data.minCurve = firstElementCurve; // 1つ目はMinCurveへ
+
+                // 2つ目の要素を読み込む（Max側）
+                data.curve = ParseSingleElementAsCurve(scanner);
+
+                // もし3つ以上あっても無視して消費
+                while (scanner.Peek() != "]" && scanner.Peek() != null)
+                {
+                    SkipBracketContent(scanner);
+                }
+
+                scanner.Expect("]");
+                return data;
+            }
+        }
+    }
+
+    /// <summary>
+    /// [ ... ] で囲まれた1つの要素を「CurveData」として読み込みます。
+    /// カーブ([[t v]...])ならそのまま、定数範囲([min max])ならフラットなカーブに変換します。
+    /// </summary>
+    private static CurveData ParseSingleElementAsCurve(Scanner scanner)
+    {
+        scanner.Expect("[");
+        var curve = new CurveData();
+
+        // 中身がカーブキーフレームの配列 ([[t v]...]) か、数値 ([min max]) か
+        if (scanner.Peek() == "[")
+        {
+            // カーブキーフレーム群
+            while (scanner.Peek() == "[")
+            {
+                curve.keys.Add(ParseKeyframe(scanner));
+            }
+        }
+        else
+        {
+            // 数値（定数またはMinMax） -> フラットなカーブに変換
+            float val1 = scanner.ConsumeFloat();
+            float val2 = val1;
+            if (scanner.Peek() != "]")
+            {
+                val2 = scanner.ConsumeFloat();
+            }
+            // 混合使用時の簡易対応: 平均値をとって定数カーブにする
+            float avg = (val1 + val2) / 2f;
+            curve.keys.Add(new KeyframeData { time = 0f, value = avg });
+            curve.keys.Add(new KeyframeData { time = 1f, value = avg });
+        }
+
+        scanner.Expect("]");
+        return curve;
+    }
+
+    private static KeyframeData ParseKeyframe(Scanner scanner)
+    {
+        scanner.Expect("[");
+        float t = scanner.ConsumeFloat();
+        float v = scanner.ConsumeFloat();
+        scanner.Expect("]");
+        return new KeyframeData { time = t, value = v };
+    }
+
+
+    // ----------------------------------------------------------------------------------
+    // メイン処理
+    // ----------------------------------------------------------------------------------
+
     public static ObjectCreationData ParseObjectCreation(string mpsCode)
     {
         var scanner = new Scanner(mpsCode);
@@ -153,7 +353,7 @@ public static class MpsParser
         scanner.Expect("<");
         while (scanner.Peek() != null && scanner.Peek() != ">")
         {
-            string key = scanner.Consume().Substring(1); // '~' を取り除く
+            string key = scanner.Consume().Substring(1);
             switch (key)
             {
                 case "shape":
@@ -161,18 +361,14 @@ public static class MpsParser
                     break;
                 default:
                     Debug.LogWarning($"Unknown object creation key: '~{key}'. Skipping.");
-                    SkipUnknownValue(scanner); // このキーの値をスキップ
+                    SkipUnknownValue(scanner);
                     break;
             }
         }
         scanner.Expect(">");
-
         return data;
     }
 
-    /// <summary>
-    /// Transform情報（位置、回転、スケール）のmpsコードを解析します。
-    /// </summary>
     public static TransformData ParseTransform(string transformCode)
     {
         var scanner = new Scanner(transformCode);
@@ -181,7 +377,7 @@ public static class MpsParser
         scanner.Expect("<");
         while (scanner.Peek() != null && scanner.Peek() != ">")
         {
-            string key = scanner.Consume().Substring(1); // '~' を取り除く
+            string key = scanner.Consume().Substring(1);
             switch (key)
             {
                 case "position":
@@ -191,7 +387,6 @@ public static class MpsParser
                     data.rotation = ParseVector3(scanner);
                     break;
                 case "scale":
-                    //data.scale = ParseVector3(scanner);
                     if (scanner.Peek() == "[")
                     {
                         data.scale = ParseVector3(scanner);
@@ -204,12 +399,11 @@ public static class MpsParser
                     break;
                 default:
                     Debug.LogWarning($"Unknown transform key: '~{key}'. Skipping.");
-                    SkipUnknownValue(scanner); // このキーの値をスキップ
+                    SkipUnknownValue(scanner);
                     break;
             }
         }
         scanner.Expect(">");
-
         return data;
     }
 
@@ -223,9 +417,6 @@ public static class MpsParser
         return new Vector3(x, y, z);
     }
 
-    /// <summary>
-    /// Animation情報（位置、回転、スケール）のmpsコードを解析します。
-    /// </summary>
     public static AnimationDatas ParseAnimation(string animationCode)
     {
         var scanner = new Scanner(animationCode);
@@ -234,7 +425,7 @@ public static class MpsParser
         scanner.Expect("<");
         while (scanner.Peek() != null && scanner.Peek() != ">")
         {
-            string key = scanner.Consume().Substring(1); // '~' を取り除く
+            string key = scanner.Consume().Substring(1);
             switch (key)
             {
                 case "position":
@@ -257,18 +448,16 @@ public static class MpsParser
                     break;
                 default:
                     Debug.LogWarning($"Unknown animation key: '~{key}'. Skipping.");
-                    SkipUnknownValue(scanner); // このキーの値をスキップ
+                    SkipUnknownValue(scanner);
                     break;
             }
         }
         scanner.Expect(">");
-
         return data;
     }
 
     private static AnimationData ParseAnimElement(Scanner scanner)
     {
-        // scanner.Expect("<"); // 呼び出し元で < を消費するように変更
         var animData = new AnimationData();
         while (scanner.Peek() != ">")
         {
@@ -284,18 +473,13 @@ public static class MpsParser
                 case "easeOut": animData.easeOut = scanner.ConsumeBool(); break;
                 default:
                     Debug.LogWarning($"Unknown animation module key: '~{key}'. Skipping.");
-                    SkipUnknownValue(scanner); // このキーの値をスキップ
+                    SkipUnknownValue(scanner);
                     break;
             }
         }
-        // scanner.Expect(">"); // 呼び出し元で > を消費
         return animData;
     }
 
-
-    /// <summary>
-    /// mpsコード文字列をParticlePresetオブジェクトに変換するメイン関数
-    /// </summary>
     public static ParticlePreset Parse(string mpsCode, Dictionary<string, Material> materialDict, Dictionary<string, Mesh> meshDict)
     {
         var scanner = new Scanner(mpsCode);
@@ -308,7 +492,6 @@ public static class MpsParser
         return preset;
     }
 
-    // オブジェクト '<' ... '>' の中身を解析
     private static void ParseObjectContent(Scanner scanner, ParticlePreset preset, Dictionary<string, Material> materialDict, Dictionary<string, Mesh> meshDict)
     {
         while (scanner.Peek() != null && scanner.Peek() != ">")
@@ -334,118 +517,87 @@ public static class MpsParser
                 case "externalForces": preset.externalForces = ParseExternalForcesModule(scanner); break;
                 case "noise": preset.noise = ParseNoiseModule(scanner); break;
                 case "collision": preset.collision = ParseCollisionModule(scanner); break;
-                case "triggers": preset.triggers = new TriggersModuleData { enabled = true }; SkipModuleContent(scanner); break; // triggersは中身をパースしない
-                case "subEmitters": preset.subEmitters = new SubEmittersModuleData { enabled = true }; SkipModuleContent(scanner); break; // 同上
+                case "triggers": preset.triggers = new TriggersModuleData { enabled = true }; SkipModuleContent(scanner); break;
+                case "subEmitters": preset.subEmitters = new SubEmittersModuleData { enabled = true }; SkipModuleContent(scanner); break;
                 case "textureSheetAnimation": preset.textureSheetAnimation = ParseTextureSheetAnimationModule(scanner); break;
-                case "lights": preset.lights = new LightsModuleData { enabled = true }; SkipModuleContent(scanner); break; // 同上
+                case "lights": preset.lights = new LightsModuleData { enabled = true }; SkipModuleContent(scanner); break;
                 case "trails": preset.trails = ParseTrailsModule(scanner); break;
-                case "customData": preset.customData = new CustomDataModuleData { enabled = true }; SkipModuleContent(scanner); break; // 同上
+                case "customData": preset.customData = new CustomDataModuleData { enabled = true }; SkipModuleContent(scanner); break;
                 case "renderer": preset.renderer = ParseRendererModule(scanner, materialDict, meshDict); break;
                 default:
-                    // 例外をスローせず、警告を出して不明なモジュールをスキップする
                     Debug.LogWarning($"Unknown MPS module key: '~{key}'. Skipping this module.");
-                    SkipModuleContent(scanner); // このモジュールの < ... > の中身を読み飛ばす
+                    SkipModuleContent(scanner);
                     break;
             }
             scanner.Expect(">");
         }
     }
 
-    /// <summary>
-    /// 不明なキーに続く値を安全に読み飛ばします。
-    /// 値がブロック（<...> or [...] or (...)）の場合はそれを読み飛ばし、
-    /// 単一の値（数値や文字列）の場合はそれを1つ消費します。
-    /// </summary>
     private static void SkipUnknownValue(Scanner scanner)
     {
         string next = scanner.Peek();
         if (next == "<")
         {
-            scanner.Consume(); // < を消費
+            scanner.Consume();
             SkipModuleContent(scanner);
-            scanner.Consume(); // > を消費
+            scanner.Consume();
         }
         else if (next == "[")
         {
-            scanner.Consume(); // [ を消費
-            SkipBracketContent(scanner); // [ ... ] の中身を読み飛ばす
-            scanner.Consume(); // ] を消費
+            scanner.Consume();
+            SkipBracketContent(scanner);
+            scanner.Consume();
         }
         else if (next == "(")
         {
-            scanner.Consume(); // ( を消費
+            scanner.Consume();
             while (scanner.Peek() != null && scanner.Peek() != ")")
             {
-                scanner.Consume(); // ( ... ) の中身を読み飛ばす
+                scanner.Consume();
             }
-            scanner.Consume(); // ) を消費
+            scanner.Consume();
         }
         else
         {
-            // 単一の値（数値、true/falseなど）
             scanner.Consume();
         }
     }
 
-    /// <summary>
-    /// 不明なモジュールの内容 < ... > を安全に読み飛ばします。
-    /// '<' を読み取った直後から呼び出され、
-    /// 対応する '>' の直前まで読み進めます（ネストされた < > にも対応）。
-    /// </summary>
     private static void SkipModuleContent(Scanner scanner)
     {
         int depth = 0;
         while (scanner.Peek() != null)
         {
             string token = scanner.Peek();
-
-            if (token == "<")
-            {
-                depth++;
-            }
+            if (token == "<") depth++;
             else if (token == ">")
             {
-                if (depth == 0)
-                {
-                    // 探していた閉じタグ '>' を見つけた
-                    // この '>' は switch 文の外側にある Expect(">"); で消費されるため、ここでは消費しない
-                    return;
-                }
+                if (depth == 0) return;
                 depth--;
             }
-
-            // トークンを消費して次に進む
             scanner.Consume();
         }
-        Debug.LogWarning("Parse Error: Reached end of code while skipping module. Missing '>'.");
     }
 
-    /// <summary>
-    /// 不明な配列 [ ... ] の内容を安全に読み飛ばします。
-    /// </summary>
     private static void SkipBracketContent(Scanner scanner)
     {
         int depth = 0;
         while (scanner.Peek() != null)
         {
             string token = scanner.Peek();
-            if (token == "[")
-            {
-                depth++;
-            }
+            if (token == "[") depth++;
             else if (token == "]")
             {
-                if (depth == 0)
-                {
-                    return; // 閉じる ] を見つけた
-                }
+                if (depth == 0) return;
                 depth--;
             }
             scanner.Consume();
         }
-        Debug.LogWarning("Parse Error: Reached end of code while skipping bracket content. Missing ']'.");
     }
 
+    // ----------------------------------------------------------------------------------
+    // 各モジュールのパース処理
+    // ----------------------------------------------------------------------------------
 
     private static MainModuleData ParseMainModule(Scanner scanner)
     {
@@ -456,111 +608,63 @@ public static class MpsParser
             switch (key)
             {
                 case "duration": main.duration = scanner.ConsumeFloat(); break;
-                case "startDelay": main.startDelay = ParseMinMaxCurveOrConstant(scanner); break;
-                case "startLifetime": main.startLifetime = ParseMinMaxCurveOrConstant(scanner); break;
-                case "startSpeed": main.startSpeed = ParseMinMaxCurveOrConstant(scanner); break;
+                case "looping": main.looping = scanner.ConsumeBool(); break;
+                case "prewarm": main.prewarm = scanner.ConsumeBool(); break;
+                case "startDelay": main.startDelay = ParseUniversalMinMaxCurve(scanner); break;
+                case "startLifetime": main.startLifetime = ParseUniversalMinMaxCurve(scanner); break;
+                case "startSpeed": main.startSpeed = ParseUniversalMinMaxCurve(scanner); break;
+
                 case "startSize3D": main.startSize3D = scanner.ConsumeBool(); break;
                 case "startSize":
-                    if (scanner.Peek() == "[")
+                    var sizeData = ParseAxisSeparatedCurve(scanner);
+                    main.startSize3D = sizeData.isSeparated;
+                    if (sizeData.isSeparated)
                     {
-                        scanner.Consume(); // 最初の'['を消費
-                        if (scanner.Peek() == "[")
-                        {
-                            // 3Dレンジ形式: [[minX maxX] [minY maxY] [minZ maxZ]]
-                            // または 3Dカーブ形式: [[curveX] [curveY] [curveZ]]
-                            main.startSize3D = true;
-                            main.startSizeX = ParseMinMaxCurve(scanner);
-                            main.startSizeY = ParseMinMaxCurve(scanner);
-                            main.startSizeZ = ParseMinMaxCurve(scanner);
-                            scanner.Expect("]"); // 最後の']'を消費
-                        }
-                        else
-                        {
-                            // 1Dレンジ [min max] または 3D固定 [x y z]
-                            var values = new List<float>();
-                            while (scanner.Peek() != "]" && scanner.Peek() != null)
-                            {
-                                values.Add(scanner.ConsumeFloat());
-                            }
-                            scanner.Expect("]"); // 最後の']'を消費
-
-                            if (values.Count == 2)
-                            {
-                                // 1Dレンジ
-                                main.startSize3D = false;
-                                main.startSize = new MinMaxCurveData { min = values[0], max = values[1] };
-                            }
-                            else if (values.Count == 3)
-                            {
-                                // 3D固定
-                                main.startSize3D = true;
-                                main.startSizeX = new MinMaxCurveData { min = values[0], max = values[0] };
-                                main.startSizeY = new MinMaxCurveData { min = values[1], max = values[1] };
-                                main.startSizeZ = new MinMaxCurveData { min = values[2], max = values[2] };
-                            }
-                            else
-                            {
-                                // 値の数が不正だが、パーサー位置は修正済みなので続行可能
-                                Debug.LogWarning($"Invalid number of arguments for startSize. Expected 2 or 3, but got {values.Count}. Skipping.");
-                            }
-                        }
+                        main.startSizeX = sizeData.x;
+                        main.startSizeY = sizeData.y;
+                        main.startSizeZ = sizeData.z;
                     }
                     else
                     {
-                        // 定数
-                        main.startSize3D = false;
-                        float value = scanner.ConsumeFloat();
-                        main.startSize = new MinMaxCurveData { min = value, max = value };
+                        main.startSize = sizeData.uniform;
                     }
                     break;
-                case "startRotation": main.startRotation = ParseMinMaxCurveOrConstant(scanner); break;
+
+                case "startRotation":
+                    var rotData = ParseAxisSeparatedCurve(scanner);
+                    main.startRotation3D = rotData.isSeparated;
+                    if (rotData.isSeparated)
+                    {
+                        main.startRotationX = rotData.x;
+                        main.startRotationY = rotData.y;
+                        main.startRotation = rotData.z; // Z軸
+                    }
+                    else
+                    {
+                        main.startRotation = rotData.uniform;
+                    }
+                    break;
+
+                case "flipRotation": main.flipRotation = scanner.ConsumeFloat(); break;
+
+                // --- gravityModifierをカーブとしてパース ---
+                case "gravityModifier":
+                    main.gravityModifier = ParseUniversalMinMaxCurve(scanner);
+                    break;
+
+                case "randomColor": main.randomColor = scanner.ConsumeBool(); break;
+
                 case "startColor":
-                    if (scanner.Peek() == "[") // 単色 [r g b a] を期待
-                    {
-                        // 【修正】 安全に配列の中身を読み取る
-                        scanner.Expect("[");
-                        List<float> values = new List<float>();
-                        while (scanner.Peek() != "]" && scanner.Peek() != null)
-                        {
-                            values.Add(scanner.ConsumeFloat());
-                        }
-                        scanner.Expect("]");
-
-                        if (values.Count == 4)
-                        {
-                            float r = values[0];
-                            float g = values[1];
-                            float b = values[2];
-                            float a = values[3];
-                            var singleColor = new Color(r, g, b, a);
-
-                            // 単色をシンプルなグラデーションとして表現
-                            main.startColor = new GradientData();
-                            main.startColor.colorKeys.Add(new ColorKeyData { color = singleColor, time = 0.0f });
-                            main.startColor.alphaKeys.Add(new AlphaKeyData { alpha = singleColor.a, time = 0.0f });
-                        }
-                        else
-                        {
-                            // 要素数が合わない場合は警告を出してスキップ（パーサーは既に ']' を消費して復帰している）
-                            Debug.LogWarning($"Parse Warning: 'startColor' expects 4 values [r g b a], but got {values.Count}. Skipping.");
-                        }
-                    }
-                    else // グラデーション < ... >
-                    {
-                        main.startColor = ParseGradient(scanner);
-                    }
+                    // 修正: MinMaxGradientDataとしてパース
+                    main.startColor = ParseMinMaxGradient(scanner);
                     break;
+
                 case "simulationSpace":
                     string spaceStr = scanner.ConsumeStringInParens();
                     if (Enum.TryParse(spaceStr, true, out ParticleSystemSimulationSpace space))
-                    {
                         main.simulationSpace = space;
-                    }
                     else
-                    {
-                        Debug.LogWarning($"Unknown simulation space '{spaceStr}'. Defaulting to Local.");
                         main.simulationSpace = ParticleSystemSimulationSpace.Local;
-                    }
                     break;
                 default:
                     Debug.LogWarning($"Unknown main module key: '~{key}'. Skipping.");
@@ -571,6 +675,172 @@ public static class MpsParser
         return main;
     }
 
+    // --- StartColor用の新しいパース関数群 ---
+
+    private static MinMaxGradientData ParseMinMaxGradient(Scanner scanner)
+    {
+        var data = new MinMaxGradientData();
+
+        // 1. (Random) の判定
+        if (scanner.Peek() == "(Random)")
+        {
+            scanner.Consume();
+            data.mode = "RandomColor";
+            // ランダム用にレインボーのグラデーションを自動生成してセット
+            data.gradientMax = CreateRainbowGradient();
+            return data;
+        }
+
+        // 2. 従来の <~gradient ...> 形式の場合 (後方互換性)
+        if (scanner.Peek() == "<")
+        {
+            data.mode = "Gradient";
+            data.gradientMax = ParseGradient(scanner);
+            return data;
+        }
+
+        // 3. 配列形式のパース
+        if (scanner.Peek() != "[")
+        {
+            SkipUnknownValue(scanner);
+            return data;
+        }
+
+        scanner.Expect("["); // 外側の [
+
+        // 次が数値なら -> [r g b a] (Single Color)
+        if (IsNumber(scanner.Peek()))
+        {
+            data.mode = "Color";
+            data.colorMax = ParseColorRGBA(scanner, false); // 既に [ は消費済みなのでfalse
+        }
+        // 次が [ なら -> 2色, Gradient, 2Gradient のいずれか
+        else if (scanner.Peek() == "[")
+        {
+            scanner.Expect("["); // 2層目の [
+
+            if (scanner.Peek() == "[")
+            {
+                // --- Two Gradients: [[[key]...]] ---
+                data.mode = "TwoGradients";
+                // Gradient 1 (Min)
+                data.gradientMin = ParseGradientKeysBlock(scanner, true); // 既に [ は消費済み
+
+                // Gradient 2 (Max)
+                scanner.Expect("[");
+                data.gradientMax = ParseGradientKeysBlock(scanner, false);
+                scanner.Expect("]"); // 外側の ]
+            }
+            else
+            {
+                // ここで中身が Color(4要素) か Key(5要素) かを判定
+                List<float> firstBlock = ParseFloatListInsideBrackets(scanner); // 2層目の ] まで読む
+
+                if (firstBlock.Count == 5)
+                {
+                    // --- Gradient: [[t r g b a] [t r g b a]...] ---
+                    data.mode = "Gradient";
+                    data.gradientMax = new GradientData();
+                    AddKeyToGradient(data.gradientMax, firstBlock);
+
+                    // 残りのキーを読み込む
+                    while (scanner.Peek() == "[")
+                    {
+                        scanner.Expect("[");
+                        var block = ParseFloatListInsideBrackets(scanner);
+                        AddKeyToGradient(data.gradientMax, block);
+                    }
+                    scanner.Expect("]"); // 外側の ]
+                }
+                else // Count == 4 とみなす
+                {
+                    // --- Two Colors: [[r g b a] [r g b a]] ---
+                    data.mode = "TwoColors";
+                    data.colorMin = new Color(firstBlock[0], firstBlock[1], firstBlock[2], firstBlock[3]);
+
+                    // 2つ目の色
+                    scanner.Expect("[");
+                    var secondBlock = ParseFloatListInsideBrackets(scanner);
+                    data.colorMax = new Color(secondBlock[0], secondBlock[1], secondBlock[2], secondBlock[3]);
+                    scanner.Expect("]"); // 外側の ]
+                }
+            }
+        }
+
+        return data;
+    }
+
+    private static Color ParseColorRGBA(Scanner scanner, bool expectOpenBracket = true)
+    {
+        if (expectOpenBracket) scanner.Expect("[");
+        float r = scanner.ConsumeFloat();
+        float g = scanner.ConsumeFloat();
+        float b = scanner.ConsumeFloat();
+        float a = scanner.ConsumeFloat();
+        scanner.Expect("]");
+        return new Color(r, g, b, a);
+    }
+
+    private static List<float> ParseFloatListInsideBrackets(Scanner scanner)
+    {
+        List<float> list = new List<float>();
+        while (scanner.Peek() != "]" && scanner.Peek() != null)
+        {
+            list.Add(scanner.ConsumeFloat());
+        }
+        scanner.Expect("]");
+        return list;
+    }
+
+    private static GradientData ParseGradientKeysBlock(Scanner scanner, bool startConsumed)
+    {
+        var grad = new GradientData();
+        if (!startConsumed) scanner.Expect("[");
+
+        while (scanner.Peek() == "[")
+        {
+            scanner.Expect("[");
+            var val = ParseFloatListInsideBrackets(scanner);
+            AddKeyToGradient(grad, val);
+        }
+        scanner.Expect("]");
+        return grad;
+    }
+
+    private static void AddKeyToGradient(GradientData grad, List<float> val)
+    {
+        if (val.Count >= 5)
+        {
+            float t = val[0];
+            Color col = new Color(val[1], val[2], val[3], val[4]);
+            grad.colorKeys.Add(new ColorKeyData { time = t, color = col });
+            grad.alphaKeys.Add(new AlphaKeyData { time = t, alpha = col.a });
+        }
+    }
+
+    private static bool IsNumber(string token)
+    {
+        if (string.IsNullOrEmpty(token)) return false;
+        return char.IsDigit(token[0]) || token[0] == '-' || token[0] == '.';
+    }
+
+    private static GradientData CreateRainbowGradient()
+    {
+        var g = new GradientData();
+        g.colorKeys.Add(new ColorKeyData { time = 0.0f, color = Color.red });
+        g.colorKeys.Add(new ColorKeyData { time = 0.2f, color = Color.yellow });
+        g.colorKeys.Add(new ColorKeyData { time = 0.4f, color = Color.green });
+        g.colorKeys.Add(new ColorKeyData { time = 0.6f, color = Color.cyan });
+        g.colorKeys.Add(new ColorKeyData { time = 0.8f, color = Color.blue });
+        g.colorKeys.Add(new ColorKeyData { time = 1.0f, color = Color.magenta });
+
+        g.alphaKeys.Add(new AlphaKeyData { time = 0.0f, alpha = 1.0f });
+        g.alphaKeys.Add(new AlphaKeyData { time = 1.0f, alpha = 1.0f });
+        return g;
+    }
+
+    // ------------------------------------
+
     private static EmissionModuleData ParseEmissionModule(Scanner scanner)
     {
         var emission = new EmissionModuleData { enabled = true };
@@ -579,19 +849,14 @@ public static class MpsParser
             string key = scanner.Consume().Substring(1);
             switch (key)
             {
-                case "enabled":
-                    emission.enabled = scanner.ConsumeBool();
-                    break;
-                case "rateOverTime":
-                    emission.rateOverTime = ParseMinMaxCurveOrConstant(scanner);
-                    break;
+                case "enabled": emission.enabled = scanner.ConsumeBool(); break;
+                case "rateOverTime": emission.rateOverTime = ParseUniversalMinMaxCurve(scanner); break;
                 case "burstCount":
-                    var curve = ParseMinMaxCurveOrConstant(scanner);
+                    var curve = ParseUniversalMinMaxCurve(scanner);
                     emission.minBurstCount = (int)curve.min;
                     emission.maxBurstCount = (int)curve.max;
                     break;
                 default:
-                    Debug.LogWarning($"Unknown emission module key: '~{key}'. Skipping.");
                     SkipUnknownValue(scanner);
                     break;
             }
@@ -607,28 +872,18 @@ public static class MpsParser
             string key = scanner.Consume().Substring(1);
             switch (key)
             {
-                case "enabled":
-                    shape.enabled = scanner.ConsumeBool();
-                    break;
+                case "enabled": shape.enabled = scanner.ConsumeBool(); break;
                 case "shape":
                     string shapeTypeStr = scanner.ConsumeStringInParens();
                     if (Enum.TryParse(shapeTypeStr, true, out ParticleSystemShapeType shapeType))
-                    {
                         shape.shapeType = shapeType;
-                    }
                     else
-                    {
-                        Debug.LogWarning($"Unknown shape type '{shapeTypeStr}'. Defaulting to Cone.");
                         shape.shapeType = ParticleSystemShapeType.Cone;
-                    }
                     break;
                 case "angle": shape.angle = scanner.ConsumeFloat(); break;
                 case "radius": shape.radius = scanner.ConsumeFloat(); break;
                 case "radiusThickness": shape.radiusThickness = scanner.ConsumeFloat(); break;
-                default:
-                    Debug.LogWarning($"Unknown shape module key: '~{key}'. Skipping.");
-                    SkipUnknownValue(scanner);
-                    break;
+                default: SkipUnknownValue(scanner); break;
             }
         }
         return shape;
@@ -644,10 +899,7 @@ public static class MpsParser
             {
                 case "enabled": col.enabled = scanner.ConsumeBool(); break;
                 case "gradient": col.color = ParseGradient(scanner); break;
-                default:
-                    Debug.LogWarning($"Unknown colorOverLifetime module key: '~{key}'. Skipping.");
-                    SkipUnknownValue(scanner);
-                    break;
+                default: SkipUnknownValue(scanner); break;
             }
         }
         return col;
@@ -662,14 +914,29 @@ public static class MpsParser
             switch (key)
             {
                 case "enabled": rot.enabled = scanner.ConsumeBool(); break;
-                case "separateAxes": rot.separateAxes = scanner.ConsumeBool(); break;
-                case "x": rot.x = ParseMinMaxCurveOrConstant(scanner); break;
-                case "y": rot.y = ParseMinMaxCurveOrConstant(scanner); break;
-                case "z": rot.z = ParseMinMaxCurveOrConstant(scanner); break;
-                default:
-                    Debug.LogWarning($"Unknown rotationOverLifetime module key: '~{key}'. Skipping.");
-                    SkipUnknownValue(scanner);
+
+                case "separateAxes":
+                case "z": // 従来の1D記述はZとして扱うことが多い
+                case "rotation":
+                    var data = ParseAxisSeparatedCurve(scanner);
+                    rot.separateAxes = data.isSeparated;
+                    if (data.isSeparated)
+                    {
+                        rot.x = data.x;
+                        rot.y = data.y;
+                        rot.z = data.z;
+                    }
+                    else
+                    {
+                        rot.z = data.uniform; // 1Dモードの時はZに値を入れて制御
+                    }
                     break;
+
+                // 個別軸指定（互換性のため）
+                case "x": rot.x = ParseUniversalMinMaxCurve(scanner); rot.separateAxes = true; break;
+                case "y": rot.y = ParseUniversalMinMaxCurve(scanner); rot.separateAxes = true; break;
+
+                default: SkipUnknownValue(scanner); break;
             }
         }
         return rot;
@@ -684,12 +951,9 @@ public static class MpsParser
             switch (key)
             {
                 case "enabled": lvol.enabled = scanner.ConsumeBool(); break;
-                case "limit": lvol.limit = ParseMinMaxCurveOrConstant(scanner); break;
+                case "limit": lvol.limit = ParseUniversalMinMaxCurve(scanner); break;
                 case "dampen": lvol.dampen = scanner.ConsumeFloat(); break;
-                default:
-                    Debug.LogWarning($"Unknown limitVelocityOverLifetime module key: '~{key}'. Skipping.");
-                    SkipUnknownValue(scanner);
-                    break;
+                default: SkipUnknownValue(scanner); break;
             }
         }
         return lvol;
@@ -709,11 +973,8 @@ public static class MpsParser
                     if (Enum.TryParse(modeStr, true, out ParticleSystemInheritVelocityMode mode))
                         iv.mode = mode;
                     break;
-                case "curve": iv.curve = ParseMinMaxCurveOrConstant(scanner); break;
-                default:
-                    Debug.LogWarning($"Unknown inheritVelocity module key: '~{key}'. Skipping.");
-                    SkipUnknownValue(scanner);
-                    break;
+                case "curve": iv.curve = ParseUniversalMinMaxCurve(scanner); break;
+                default: SkipUnknownValue(scanner); break;
             }
         }
         return iv;
@@ -734,10 +995,7 @@ public static class MpsParser
                     cbs.range = new Vector2(scanner.ConsumeFloat(), scanner.ConsumeFloat());
                     scanner.Expect("]");
                     break;
-                default:
-                    Debug.LogWarning($"Unknown colorBySpeed module key: '~{key}'. Skipping.");
-                    SkipUnknownValue(scanner);
-                    break;
+                default: SkipUnknownValue(scanner); break;
             }
         }
         return cbs;
@@ -752,16 +1010,13 @@ public static class MpsParser
             switch (key)
             {
                 case "enabled": sbs.enabled = scanner.ConsumeBool(); break;
-                case "size": sbs.size = ParseMinMaxCurveOrConstant(scanner); break;
+                case "size": sbs.size = ParseUniversalMinMaxCurve(scanner); break;
                 case "range":
                     scanner.Expect("[");
                     sbs.range = new Vector2(scanner.ConsumeFloat(), scanner.ConsumeFloat());
                     scanner.Expect("]");
                     break;
-                default:
-                    Debug.LogWarning($"Unknown sizeBySpeed module key: '~{key}'. Skipping.");
-                    SkipUnknownValue(scanner);
-                    break;
+                default: SkipUnknownValue(scanner); break;
             }
         }
         return sbs;
@@ -776,16 +1031,13 @@ public static class MpsParser
             switch (key)
             {
                 case "enabled": rbs.enabled = scanner.ConsumeBool(); break;
-                case "z": rbs.z = ParseMinMaxCurveOrConstant(scanner); break;
+                case "z": rbs.z = ParseUniversalMinMaxCurve(scanner); break;
                 case "range":
                     scanner.Expect("[");
                     rbs.range = new Vector2(scanner.ConsumeFloat(), scanner.ConsumeFloat());
                     scanner.Expect("]");
                     break;
-                default:
-                    Debug.LogWarning($"Unknown rotationBySpeed module key: '~{key}'. Skipping.");
-                    SkipUnknownValue(scanner);
-                    break;
+                default: SkipUnknownValue(scanner); break;
             }
         }
         return rbs;
@@ -800,11 +1052,8 @@ public static class MpsParser
             switch (key)
             {
                 case "enabled": ef.enabled = scanner.ConsumeBool(); break;
-                case "multiplier": ef.multiplier = ParseMinMaxCurveOrConstant(scanner); break;
-                default:
-                    Debug.LogWarning($"Unknown externalForces module key: '~{key}'. Skipping.");
-                    SkipUnknownValue(scanner);
-                    break;
+                case "multiplier": ef.multiplier = ParseUniversalMinMaxCurve(scanner); break;
+                default: SkipUnknownValue(scanner); break;
             }
         }
         return ef;
@@ -819,13 +1068,10 @@ public static class MpsParser
             switch (key)
             {
                 case "enabled": collision.enabled = scanner.ConsumeBool(); break;
-                case "dampen": collision.dampen = ParseMinMaxCurveOrConstant(scanner); break;
-                case "bounce": collision.bounce = ParseMinMaxCurveOrConstant(scanner); break;
-                case "lifetimeLoss": collision.lifetimeLoss = ParseMinMaxCurveOrConstant(scanner); break;
-                default:
-                    Debug.LogWarning($"Unknown collision module key: '~{key}'. Skipping.");
-                    SkipUnknownValue(scanner);
-                    break;
+                case "dampen": collision.dampen = ParseUniversalMinMaxCurve(scanner); break;
+                case "bounce": collision.bounce = ParseUniversalMinMaxCurve(scanner); break;
+                case "lifetimeLoss": collision.lifetimeLoss = ParseUniversalMinMaxCurve(scanner); break;
+                default: SkipUnknownValue(scanner); break;
             }
         }
         return collision;
@@ -836,44 +1082,29 @@ public static class MpsParser
         var vol = new VelocityOverLifetimeModuleData { enabled = true };
         while (scanner.Peek() != ">")
         {
-            // 以前の ConsumeStringInParens から標準的な ~key 形式に変更
             string key = scanner.Consume().Substring(1);
             switch (key)
             {
-                case "x": vol.x = ParseMinMaxCurveOrConstant(scanner); break;
-                case "y": vol.y = ParseMinMaxCurveOrConstant(scanner); break;
-                case "z": vol.z = ParseMinMaxCurveOrConstant(scanner); break;
-
+                case "x": vol.x = ParseUniversalMinMaxCurve(scanner); break;
+                case "y": vol.y = ParseUniversalMinMaxCurve(scanner); break;
+                case "z": vol.z = ParseUniversalMinMaxCurve(scanner); break;
                 case "space":
                     string spaceStr = scanner.ConsumeStringInParens();
                     if (Enum.TryParse(spaceStr, true, out ParticleSystemSimulationSpace space))
-                    {
                         vol.space = space;
-                    }
                     else
-                    {
-                        Debug.LogWarning($"Unknown simulation space '{spaceStr}'. Defaulting to Local.");
                         vol.space = ParticleSystemSimulationSpace.Local;
-                    }
                     break;
-
-                case "orbitalX": vol.orbitalX = ParseMinMaxCurveOrConstant(scanner); break;
-                case "orbitalY": vol.orbitalY = ParseMinMaxCurveOrConstant(scanner); break;
-                case "orbitalZ": vol.orbitalZ = ParseMinMaxCurveOrConstant(scanner); break;
-
-                // OffsetはVector3または個別指定に対応
+                case "orbitalX": vol.orbitalX = ParseUniversalMinMaxCurve(scanner); break;
+                case "orbitalY": vol.orbitalY = ParseUniversalMinMaxCurve(scanner); break;
+                case "orbitalZ": vol.orbitalZ = ParseUniversalMinMaxCurve(scanner); break;
                 case "offset": vol.orbitalOffset = ParseVector3(scanner); break;
                 case "offsetX": vol.orbitalOffset.x = scanner.ConsumeFloat(); break;
                 case "offsetY": vol.orbitalOffset.y = scanner.ConsumeFloat(); break;
                 case "offsetZ": vol.orbitalOffset.z = scanner.ConsumeFloat(); break;
-
-                case "radial": vol.radial = ParseMinMaxCurveOrConstant(scanner); break;
-                case "speedModifier": vol.speedModifier = ParseMinMaxCurveOrConstant(scanner); break;
-
-                default:
-                    Debug.LogWarning($"Unknown velocityOverLifetime key: '~{key}'. Skipping.");
-                    SkipUnknownValue(scanner);
-                    break;
+                case "radial": vol.radial = ParseUniversalMinMaxCurve(scanner); break;
+                case "speedModifier": vol.speedModifier = ParseUniversalMinMaxCurve(scanner); break;
+                default: SkipUnknownValue(scanner); break;
             }
         }
         return vol;
@@ -884,16 +1115,25 @@ public static class MpsParser
         var fol = new ForceOverLifetimeModuleData { enabled = true };
         while (scanner.Peek() != ">")
         {
-            string axis = scanner.ConsumeStringInParens();
+            // ForceOverLifetimeはMPS形式によっては <x ...> ではなく ~x ... と書かれる場合もあるが
+            // 既存の実装が ConsumeStringInParens() を使っていた場合、(x) のような記述を期待していた可能性がある。
+            // しかし既存コードでは `string axis = scanner.ConsumeStringInParens();` となっていたため
+            // <~forceOverLifetime (x) [0 1]> のような形式だったと思われる。
+            // 互換性のため、元の実装パターンに ParseUniversalMinMaxCurve を適用する。
+
+            // ただし、もし `~x` というキーで来るなら以下のようになる
+            string token = scanner.Consume();
+            string axis = "";
+            if (token.StartsWith("~")) axis = token.Substring(1);
+            else if (token.StartsWith("(")) axis = token.Replace("(", "").Replace(")", "");
+            else axis = token;
+
             switch (axis)
             {
-                case "x": fol.x = ParseMinMaxCurveOrConstant(scanner); break;
-                case "y": fol.y = ParseMinMaxCurveOrConstant(scanner); break;
-                case "z": fol.z = ParseMinMaxCurveOrConstant(scanner); break;
-                default:
-                    Debug.LogWarning($"Unknown forceOverLifetime axis: '{axis}'. Skipping.");
-                    SkipUnknownValue(scanner);
-                    break;
+                case "x": fol.x = ParseUniversalMinMaxCurve(scanner); break;
+                case "y": fol.y = ParseUniversalMinMaxCurve(scanner); break;
+                case "z": fol.z = ParseUniversalMinMaxCurve(scanner); break;
+                default: SkipUnknownValue(scanner); break;
             }
         }
         return fol;
@@ -908,13 +1148,10 @@ public static class MpsParser
             switch (key)
             {
                 case "enabled": noise.enabled = scanner.ConsumeBool(); break;
-                case "strength": noise.strength = ParseMinMaxCurveOrConstant(scanner); break;
+                case "strength": noise.strength = ParseUniversalMinMaxCurve(scanner); break;
                 case "frequency": noise.frequency = scanner.ConsumeFloat(); break;
-                case "scrollSpeed": noise.scrollSpeed = ParseMinMaxCurveOrConstant(scanner); break;
-                default:
-                    Debug.LogWarning($"Unknown noise module key: '~{key}'. Skipping.");
-                    SkipUnknownValue(scanner);
-                    break;
+                case "scrollSpeed": noise.scrollSpeed = ParseUniversalMinMaxCurve(scanner); break;
+                default: SkipUnknownValue(scanner); break;
             }
         }
         return noise;
@@ -931,11 +1168,8 @@ public static class MpsParser
                 case "enabled": tsa.enabled = scanner.ConsumeBool(); break;
                 case "tilesX": tsa.numTilesX = (int)scanner.ConsumeFloat(); break;
                 case "tilesY": tsa.numTilesY = (int)scanner.ConsumeFloat(); break;
-                case "frameOverTime": tsa.frameOverTime = ParseMinMaxCurveOrConstant(scanner); break;
-                default:
-                    Debug.LogWarning($"Unknown textureSheetAnimation module key: '~{key}'. Skipping.");
-                    SkipUnknownValue(scanner);
-                    break;
+                case "frameOverTime": tsa.frameOverTime = ParseUniversalMinMaxCurve(scanner); break;
+                default: SkipUnknownValue(scanner); break;
             }
         }
         return tsa;
@@ -949,65 +1183,32 @@ public static class MpsParser
             string key = scanner.Consume().Substring(1);
             switch (key)
             {
-                case "enabled":
-                    trails.enabled = scanner.ConsumeBool();
-                    break;
+                case "enabled": trails.enabled = scanner.ConsumeBool(); break;
                 case "mode":
                     string modeStr = scanner.ConsumeStringInParens();
                     if (Enum.TryParse(modeStr, true, out ParticleSystemTrailMode mode))
                         trails.mode = mode;
                     break;
-                case "ratio":
-                    trails.ratio = scanner.ConsumeFloat();
-                    break;
-                case "lifetime":
-                    trails.lifetime = ParseMinMaxCurveOrConstant(scanner);
-                    break;
-                case "minVertexDistance":
-                    trails.minVertexDistance = scanner.ConsumeFloat();
-                    break;
-                case "worldSpace":
-                    trails.worldSpace = scanner.ConsumeBool();
-                    break;
-                case "dieWithParticles":
-                    trails.dieWithParticles = scanner.ConsumeBool();
-                    break;
-                case "ribbonCount":
-                    trails.ribbonCount = (int)scanner.ConsumeFloat();
-                    break;
-                case "splitSubEmitterRibbons":
-                    trails.splitSubEmitterRibbons = scanner.ConsumeBool();
-                    break;
+                case "ratio": trails.ratio = scanner.ConsumeFloat(); break;
+                case "lifetime": trails.lifetime = ParseUniversalMinMaxCurve(scanner); break;
+                case "minVertexDistance": trails.minVertexDistance = scanner.ConsumeFloat(); break;
+                case "worldSpace": trails.worldSpace = scanner.ConsumeBool(); break;
+                case "dieWithParticles": trails.dieWithParticles = scanner.ConsumeBool(); break;
+                case "ribbonCount": trails.ribbonCount = (int)scanner.ConsumeFloat(); break;
+                case "splitSubEmitterRibbons": trails.splitSubEmitterRibbons = scanner.ConsumeBool(); break;
                 case "textureMode":
                     string texModeStr = scanner.ConsumeStringInParens();
                     if (Enum.TryParse(texModeStr, true, out ParticleSystemTrailTextureMode texMode))
                         trails.textureMode = texMode;
                     break;
-                case "sizeAffectsWidth":
-                    trails.sizeAffectsWidth = scanner.ConsumeBool();
-                    break;
-                case "sizeAffectsLifetime":
-                    trails.sizeAffectsLifetime = scanner.ConsumeBool();
-                    break;
-                case "inheritParticleColor":
-                    trails.inheritParticleColor = scanner.ConsumeBool();
-                    break;
-                case "colorOverLifetime":
-                    trails.colorOverLifetime = ParseGradient(scanner);
-                    break;
-                case "widthOverTrail":
-                    trails.widthOverTrail = ParseMinMaxCurveOrConstant(scanner);
-                    break;
-                case "colorOverTrail":
-                    trails.colorOverTrail = ParseGradient(scanner);
-                    break;
-                case "generateLightingData":
-                    trails.generateLightingData = scanner.ConsumeBool();
-                    break;
-                default:
-                    Debug.LogWarning($"Unknown trails module key: '~{key}'. Skipping.");
-                    SkipUnknownValue(scanner);
-                    break;
+                case "sizeAffectsWidth": trails.sizeAffectsWidth = scanner.ConsumeBool(); break;
+                case "sizeAffectsLifetime": trails.sizeAffectsLifetime = scanner.ConsumeBool(); break;
+                case "inheritParticleColor": trails.inheritParticleColor = scanner.ConsumeBool(); break;
+                case "colorOverLifetime": trails.colorOverLifetime = ParseGradient(scanner); break;
+                case "widthOverTrail": trails.widthOverTrail = ParseUniversalMinMaxCurve(scanner); break;
+                case "colorOverTrail": trails.colorOverTrail = ParseGradient(scanner); break;
+                case "generateLightingData": trails.generateLightingData = scanner.ConsumeBool(); break;
+                default: SkipUnknownValue(scanner); break;
             }
         }
         return trails;
@@ -1022,111 +1223,22 @@ public static class MpsParser
             switch (key)
             {
                 case "enabled": sol.enabled = scanner.ConsumeBool(); break;
-                // --- ▼▼▼ ここから修正: size入力の柔軟化（1D/3D対応） ▼▼▼ ---
                 case "size":
-                    if (scanner.Peek() == "[")
+                case "separateAxes":
+                    var data = ParseAxisSeparatedCurve(scanner);
+                    sol.separateAxes = data.isSeparated;
+                    if (data.isSeparated)
                     {
-                        scanner.Consume(); // 最初の'['を消費
-
-                        // 3Dまたは1Dの判断
-                        // startSizeと同様に、リストの中身を確認して分岐する
-                        // パターン:
-                        // 1. [val val val] -> 3D定数
-                        // 2. [val val] -> 1D MinMax
-                        // 3. [[...]] -> 1Dカーブ または 3D MinMax/カーブ
-
-                        // --- ケースA: 次がさらに '[' で始まる場合（カーブやMinMaxのリスト） ---
-                        if (scanner.Peek() == "[")
-                        {
-                            // 要素を全て読み取ってから判断する
-                            List<MinMaxCurveData> items = new List<MinMaxCurveData>();
-                            while (scanner.Peek() == "[")
-                            {
-                                items.Add(ParseMinMaxCurve(scanner));
-                            }
-                            scanner.Expect("]"); // 外側の']'
-
-                            if (items.Count == 3)
-                            {
-                                // 要素が3つある場合は3D (X, Y, Z) として扱う
-                                sol.separateAxes = true;
-                                sol.x = items[0];
-                                sol.y = items[1];
-                                sol.z = items[2];
-                            }
-                            else if (items.Count == 1)
-                            {
-                                // 要素が1つだけなら 1D Curve (MinMaxCurveDataそのもの)
-                                sol.separateAxes = false;
-                                sol.size = items[0];
-                            }
-                            else
-                            {
-                                // 要素数が2つなどの場合、これは 1D Curve のキーフレームリストを
-                                // 誤って個別のMinMaxCurveDataとしてパースしてしまった可能性がある
-                                // またはユーザーが誤った数のデータを渡したか
-
-                                // ここでは、パースされた MinMaxCurveData (min, maxを持つ) を
-                                // CurveData (Keys) に変換して 1D Curve として再構築する救済措置をとる
-                                sol.separateAxes = false;
-                                var curve = new CurveData();
-                                foreach (var item in items)
-                                {
-                                    // ParseMinMaxCurve は [t v] を min=t, max=v として読み込んでいるはず
-                                    curve.keys.Add(new KeyframeData { time = item.min, value = item.max });
-                                }
-                                sol.size = new MinMaxCurveData { curve = curve };
-                            }
-                        }
-                        // --- ケースB: 次が数値の場合（定数リスト） ---
-                        else
-                        {
-                            List<float> values = new List<float>();
-                            while (scanner.Peek() != "]" && scanner.Peek() != null)
-                            {
-                                values.Add(scanner.ConsumeFloat());
-                            }
-                            scanner.Expect("]"); // 外側の']'
-
-                            if (values.Count == 3)
-                            {
-                                // 3D 定数 [x y z]
-                                sol.separateAxes = true;
-                                sol.x = new MinMaxCurveData { min = values[0], max = values[0] };
-                                sol.y = new MinMaxCurveData { min = values[1], max = values[1] };
-                                sol.z = new MinMaxCurveData { min = values[2], max = values[2] };
-                            }
-                            else if (values.Count == 2)
-                            {
-                                // 1D MinMax [min max]
-                                sol.separateAxes = false;
-                                sol.size = new MinMaxCurveData { min = values[0], max = values[1] };
-                            }
-                            else if (values.Count == 1)
-                            {
-                                // 1D 定数 [val]
-                                sol.separateAxes = false;
-                                sol.size = new MinMaxCurveData { min = values[0], max = values[0] };
-                            }
-                            else
-                            {
-                                Debug.LogWarning($"Invalid number of arguments for sizeOverLifetime size. Expected 1, 2, or 3, but got {values.Count}.");
-                            }
-                        }
+                        sol.x = data.x;
+                        sol.y = data.y;
+                        sol.z = data.z;
                     }
                     else
                     {
-                        // 単一の数値（定数）
-                        float val = scanner.ConsumeFloat();
-                        sol.separateAxes = false;
-                        sol.size = new MinMaxCurveData { min = val, max = val };
+                        sol.size = data.uniform;
                     }
                     break;
-                // --- ▲▲▲ ここまで修正 ▲▲▲ ---
-                default:
-                    Debug.LogWarning($"Unknown sizeOverLifetime module key: '~{key}'. Skipping.");
-                    SkipUnknownValue(scanner);
-                    break;
+                default: SkipUnknownValue(scanner); break;
             }
         }
         return sol;
@@ -1144,25 +1256,12 @@ public static class MpsParser
                 case "renderMode":
                     string renderModeStr = scanner.ConsumeStringInParens();
                     if (Enum.TryParse(renderModeStr, true, out ParticleSystemRenderMode mode))
-                    {
                         renderer.renderMode = mode;
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"Unknown render mode '{renderModeStr}'. Defaulting to Billboard.");
-                        renderer.renderMode = ParticleSystemRenderMode.Billboard;
-                    }
                     break;
                 case "meshDistribution":
                     string distStr = scanner.ConsumeStringInParens();
                     if (Enum.TryParse(distStr, true, out ParticleSystemMeshDistribution dist))
-                    {
                         renderer.meshDistribution = dist;
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"Unknown mesh distribution '{distStr}'. Defaulting to Triangle.");
-                    }
                     break;
                 case "meshes":
                     string meshNamesStr = scanner.ConsumeStringInParens();
@@ -1170,172 +1269,41 @@ public static class MpsParser
                     foreach (var meshName in meshNames)
                     {
                         if (meshDict.TryGetValue(meshName, out Mesh mesh))
-                        {
                             renderer.meshes.Add(mesh);
-                        }
-                        else
-                        {
-                            Debug.LogWarning($"Mesh with name '{meshName}' not found in SystemManager's mesh list.");
-                        }
                     }
                     break;
                 case "materialName":
                     string materialName = scanner.ConsumeStringInParens();
                     if (materialDict.TryGetValue(materialName, out Material mat))
-                    {
                         renderer.material = mat;
-                    }
-                    else
-                    {
-                        Debug.LogError($"Material '{materialName}' not found in SystemManager's material list.");
-                    }
                     break;
                 case "trailMaterialName":
                     string trailMaterialName = scanner.ConsumeStringInParens();
                     if (materialDict.TryGetValue(trailMaterialName, out Material trailMat))
-                    {
                         renderer.trailMaterial = trailMat;
-                    }
-                    else
-                    {
-                        Debug.LogError($"Trail Material '{trailMaterialName}' not found in SystemManager's material list.");
-                    }
                     break;
                 case "alignment":
                     string aligStr = scanner.ConsumeStringInParens();
                     if (Enum.TryParse(aligStr, true, out ParticleSystemRenderSpace alig))
-                    {
                         renderer.alignment = alig;
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"Unknown alignment '{aligStr}'. Defaulting to Triangle.");
-                    }
                     break;
-                case "shader": // "~shader (Additive)" のように指定
-                case "blendMode": // "~blendMode (Additive)" でも可
+                case "shader":
+                case "blendMode":
                     renderer.blendMode = scanner.ConsumeStringInParens();
                     break;
-                // ★ Sorting Fudge のパース処理を追加
                 case "sortingFudge":
                     renderer.sortingFudge = scanner.ConsumeFloat();
                     break;
-                default:
-                    Debug.LogWarning($"Unknown renderer module key: '~{key}'. Skipping.");
-                    SkipUnknownValue(scanner);
-                    break;
+                default: SkipUnknownValue(scanner); break;
             }
         }
         return renderer;
     }
 
-    /// <summary>
-    /// 定数、MinMax、またはキーフレーム配列（カーブ）をパースします。
-    /// 対応フォーマット:
-    /// - 定数: 1.0
-    /// - MinMax: [1.0 2.0]
-    /// - カーブ配列: [[0 0] [0.5 1] [1 0]]
-    /// - 従来カーブ: <~keys ...>
-    /// </summary>
-    private static MinMaxCurveData ParseMinMaxCurveOrConstant(Scanner scanner)
-    {
-        var data = new MinMaxCurveData();
-        string nextToken = scanner.Peek();
-
-        if (nextToken == "[")
-        {
-            scanner.Expect("["); // consume first '['
-
-            // 次のトークンが '[' なら、[[t v] [t v]] の形式（カーブキー配列）とみなす
-            if (scanner.Peek() == "[")
-            {
-                // カーブとしてパース
-                data.curve = ParseCurveFromKeyArray(scanner);
-                scanner.Expect("]"); // 閉じる ']'
-            }
-            else
-            {
-                // MinMax [min max] としてパース
-                data.min = scanner.ConsumeFloat();
-                data.max = scanner.ConsumeFloat();
-                scanner.Expect("]");
-            }
-        }
-        else if (nextToken == "<")
-        {
-            // 従来の <~keys ...> 形式
-            data.curve = ParseCurve(scanner);
-            data.min = 0;
-            data.max = 0;
-        }
-        else
-        {
-            // 定数
-            float value = scanner.ConsumeFloat();
-            data.min = value;
-            data.max = value;
-        }
-        return data;
-    }
-
-    /// <summary>
-    /// StartSizeの3Dモードなどで使用される、[ ... ] で囲まれたMinMaxまたはカーブをパースします。
-    /// 対応フォーマット:
-    /// - MinMax: [1.0 2.0]
-    /// - カーブ配列: [[0 0] [0.5 1] [1 0]]
-    /// </summary>
-    private static MinMaxCurveData ParseMinMaxCurve(Scanner scanner)
-    {
-        var data = new MinMaxCurveData();
-        scanner.Expect("[");
-
-        if (scanner.Peek() == "[")
-        {
-            // カーブ配列 [[t v]...]
-            data.curve = ParseCurveFromKeyArray(scanner);
-            scanner.Expect("]");
-        }
-        else
-        {
-            // MinMax [min max]
-            data.min = scanner.ConsumeFloat();
-            data.max = scanner.ConsumeFloat();
-            scanner.Expect("]");
-        }
-        return data;
-    }
-
-    /// <summary>
-    /// 既に外側の [ を消費した状態から、内部の [time value] 配列のリストを読み取り、CurveDataを生成します。
-    /// Peek() == "[" である間ループします。
-    /// </summary>
-    private static CurveData ParseCurveFromKeyArray(Scanner scanner)
-    {
-        var curve = new CurveData();
-        // 呼び出し元で外側の '[' は消費済み、またはチェック済み
-        // ここでは内側の [t v] を連続して読み取る
-        while (scanner.Peek() == "[")
-        {
-            scanner.Expect("[");
-            // [time value] を読み取る
-            List<float> values = new List<float>();
-            while (scanner.Peek() != "]" && scanner.Peek() != null)
-            {
-                values.Add(scanner.ConsumeFloat());
-            }
-            scanner.Expect("]");
-
-            if (values.Count >= 2)
-            {
-                curve.keys.Add(new KeyframeData { time = values[0], value = values[1] });
-            }
-            else
-            {
-                Debug.LogWarning($"Parse Warning: Invalid Keyframe data in array. Expected [time value], but got {values.Count} elements.");
-            }
-        }
-        return curve;
-    }
+    // ----------------------------------------------------------------------------------
+    // カーブパースのヘルパー (旧 ParseCurve は ParseUniversalMinMaxCurve に統合されましたが、
+    // 古い <~keys ...> 形式の互換性のために残しています)
+    // ----------------------------------------------------------------------------------
 
     private static GradientData ParseGradient(Scanner scanner)
     {
@@ -1346,16 +1314,9 @@ public static class MpsParser
             string key = scanner.Consume().Substring(1);
             switch (key)
             {
-                case "colorKeys":
-                    gradient.colorKeys = ParseColorKeysList(scanner);
-                    break;
-                case "alphaKeys":
-                    gradient.alphaKeys = ParseAlphaKeysList(scanner);
-                    break;
-                default:
-                    Debug.LogWarning($"Unknown gradient key: '~{key}'. Skipping.");
-                    SkipUnknownValue(scanner);
-                    break;
+                case "colorKeys": gradient.colorKeys = ParseColorKeysList(scanner); break;
+                case "alphaKeys": gradient.alphaKeys = ParseAlphaKeysList(scanner); break;
+                default: SkipUnknownValue(scanner); break;
             }
         }
         scanner.Expect(">");
@@ -1368,16 +1329,9 @@ public static class MpsParser
         scanner.Expect("<");
         while (scanner.Peek() != ">")
         {
-            string key = scanner.Consume().Substring(1); // ~key を消費
-            if (key == "keys")
-            {
-                curve.keys = ParseKeysList(scanner);
-            }
-            else
-            {
-                Debug.LogWarning($"Unknown curve key: '~{key}'. Skipping.");
-                SkipUnknownValue(scanner);
-            }
+            string key = scanner.Consume().Substring(1);
+            if (key == "keys") curve.keys = ParseKeysList(scanner);
+            else SkipUnknownValue(scanner);
         }
         scanner.Expect(">");
         return curve;
@@ -1390,24 +1344,12 @@ public static class MpsParser
         while (scanner.Peek() == "[")
         {
             scanner.Expect("[");
-
-            // ブロック内の数値をすべて読み取る
             List<float> values = new List<float>();
             while (scanner.Peek() != "]" && scanner.Peek() != null)
             {
                 values.Add(scanner.ConsumeFloat());
             }
-
-            // time, value の2つが必要
-            if (values.Count == 2)
-            {
-                keyList.Add(new KeyframeData { time = values[0], value = values[1] });
-            }
-            else
-            {
-                Debug.LogWarning($"Parse Warning: Invalid Keyframe data. Expected 2 values (time, value), but got {values.Count}. Skipping this key.");
-            }
-
+            if (values.Count == 2) keyList.Add(new KeyframeData { time = values[0], value = values[1] });
             scanner.Expect("]");
         }
         scanner.Expect("]");
@@ -1421,31 +1363,15 @@ public static class MpsParser
         while (scanner.Peek() == "[")
         {
             scanner.Expect("[");
-
-            // ブロック内の数値をすべて読み取る
             List<float> values = new List<float>();
             while (scanner.Peek() != "]" && scanner.Peek() != null)
             {
                 values.Add(scanner.ConsumeFloat());
             }
-
-            // 【変更】順序を [time, r, g, b, a] に統一
-            // r, g, b, a, time の5つが必要
             if (values.Count == 5)
             {
-                keyList.Add(new ColorKeyData
-                {
-                    // 旧: values[0]..[3]がcolor, [4]がtime
-                    // 新: values[0]がtime, values[1]..[4]がcolor
-                    time = values[0],
-                    color = new Color(values[1], values[2], values[3], values[4])
-                });
+                keyList.Add(new ColorKeyData { time = values[0], color = new Color(values[1], values[2], values[3], values[4]) });
             }
-            else
-            {
-                Debug.LogWarning($"Parse Warning: Invalid ColorKey data. Expected 5 values (time, r, g, b, a), but got {values.Count}. Skipping this key.");
-            }
-
             scanner.Expect("]");
         }
         scanner.Expect("]");
@@ -1459,27 +1385,15 @@ public static class MpsParser
         while (scanner.Peek() == "[")
         {
             scanner.Expect("[");
-
-            // ブロック内の数値をすべて読み取る
             List<float> values = new List<float>();
             while (scanner.Peek() != "]" && scanner.Peek() != null)
             {
                 values.Add(scanner.ConsumeFloat());
             }
-
-            // 【変更】順序を [time, alpha] に統一
-            // alpha, time の2つが必要
             if (values.Count == 2)
             {
-                // 旧: values[0]がalpha, values[1]がtime
-                // 新: values[0]がtime, values[1]がalpha
                 keyList.Add(new AlphaKeyData { time = values[0], alpha = values[1] });
             }
-            else
-            {
-                Debug.LogWarning($"Parse Warning: Invalid AlphaKey data. Expected 2 values (time, alpha), but got {values.Count}. Skipping this key.");
-            }
-
             scanner.Expect("]");
         }
         scanner.Expect("]");

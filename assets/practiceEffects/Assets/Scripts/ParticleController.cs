@@ -1,5 +1,5 @@
 using UnityEngine;
-using System.Linq; // ToList()を使うために必要
+using System.Linq;
 
 /// <summary>
 /// プリセットデータに基づいてパーティクルをカスタマイズして再生します
@@ -9,6 +9,20 @@ public class ParticleController : MonoBehaviour
 {
     private ParticleSystem ps;
 
+    /// <summary>
+    /// CurveDataからUnityEngine.AnimationCurveを作成するヘルパー
+    /// </summary>
+    private AnimationCurve CreateUnityCurve(CurveData curveData, float multiplier)
+    {
+        if (curveData == null || curveData.keys.Count == 0) return null;
+
+        var unityCurve = new AnimationCurve();
+        foreach (var key in curveData.keys)
+        {
+            unityCurve.AddKey(key.time, key.value * multiplier);
+        }
+        return unityCurve;
+    }
 
     /// <summary>
     /// MinMaxCurveDataからParticleSystem.MinMaxCurveを生成する汎用ヘルパー関数
@@ -18,35 +32,36 @@ public class ParticleController : MonoBehaviour
     /// <returns>パーティクルシステムに適用するMinMaxCurve</returns>
     private ParticleSystem.MinMaxCurve CreatePsMinMaxCurveFromData(MinMaxCurveData data, float multiplier = 1.0f)
     {
-        // カーブデータが存在し、キーが1つ以上ある場合
-        if (data.curve != null && data.curve.keys.Count > 0)
+        // 1. Two Curves (MinMax Curve) Mode
+        // minCurveとcurve(maxCurveとして使用)の両方が存在する場合
+        if (data.minCurve != null && data.minCurve.keys.Count > 0 &&
+            data.curve != null && data.curve.keys.Count > 0)
         {
-            var unityCurve = new AnimationCurve();
-            foreach (var key in data.curve.keys)
-            {
-                // 乗数を適用してキーを追加
-                unityCurve.AddKey(key.time, key.value * multiplier);
-            }
-            // ParticleSystem.MinMaxCurveはカーブ自体には乗数を適用しないため、
-            // グローバルな乗数として1.0fを渡す
-            return new ParticleSystem.MinMaxCurve(1.0f, unityCurve);
+            var minCurve = CreateUnityCurve(data.minCurve, multiplier);
+            var maxCurve = CreateUnityCurve(data.curve, multiplier);
+            return new ParticleSystem.MinMaxCurve(1.0f, minCurve, maxCurve);
         }
+        // 2. Single Curve Mode
+        else if (data.curve != null && data.curve.keys.Count > 0)
+        {
+            var maxCurve = CreateUnityCurve(data.curve, multiplier);
+            return new ParticleSystem.MinMaxCurve(1.0f, maxCurve);
+        }
+        // 3. Constant or Random Between Two Constants Mode
         else
         {
-            // 定数または2定数間のランダム値の場合
             return new ParticleSystem.MinMaxCurve(data.min * multiplier, data.max * multiplier);
         }
     }
 
-    // --- ▼▼▼ 追加: Orbital Velocityのエラー回避用ヘルパーメソッド ▼▼▼ ---
-
-    // データがカーブモードかどうかを判定
+    // データがカーブモードかどうかを判定 (Orbital Velocityなどで使用)
     private bool IsCurve(MinMaxCurveData data)
     {
-        return data.curve != null && data.curve.keys.Count > 0;
+        return (data.curve != null && data.curve.keys.Count > 0) ||
+               (data.minCurve != null && data.minCurve.keys.Count > 0);
     }
 
-    // 定数であっても強制的に「平坦なカーブ」としてMinMaxCurveを生成する
+    // 強制的にカーブモードとしてMinMaxCurveを生成する（Orbital Velocity用）
     private ParticleSystem.MinMaxCurve CreateCurveMode(MinMaxCurveData data, float multiplier = 1.0f)
     {
         if (IsCurve(data))
@@ -63,26 +78,45 @@ public class ParticleController : MonoBehaviour
             return new ParticleSystem.MinMaxCurve(1.0f, curve);
         }
     }
-    // --- ▲▲▲ 追加ここまで ▲▲▲ ---
 
+    // Helper: GradientData を Unity Gradient に変換
+    private Gradient CreateUnityGradient(GradientData data)
+    {
+        if (data == null) return new Gradient();
+
+        Gradient grad = new Gradient();
+        // キーがない場合は白を返す
+        if (data.colorKeys.Count == 0) return grad;
+
+        var colorKeys = data.colorKeys.Select(k => new GradientColorKey(k.color, k.time)).ToArray();
+        var alphaKeys = data.alphaKeys.Select(k => new GradientAlphaKey(k.alpha, k.time)).ToArray();
+        grad.SetKeys(colorKeys, alphaKeys);
+        return grad;
+    }
 
     public void CustomizeAndPlay(ParticlePreset preset)
     {
         ps = GetComponent<ParticleSystem>();
         if (ps == null || preset == null) return;
 
-        // 設定を適用する前に、パーティクルシステムを完全に停止してクリアします。
-        // これにより "Play on Awake" が有効でも安全に設定を変更できます。
         ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
 
         // --- Main Module ---
         var main = ps.main;
         if (preset.main != null && preset.main.enabled)
         {
+            // Looping修正適用
+            main.loop = preset.main.looping;
+            main.prewarm = preset.main.prewarm;
             main.duration = preset.main.duration;
-            // ▼追加: Start Delayの設定
-            main.startDelay = CreatePsMinMaxCurveFromData(preset.main.startDelay);
-            // ▲追加
+            main.flipRotation = preset.main.flipRotation;
+
+            // Gravity Modifier (MinMaxCurve対応)
+            main.gravityModifier = CreatePsMinMaxCurveFromData(preset.main.gravityModifier);
+
+            // StartDelay修正適用 (カーブは無視してMinMax定数のみ適用)
+            main.startDelay = new ParticleSystem.MinMaxCurve(preset.main.startDelay.min, preset.main.startDelay.max);
+
             main.startLifetime = CreatePsMinMaxCurveFromData(preset.main.startLifetime);
             main.startSpeed = CreatePsMinMaxCurveFromData(preset.main.startSpeed);
 
@@ -112,28 +146,55 @@ public class ParticleController : MonoBehaviour
 
             main.simulationSpace = preset.main.simulationSpace;
 
-            // Start Color
-            if (preset.main.startColor != null && preset.main.startColor.colorKeys.Count > 0)
+            // --- Start Colorの適用（高度な機能対応） ---
+            if (preset.main.startColor != null)
             {
-                if (preset.main.startColor.colorKeys.Count == 1)
+                var sc = preset.main.startColor;
+                ParticleSystem.MinMaxGradient minMaxGrad = new ParticleSystem.MinMaxGradient(Color.white);
+
+                switch (sc.mode)
                 {
-                    main.startColor = preset.main.startColor.colorKeys[0].color;
+                    case "Color":
+                        minMaxGrad = new ParticleSystem.MinMaxGradient(sc.colorMax);
+                        break;
+                    case "TwoColors":
+                        minMaxGrad = new ParticleSystem.MinMaxGradient(sc.colorMin, sc.colorMax);
+                        break;
+                    case "Gradient":
+                        minMaxGrad = new ParticleSystem.MinMaxGradient(CreateUnityGradient(sc.gradientMax));
+                        break;
+                    case "TwoGradients":
+                        minMaxGrad = new ParticleSystem.MinMaxGradient(
+                            CreateUnityGradient(sc.gradientMin),
+                            CreateUnityGradient(sc.gradientMax)
+                        );
+                        break;
+                    case "RandomColor":
+                        // (Random)指定の場合はRainbowグラディエントを生成済み
+                        var g = CreateUnityGradient(sc.gradientMax);
+                        minMaxGrad = new ParticleSystem.MinMaxGradient(g);
+                        minMaxGrad.mode = ParticleSystemGradientMode.RandomColor;
+                        break;
                 }
-                else
+
+                // randomColorフラグが有効なら、既存のGradient設定を「RandomColor」モードで上書き
+                if (preset.main.randomColor)
                 {
-                    Gradient grad = new Gradient();
-                    var colorKeys = preset.main.startColor.colorKeys.Select(k => new GradientColorKey(k.color, k.time)).ToArray();
-                    var alphaKeys = preset.main.startColor.alphaKeys.Select(k => new GradientAlphaKey(k.alpha, k.time)).ToArray();
-                    grad.SetKeys(colorKeys, alphaKeys);
-                    main.startColor = new ParticleSystem.MinMaxGradient(grad);
+                    // 現在の設定がGradientかTwoGradientsなら、そのGradientを使ってRandomColorモードにする
+                    if (minMaxGrad.mode == ParticleSystemGradientMode.Gradient ||
+                        minMaxGrad.mode == ParticleSystemGradientMode.TwoGradients)
+                    {
+                        minMaxGrad.mode = ParticleSystemGradientMode.RandomColor;
+                    }
                 }
+
+                main.startColor = minMaxGrad;
             }
             else
             {
                 main.startColor = Color.white;
             }
         }
-
 
         // --- Emission Module ---
         var emission = ps.emission;
@@ -165,36 +226,28 @@ public class ParticleController : MonoBehaviour
         velocityOverLifetime.enabled = preset.velocityOverLifetime != null && preset.velocityOverLifetime.enabled;
         if (velocityOverLifetime.enabled)
         {
-            // Linear XYZ はモードが混在しても問題ないため通常通り設定
             velocityOverLifetime.x = CreatePsMinMaxCurveFromData(preset.velocityOverLifetime.x);
             velocityOverLifetime.y = CreatePsMinMaxCurveFromData(preset.velocityOverLifetime.y);
             velocityOverLifetime.z = CreatePsMinMaxCurveFromData(preset.velocityOverLifetime.z);
-
             velocityOverLifetime.space = preset.velocityOverLifetime.space;
 
-            // --- ▼▼▼ 修正: Orbital Velocityのモード統一処理 ▼▼▼ ---
-            // Orbital X, Y, Z のいずれかがカーブを使っているか確認
             bool useCurveForOrbital = IsCurve(preset.velocityOverLifetime.orbitalX) ||
                                       IsCurve(preset.velocityOverLifetime.orbitalY) ||
                                       IsCurve(preset.velocityOverLifetime.orbitalZ);
 
             if (useCurveForOrbital)
             {
-                // どれかがカーブなら、全てをカーブモード（定数は平坦なカーブ）として設定
                 velocityOverLifetime.orbitalX = CreateCurveMode(preset.velocityOverLifetime.orbitalX);
                 velocityOverLifetime.orbitalY = CreateCurveMode(preset.velocityOverLifetime.orbitalY);
                 velocityOverLifetime.orbitalZ = CreateCurveMode(preset.velocityOverLifetime.orbitalZ);
             }
             else
             {
-                // 全て定数なら通常通り設定
                 velocityOverLifetime.orbitalX = CreatePsMinMaxCurveFromData(preset.velocityOverLifetime.orbitalX);
                 velocityOverLifetime.orbitalY = CreatePsMinMaxCurveFromData(preset.velocityOverLifetime.orbitalY);
                 velocityOverLifetime.orbitalZ = CreatePsMinMaxCurveFromData(preset.velocityOverLifetime.orbitalZ);
             }
-            // --- ▲▲▲ 修正ここまで ▲▲▲ ---
 
-            // Offsetは定数として適用
             velocityOverLifetime.orbitalOffsetX = new ParticleSystem.MinMaxCurve(preset.velocityOverLifetime.orbitalOffset.x);
             velocityOverLifetime.orbitalOffsetY = new ParticleSystem.MinMaxCurve(preset.velocityOverLifetime.orbitalOffset.y);
             velocityOverLifetime.orbitalOffsetZ = new ParticleSystem.MinMaxCurve(preset.velocityOverLifetime.orbitalOffset.z);
@@ -236,11 +289,7 @@ public class ParticleController : MonoBehaviour
         colorOverLifetime.enabled = preset.colorOverLifetime != null && preset.colorOverLifetime.enabled;
         if (colorOverLifetime.enabled && preset.colorOverLifetime.color != null)
         {
-            Gradient grad = new Gradient();
-            var colorKeys = preset.colorOverLifetime.color.colorKeys.Select(k => new GradientColorKey(k.color, k.time)).ToArray();
-            var alphaKeys = preset.colorOverLifetime.color.alphaKeys.Select(k => new GradientAlphaKey(k.alpha, k.time)).ToArray();
-            grad.SetKeys(colorKeys, alphaKeys);
-            colorOverLifetime.color = grad;
+            colorOverLifetime.color = CreateUnityGradient(preset.colorOverLifetime.color);
         }
 
         // --- Color by Speed Module ---
@@ -248,14 +297,9 @@ public class ParticleController : MonoBehaviour
         colorBySpeed.enabled = preset.colorBySpeed != null && preset.colorBySpeed.enabled;
         if (colorBySpeed.enabled)
         {
-            Gradient cbsGrad = new Gradient();
-            var cbsColorKeys = preset.colorBySpeed.color.colorKeys.Select(k => new GradientColorKey(k.color, k.time)).ToArray();
-            var cbsAlphaKeys = preset.colorBySpeed.color.alphaKeys.Select(k => new GradientAlphaKey(k.alpha, k.time)).ToArray();
-            cbsGrad.SetKeys(cbsColorKeys, cbsAlphaKeys);
-            colorBySpeed.color = cbsGrad;
+            colorBySpeed.color = CreateUnityGradient(preset.colorBySpeed.color);
             colorBySpeed.range = preset.colorBySpeed.range;
         }
-
 
         // --- Size by Speed Module ---
         var sizeBySpeed = ps.sizeBySpeed;
@@ -288,7 +332,6 @@ public class ParticleController : MonoBehaviour
         sizeOverLifetime.enabled = preset.sizeOverLifetime != null && preset.sizeOverLifetime.enabled;
         if (sizeOverLifetime.enabled)
         {
-            // --- ▼▼▼ 修正: 3Dサイズの適用 ▼▼▼ ---
             sizeOverLifetime.separateAxes = preset.sizeOverLifetime.separateAxes;
             if (sizeOverLifetime.separateAxes)
             {
@@ -300,7 +343,6 @@ public class ParticleController : MonoBehaviour
             {
                 sizeOverLifetime.size = CreatePsMinMaxCurveFromData(preset.sizeOverLifetime.size);
             }
-            // --- ▲▲▲ 修正ここまで ▲▲▲ ---
         }
 
         // --- Rotation over Lifetime Module ---
@@ -343,13 +385,18 @@ public class ParticleController : MonoBehaviour
             collision.lifetimeLoss = CreatePsMinMaxCurveFromData(preset.collision.lifetimeLoss);
         }
 
-        // --- Triggers Module ---
+        // --- Triggers Module, SubEmitters, Lights, CustomData (Basic Enable only) ---
         var trigger = ps.trigger;
         trigger.enabled = preset.triggers != null && preset.triggers.enabled;
 
-        // --- SubEmitters Module ---
         var subEmitters = ps.subEmitters;
         subEmitters.enabled = preset.subEmitters != null && preset.subEmitters.enabled;
+
+        var lights = ps.lights;
+        lights.enabled = preset.lights != null && preset.lights.enabled;
+
+        var customData = ps.customData;
+        customData.enabled = preset.customData != null && preset.customData.enabled;
 
         // --- Texture Sheet Animation Module ---
         var textureSheetAnimation = ps.textureSheetAnimation;
@@ -361,10 +408,6 @@ public class ParticleController : MonoBehaviour
             textureSheetAnimation.numTilesY = preset.textureSheetAnimation.numTilesY;
             textureSheetAnimation.frameOverTime = CreatePsMinMaxCurveFromData(preset.textureSheetAnimation.frameOverTime);
         }
-
-        // --- Lights Module ---
-        var lights = ps.lights;
-        lights.enabled = preset.lights != null && preset.lights.enabled;
 
         // --- Trails Module ---
         var trails = ps.trails;
@@ -388,31 +431,17 @@ public class ParticleController : MonoBehaviour
 
             if (preset.trails.colorOverLifetime != null && preset.trails.colorOverLifetime.colorKeys.Count > 0)
             {
-                Gradient grad = new Gradient();
-                var colorKeys = preset.trails.colorOverLifetime.colorKeys.Select(k => new GradientColorKey(k.color, k.time)).ToArray();
-                var alphaKeys = preset.trails.colorOverLifetime.alphaKeys.Select(k => new GradientAlphaKey(k.alpha, k.time)).ToArray();
-                grad.SetKeys(colorKeys, alphaKeys);
-                trails.colorOverLifetime = new ParticleSystem.MinMaxGradient(grad);
+                trails.colorOverLifetime = new ParticleSystem.MinMaxGradient(CreateUnityGradient(preset.trails.colorOverLifetime));
             }
 
             trails.widthOverTrail = CreatePsMinMaxCurveFromData(preset.trails.widthOverTrail);
 
             if (preset.trails.colorOverTrail != null && preset.trails.colorOverTrail.colorKeys.Count > 0)
             {
-                Gradient grad = new Gradient();
-                var colorKeys = preset.trails.colorOverTrail.colorKeys.Select(k => new GradientColorKey(k.color, k.time)).ToArray();
-                var alphaKeys = preset.trails.colorOverTrail.alphaKeys.Select(k => new GradientAlphaKey(k.alpha, k.time)).ToArray();
-                grad.SetKeys(colorKeys, alphaKeys);
-                trails.colorOverTrail = new ParticleSystem.MinMaxGradient(grad);
+                trails.colorOverTrail = new ParticleSystem.MinMaxGradient(CreateUnityGradient(preset.trails.colorOverTrail));
             }
-
             trails.generateLightingData = preset.trails.generateLightingData;
         }
-
-        // --- CustomData Module ---
-        var customData = ps.customData;
-        customData.enabled = preset.customData != null && preset.customData.enabled;
-
 
         // --- Renderer Module ---
         var renderer = ps.GetComponent<ParticleSystemRenderer>();
@@ -459,9 +488,6 @@ public class ParticleController : MonoBehaviour
         ps.Play();
     }
 
-    /// <summary>
-    /// 指定されたマテリアルにブレンドモード（シェーダー変更含む）を適用するヘルパー関数
-    /// </summary>
     private void ApplyBlendModeToMaterial(Material mat, string mode)
     {
         Debug.Log($"Applying Blend Mode: {mode} to material: {mat.name} (Shader: {mat.shader.name})");
@@ -474,19 +500,10 @@ public class ParticleController : MonoBehaviour
             Shader newShader = null;
             string prefix = isMobileShader ? "Mobile/Particles/" : "Legacy Shaders/Particles/";
 
-            if (mode == "additive")
-            {
-                newShader = Shader.Find(prefix + "Additive");
-            }
-            else if (mode == "alphablended")
-            {
-                newShader = Shader.Find(prefix + "Alpha Blended");
-            }
+            if (mode == "additive") newShader = Shader.Find(prefix + "Additive");
+            else if (mode == "alphablended") newShader = Shader.Find(prefix + "Alpha Blended");
 
-            if (newShader != null)
-            {
-                mat.shader = newShader;
-            }
+            if (newShader != null) mat.shader = newShader;
             else
             {
                 Debug.LogWarning($"Requested legacy shader for mode '{mode}' not found. Falling back to Standard Unlit.");
@@ -504,9 +521,6 @@ public class ParticleController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Standard Particle Shader向けのブレンド設定を適用するヘルパー関数
-    /// </summary>
     private void ApplyStandardBlendProperties(Material mat, string mode)
     {
         if (mode == "additive")
