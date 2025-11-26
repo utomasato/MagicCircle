@@ -161,22 +161,19 @@ public class MainModuleData
     public MinMaxCurveData startRotationX = new MinMaxCurveData();
     public MinMaxCurveData startRotationY = new MinMaxCurveData();
     public float flipRotation = 0f;
-
-    // 削除: public string gravitySource;
-
-    // StartColorを拡張型に変更
     public MinMaxGradientData startColor = new MinMaxGradientData();
     public bool randomColor = false;
-
     public MinMaxCurveData gravityModifier = new MinMaxCurveData();
     public ParticleSystemSimulationSpace simulationSpace = ParticleSystemSimulationSpace.Local;
-    public Transform customSimulationSpace = null;
+    public Transform customSimulationSpace = null; // ※参照はパース困難なため基本的にはnull
     public float simulationSpeed = 1.0f;
     public bool useUnscaledTime = false;
     public ParticleSystemScalingMode scalingMode = ParticleSystemScalingMode.Local;
     public bool playOnAwake = true;
     public ParticleSystemEmitterVelocityMode emitterVelocityMode = ParticleSystemEmitterVelocityMode.Transform;
     public int maxParticles = 1000;
+    public bool autoRandomSeed = true;
+    public uint randomSeed = 0;
     public ParticleSystemStopAction stopAction = ParticleSystemStopAction.None;
     public ParticleSystemCullingMode cullingMode = ParticleSystemCullingMode.Automatic;
     public ParticleSystemRingBufferMode ringBufferMode = ParticleSystemRingBufferMode.Disabled;

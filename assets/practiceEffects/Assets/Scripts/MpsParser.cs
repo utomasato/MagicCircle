@@ -59,7 +59,7 @@ public class AxisSeparatedCurveData
 /// <summary>
 /// p5.jsから送られてくるmpsコードを解析し、ParticlePresetオブジェクトに変換する静的クラスです。
 /// </summary>
-public static class MpsParser
+public static partial class MpsParser
 {
     // 文字列をトークン単位で読み進めるためのヘルパークラス
     private class Scanner
@@ -340,6 +340,114 @@ public static class MpsParser
         return new KeyframeData { time = t, value = v };
     }
 
+    private static MinMaxGradientData ParseMinMaxGradient(Scanner scanner)
+    {
+        var data = new MinMaxGradientData();
+
+        // 1. (Random) の判定
+        if (scanner.Peek() == "(Random)")
+        {
+            scanner.Consume();
+            data.mode = "RandomColor";
+            // ランダム用にレインボーのグラデーションを自動生成してセット
+            data.gradientMax = CreateRainbowGradient();
+            return data;
+        }
+
+        // 2. 従来の <~gradient ...> 形式の場合 (後方互換性)
+        if (scanner.Peek() == "<")
+        {
+            data.mode = "Gradient";
+            data.gradientMax = ParseGradient(scanner);
+            return data;
+        }
+
+        // 3. 配列形式のパース
+        if (scanner.Peek() != "[")
+        {
+            SkipUnknownValue(scanner);
+            return data;
+        }
+
+        scanner.Expect("["); // 外側の [
+
+        // 次が数値なら -> [r g b a] (Single Color)
+        if (IsNumber(scanner.Peek()))
+        {
+            data.mode = "Color";
+            data.colorMax = ParseColorRGBA(scanner, false); // 既に [ は消費済みなのでfalse
+        }
+        // 次が [ なら -> 2色, Gradient, 2Gradient のいずれか
+        else if (scanner.Peek() == "[")
+        {
+            scanner.Expect("["); // 2層目の [
+
+            if (scanner.Peek() == "[")
+            {
+                // --- Two Gradients: [[[key]...]] ---
+                data.mode = "TwoGradients";
+                // Gradient 1 (Min)
+                data.gradientMin = ParseGradientKeysBlock(scanner, true); // 既に [ は消費済み
+
+                // Gradient 2 (Max)
+                scanner.Expect("[");
+                data.gradientMax = ParseGradientKeysBlock(scanner, false);
+                scanner.Expect("]"); // 外側の ]
+            }
+            else
+            {
+                // ここで中身が Color(4要素) か Key(5要素) かを判定
+                List<float> firstBlock = ParseFloatListInsideBrackets(scanner); // 2層目の ] まで読む
+
+                if (firstBlock.Count == 5)
+                {
+                    // --- Gradient: [[t r g b a] [t r g b a]...] ---
+                    data.mode = "Gradient";
+                    data.gradientMax = new GradientData();
+                    AddKeyToGradient(data.gradientMax, firstBlock);
+
+                    // 残りのキーを読み込む
+                    while (scanner.Peek() == "[")
+                    {
+                        scanner.Expect("[");
+                        var block = ParseFloatListInsideBrackets(scanner);
+                        AddKeyToGradient(data.gradientMax, block);
+                    }
+                    scanner.Expect("]"); // 外側の ]
+                }
+                else // Count == 4 とみなす
+                {
+                    // --- Two Colors: [[r g b a] [r g b a]] ---
+                    data.mode = "TwoColors";
+                    data.colorMin = new Color(firstBlock[0], firstBlock[1], firstBlock[2], firstBlock[3]);
+
+                    // 2つ目の色
+                    scanner.Expect("[");
+                    var secondBlock = ParseFloatListInsideBrackets(scanner);
+                    data.colorMax = new Color(secondBlock[0], secondBlock[1], secondBlock[2], secondBlock[3]);
+                    scanner.Expect("]"); // 外側の ]
+                }
+            }
+        }
+
+        return data;
+    }
+
+    private static GradientData CreateRainbowGradient()
+    {
+        var g = new GradientData();
+        g.colorKeys.Add(new ColorKeyData { time = 0.0f, color = Color.red });
+        g.colorKeys.Add(new ColorKeyData { time = 0.2f, color = Color.yellow });
+        g.colorKeys.Add(new ColorKeyData { time = 0.4f, color = Color.green });
+        g.colorKeys.Add(new ColorKeyData { time = 0.6f, color = Color.cyan });
+        g.colorKeys.Add(new ColorKeyData { time = 0.8f, color = Color.blue });
+        g.colorKeys.Add(new ColorKeyData { time = 1.0f, color = Color.magenta });
+
+        g.alphaKeys.Add(new AlphaKeyData { time = 0.0f, alpha = 1.0f });
+        g.alphaKeys.Add(new AlphaKeyData { time = 1.0f, alpha = 1.0f });
+        return g;
+    }
+
 
     // ----------------------------------------------------------------------------------
     // メイン処理
@@ -501,7 +609,7 @@ public static class MpsParser
 
             switch (key)
             {
-                case "main": preset.main = ParseMainModule(scanner); break;
+                case "main": preset.main = ParseMainModule(scanner); break; // 別ファイル(partial)で定義
                 case "emission": preset.emission = ParseEmissionModule(scanner); break;
                 case "shape": preset.shape = ParseShapeModule(scanner); break;
                 case "velocityOverLifetime": preset.velocityOverLifetime = ParseVelocityOverLifetimeModule(scanner); break;
@@ -597,178 +705,8 @@ public static class MpsParser
 
     // ----------------------------------------------------------------------------------
     // 各モジュールのパース処理
+    // MainModuleは別ファイル (MpsParser_MainModule.cs) へ移動
     // ----------------------------------------------------------------------------------
-
-    private static MainModuleData ParseMainModule(Scanner scanner)
-    {
-        var main = new MainModuleData();
-        while (scanner.Peek() != ">")
-        {
-            string key = scanner.Consume().Substring(1);
-            switch (key)
-            {
-                case "duration": main.duration = scanner.ConsumeFloat(); break;
-                case "looping": main.looping = scanner.ConsumeBool(); break;
-                case "prewarm": main.prewarm = scanner.ConsumeBool(); break;
-                case "startDelay": main.startDelay = ParseUniversalMinMaxCurve(scanner); break;
-                case "startLifetime": main.startLifetime = ParseUniversalMinMaxCurve(scanner); break;
-                case "startSpeed": main.startSpeed = ParseUniversalMinMaxCurve(scanner); break;
-
-                case "startSize3D": main.startSize3D = scanner.ConsumeBool(); break;
-                case "startSize":
-                    var sizeData = ParseAxisSeparatedCurve(scanner);
-                    main.startSize3D = sizeData.isSeparated;
-                    if (sizeData.isSeparated)
-                    {
-                        main.startSizeX = sizeData.x;
-                        main.startSizeY = sizeData.y;
-                        main.startSizeZ = sizeData.z;
-                    }
-                    else
-                    {
-                        main.startSize = sizeData.uniform;
-                    }
-                    break;
-
-                case "startRotation":
-                    var rotData = ParseAxisSeparatedCurve(scanner);
-                    main.startRotation3D = rotData.isSeparated;
-                    if (rotData.isSeparated)
-                    {
-                        main.startRotationX = rotData.x;
-                        main.startRotationY = rotData.y;
-                        main.startRotation = rotData.z; // Z軸
-                    }
-                    else
-                    {
-                        main.startRotation = rotData.uniform;
-                    }
-                    break;
-
-                case "flipRotation": main.flipRotation = scanner.ConsumeFloat(); break;
-
-                // --- gravityModifierをカーブとしてパース ---
-                case "gravityModifier":
-                    main.gravityModifier = ParseUniversalMinMaxCurve(scanner);
-                    break;
-
-                case "randomColor": main.randomColor = scanner.ConsumeBool(); break;
-
-                case "startColor":
-                    // 修正: MinMaxGradientDataとしてパース
-                    main.startColor = ParseMinMaxGradient(scanner);
-                    break;
-
-                case "simulationSpace":
-                    string spaceStr = scanner.ConsumeStringInParens();
-                    if (Enum.TryParse(spaceStr, true, out ParticleSystemSimulationSpace space))
-                        main.simulationSpace = space;
-                    else
-                        main.simulationSpace = ParticleSystemSimulationSpace.Local;
-                    break;
-                default:
-                    Debug.LogWarning($"Unknown main module key: '~{key}'. Skipping.");
-                    SkipUnknownValue(scanner);
-                    break;
-            }
-        }
-        return main;
-    }
-
-    // --- StartColor用の新しいパース関数群 ---
-
-    private static MinMaxGradientData ParseMinMaxGradient(Scanner scanner)
-    {
-        var data = new MinMaxGradientData();
-
-        // 1. (Random) の判定
-        if (scanner.Peek() == "(Random)")
-        {
-            scanner.Consume();
-            data.mode = "RandomColor";
-            // ランダム用にレインボーのグラデーションを自動生成してセット
-            data.gradientMax = CreateRainbowGradient();
-            return data;
-        }
-
-        // 2. 従来の <~gradient ...> 形式の場合 (後方互換性)
-        if (scanner.Peek() == "<")
-        {
-            data.mode = "Gradient";
-            data.gradientMax = ParseGradient(scanner);
-            return data;
-        }
-
-        // 3. 配列形式のパース
-        if (scanner.Peek() != "[")
-        {
-            SkipUnknownValue(scanner);
-            return data;
-        }
-
-        scanner.Expect("["); // 外側の [
-
-        // 次が数値なら -> [r g b a] (Single Color)
-        if (IsNumber(scanner.Peek()))
-        {
-            data.mode = "Color";
-            data.colorMax = ParseColorRGBA(scanner, false); // 既に [ は消費済みなのでfalse
-        }
-        // 次が [ なら -> 2色, Gradient, 2Gradient のいずれか
-        else if (scanner.Peek() == "[")
-        {
-            scanner.Expect("["); // 2層目の [
-
-            if (scanner.Peek() == "[")
-            {
-                // --- Two Gradients: [[[key]...]] ---
-                data.mode = "TwoGradients";
-                // Gradient 1 (Min)
-                data.gradientMin = ParseGradientKeysBlock(scanner, true); // 既に [ は消費済み
-
-                // Gradient 2 (Max)
-                scanner.Expect("[");
-                data.gradientMax = ParseGradientKeysBlock(scanner, false);
-                scanner.Expect("]"); // 外側の ]
-            }
-            else
-            {
-                // ここで中身が Color(4要素) か Key(5要素) かを判定
-                List<float> firstBlock = ParseFloatListInsideBrackets(scanner); // 2層目の ] まで読む
-
-                if (firstBlock.Count == 5)
-                {
-                    // --- Gradient: [[t r g b a] [t r g b a]...] ---
-                    data.mode = "Gradient";
-                    data.gradientMax = new GradientData();
-                    AddKeyToGradient(data.gradientMax, firstBlock);
-
-                    // 残りのキーを読み込む
-                    while (scanner.Peek() == "[")
-                    {
-                        scanner.Expect("[");
-                        var block = ParseFloatListInsideBrackets(scanner);
-                        AddKeyToGradient(data.gradientMax, block);
-                    }
-                    scanner.Expect("]"); // 外側の ]
-                }
-                else // Count == 4 とみなす
-                {
-                    // --- Two Colors: [[r g b a] [r g b a]] ---
-                    data.mode = "TwoColors";
-                    data.colorMin = new Color(firstBlock[0], firstBlock[1], firstBlock[2], firstBlock[3]);
-
-                    // 2つ目の色
-                    scanner.Expect("[");
-                    var secondBlock = ParseFloatListInsideBrackets(scanner);
-                    data.colorMax = new Color(secondBlock[0], secondBlock[1], secondBlock[2], secondBlock[3]);
-                    scanner.Expect("]"); // 外側の ]
-                }
-            }
-        }
-
-        return data;
-    }
 
     private static Color ParseColorRGBA(Scanner scanner, bool expectOpenBracket = true)
     {
@@ -824,45 +762,7 @@ public static class MpsParser
         return char.IsDigit(token[0]) || token[0] == '-' || token[0] == '.';
     }
 
-    private static GradientData CreateRainbowGradient()
-    {
-        var g = new GradientData();
-        g.colorKeys.Add(new ColorKeyData { time = 0.0f, color = Color.red });
-        g.colorKeys.Add(new ColorKeyData { time = 0.2f, color = Color.yellow });
-        g.colorKeys.Add(new ColorKeyData { time = 0.4f, color = Color.green });
-        g.colorKeys.Add(new ColorKeyData { time = 0.6f, color = Color.cyan });
-        g.colorKeys.Add(new ColorKeyData { time = 0.8f, color = Color.blue });
-        g.colorKeys.Add(new ColorKeyData { time = 1.0f, color = Color.magenta });
-
-        g.alphaKeys.Add(new AlphaKeyData { time = 0.0f, alpha = 1.0f });
-        g.alphaKeys.Add(new AlphaKeyData { time = 1.0f, alpha = 1.0f });
-        return g;
-    }
-
     // ------------------------------------
-
-    private static EmissionModuleData ParseEmissionModule(Scanner scanner)
-    {
-        var emission = new EmissionModuleData { enabled = true };
-        while (scanner.Peek() != ">")
-        {
-            string key = scanner.Consume().Substring(1);
-            switch (key)
-            {
-                case "enabled": emission.enabled = scanner.ConsumeBool(); break;
-                case "rateOverTime": emission.rateOverTime = ParseUniversalMinMaxCurve(scanner); break;
-                case "burstCount":
-                    var curve = ParseUniversalMinMaxCurve(scanner);
-                    emission.minBurstCount = (int)curve.min;
-                    emission.maxBurstCount = (int)curve.max;
-                    break;
-                default:
-                    SkipUnknownValue(scanner);
-                    break;
-            }
-        }
-        return emission;
-    }
 
     private static ShapeModuleData ParseShapeModule(Scanner scanner)
     {
@@ -1115,13 +1015,6 @@ public static class MpsParser
         var fol = new ForceOverLifetimeModuleData { enabled = true };
         while (scanner.Peek() != ">")
         {
-            // ForceOverLifetimeはMPS形式によっては <x ...> ではなく ~x ... と書かれる場合もあるが
-            // 既存の実装が ConsumeStringInParens() を使っていた場合、(x) のような記述を期待していた可能性がある。
-            // しかし既存コードでは `string axis = scanner.ConsumeStringInParens();` となっていたため
-            // <~forceOverLifetime (x) [0 1]> のような形式だったと思われる。
-            // 互換性のため、元の実装パターンに ParseUniversalMinMaxCurve を適用する。
-
-            // ただし、もし `~x` というキーで来るなら以下のようになる
             string token = scanner.Consume();
             string axis = "";
             if (token.StartsWith("~")) axis = token.Substring(1);

@@ -105,21 +105,15 @@ public class ParticleController : MonoBehaviour
         var main = ps.main;
         if (preset.main != null && preset.main.enabled)
         {
-            // Looping修正適用
+            // Basic
+            main.duration = preset.main.duration;
             main.loop = preset.main.looping;
             main.prewarm = preset.main.prewarm;
-            main.duration = preset.main.duration;
-            main.flipRotation = preset.main.flipRotation;
-
-            // Gravity Modifier (MinMaxCurve対応)
-            main.gravityModifier = CreatePsMinMaxCurveFromData(preset.main.gravityModifier);
-
-            // StartDelay修正適用 (カーブは無視してMinMax定数のみ適用)
             main.startDelay = new ParticleSystem.MinMaxCurve(preset.main.startDelay.min, preset.main.startDelay.max);
-
             main.startLifetime = CreatePsMinMaxCurveFromData(preset.main.startLifetime);
             main.startSpeed = CreatePsMinMaxCurveFromData(preset.main.startSpeed);
 
+            // Size
             main.startSize3D = preset.main.startSize3D;
             if (main.startSize3D)
             {
@@ -132,6 +126,7 @@ public class ParticleController : MonoBehaviour
                 main.startSize = CreatePsMinMaxCurveFromData(preset.main.startSize);
             }
 
+            // Rotation
             main.startRotation3D = preset.main.startRotation3D;
             if (main.startRotation3D)
             {
@@ -143,8 +138,31 @@ public class ParticleController : MonoBehaviour
             {
                 main.startRotation = CreatePsMinMaxCurveFromData(preset.main.startRotation, Mathf.Deg2Rad); // Z
             }
+            main.flipRotation = preset.main.flipRotation;
 
+            // Physics / Scaling / Simulation
+            main.gravityModifier = CreatePsMinMaxCurveFromData(preset.main.gravityModifier);
             main.simulationSpace = preset.main.simulationSpace;
+            main.simulationSpeed = preset.main.simulationSpeed;
+            main.useUnscaledTime = preset.main.useUnscaledTime;
+            main.scalingMode = preset.main.scalingMode;
+            main.playOnAwake = preset.main.playOnAwake;
+            main.emitterVelocityMode = preset.main.emitterVelocityMode;
+            main.maxParticles = preset.main.maxParticles;
+            main.stopAction = preset.main.stopAction;
+            main.cullingMode = preset.main.cullingMode;
+            main.ringBufferMode = preset.main.ringBufferMode;
+
+            // Random Seed
+            if (preset.main.autoRandomSeed)
+            {
+                ps.useAutoRandomSeed = true;
+            }
+            else
+            {
+                ps.useAutoRandomSeed = false;
+                ps.randomSeed = preset.main.randomSeed;
+            }
 
             // --- Start Colorの適用（高度な機能対応） ---
             if (preset.main.startColor != null)
