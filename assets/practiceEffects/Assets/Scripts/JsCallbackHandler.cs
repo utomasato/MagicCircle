@@ -126,7 +126,7 @@ public class JsCallbackHandler : MonoBehaviour
         childId = "test-id-from-csharp-5";
         systemManager.AttachToParent(childId, parentId);
         //spiral
-        spellText = "<~main <~duration 1 ~startLifetime 2 ~startSpeed 10 ~startSize <~x 10 ~y 10 ~z 200> ~startColor [1 0.5 0 1] > ~emission <~rateOverTime 0 ~burstCount 2> ~colorOverLifetime <~gradient <~alphaKeys [[0 0] [0.05 1] [0.95 1] [1 0]]>> ~rotationOverLifetime <~z -800> ~renderer <~renderMode (Mesh) ~meshDistribution (NonUniformRandom) ~meshes (Cylinder) ~material <~texture (Spiral)> ~alignment (Local)>>";
+        spellText = "<~main <~duration 1 ~startLifetime 2 ~startSpeed 10 ~startSize <~x 10 ~y 10 ~z 200> ~startColor [1 0.5 0 1] > ~emission <~rateOverTime 0 ~burstCount 2> ~colorOverLifetime <~gradient <~alphaKeys [[0 0] [0.05 1] [0.95 1] [1 0]]>> ~rotationOverLifetime <~z -800> ~renderer <~renderMode (Mesh) ~meshDistribution (NonUniformRandom) ~meshes (Cylinder_1) ~material <~texture (Spiral)> ~alignment (Local)>>";
         testId = "test-id-from-csharp-3";
         systemManager.CreateAndSpawnParticleFromMps(spellText, testId);
         childId = "test-id-from-csharp-3";

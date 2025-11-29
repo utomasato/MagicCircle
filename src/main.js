@@ -305,7 +305,6 @@ function Update() {
     // デバッグボタン
     if (CheckKeyDown(Key.D)) { debugMode = !debugMode; } // デバッグボタン
     //if (CheckKeyDown(Key.H)) { globalIsClockwise = !globalIsClockwise; }
-
     // 入力モード ショートカット
     if (CheckKeyDown(Key.A)) { cursormode = "grad"; SetMouseCursor('grab'); }
     if (CheckKeyDown(Key.S)) { cursormode = "edit"; SetMouseCursor('default'); }
