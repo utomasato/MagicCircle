@@ -56,7 +56,7 @@ const templateDatas = {
             },
         invalidVariableNames :
             ["root", "setMagic", "magic", "preset"],
-    },
+    },        
 };
 
 

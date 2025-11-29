@@ -253,6 +253,14 @@ function Update() {
     else if (CheckMouseUp() || CheckTouchEnded()) { MouseUpEvent(); }
 
     if (CheckKeyDown(Key.D)) { debugMode = !debugMode; }
+    if (CheckKeyDown(Key.A)) { cursormode = "grad"; SetMouseCursor('grab'); }
+    if (CheckKeyDown(Key.S)) { cursormode = "edit"; SetMouseCursor('default'); }
+    if (CheckKeyDown(Key.Q)) {  AddObjectMode = "ring"; }
+    if (CheckKeyDown(Key.W)) {  AddObjectMode = "sigil"; }
+    if (CheckKeyDown(Key.E)) {  AddObjectMode = "num"; }
+    if (CheckKeyDown(Key.R)) {  AddObjectMode = "str"; }
+    if (CheckKeyDown(Key.T)) {  AddObjectMode = "name"; }
+    if (CheckKeyDown(Key.Y)) {  AddObjectMode = "tRing"; }
     //if (CheckKeyDown(Key.H)) { globalIsClockwise = !globalIsClockwise; }
 }
 
