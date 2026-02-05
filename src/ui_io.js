@@ -70,15 +70,30 @@ function generateLayoutXML() {
     return xml;
 }
 
+// ui_io.js より抜粋
+
 function createModalBase(titleText, closeCallback) {
-    if (currentUiPanel) { currentUiPanel.remove(); currentUiPanel = null; }
+    // 1. 既存のモーダルやパネルを完全に削除（二重表示の防止）
+    if (currentModalPanel) {
+        currentModalPanel.remove();
+        currentModalPanel = null;
+    }
+    if (currentUiPanel) {
+        currentUiPanel.remove();
+        currentUiPanel = null;
+    }
+
     const overlay = createDiv('');
     currentModalPanel = overlay;
     overlay.addClass('modal-overlay');
+    // オーバーレイ自体でクリックが背後に抜けないようにする
+    overlay.elt.addEventListener('mousedown', (e) => e.stopPropagation());
 
     const panel = createDiv('');
     panel.parent(overlay);
     panel.addClass('modal-content');
+    // パネル本体でのクリックイベントがp5.jsのCanvasに伝わるのを防ぐ
+    panel.elt.addEventListener('mousedown', (e) => e.stopPropagation());
 
     const header = createDiv('');
     header.parent(panel);
@@ -86,7 +101,14 @@ function createModalBase(titleText, closeCallback) {
 
     const title = createP(titleText).parent(header).addClass('modal-title');
     const closeBtn = createButton('×').parent(header).addClass('ui-btn-close').style('font-size', '24px');
-    closeBtn.mousePressed(() => { if (currentModalPanel) { currentModalPanel.remove(); currentModalPanel = null; } if (closeCallback) closeCallback(); });
+
+    closeBtn.mousePressed(() => {
+        if (currentModalPanel) {
+            currentModalPanel.remove();
+            currentModalPanel = null;
+        }
+        if (closeCallback) closeCallback();
+    });
 
     return panel;
 }
@@ -95,36 +117,64 @@ function showXMLPanel(xmlContent) {
     const panel = createModalBase('XML Output');
 
     const textArea = createElement('textarea').parent(panel).addClass('modal-textarea');
-    textArea.value(xmlContent); textArea.attribute('readonly', '');
+    textArea.value(xmlContent);
+    textArea.attribute('readonly', '');
 
     const footer = createDiv('').parent(panel).addClass('modal-footer');
 
+    // 上書き保存ボタン（既存ファイルがある場合）
     if (currentFileHandle) {
         const overwriteBtn = createButton('💾 上書き保存').parent(footer).addClass('ui-btn').addClass('ui-btn-primary');
         overwriteBtn.mousePressed(async () => {
+            overwriteBtn.attribute('disabled', ''); // 連打防止
             try {
                 const writable = await currentFileHandle.createWritable();
-                await writable.write(textArea.value()); await writable.close();
-                alert('上書き保存しました。');
-            } catch (err) { alert('失敗しました: ' + err.message); }
+                await writable.write(textArea.value());
+                await writable.close();
+                showToast('上書き保存しました。');
+            } catch (err) {
+                alert('失敗しました: ' + err.message);
+            } finally {
+                overwriteBtn.removeAttribute('disabled');
+            }
         });
     }
 
+    // 名前を付けて保存ボタン
     const saveAsBtn = createButton('💾 名前を付けて保存').parent(footer).addClass('ui-btn').style('border-color', '#28a745').style('color', '#28a745');
     saveAsBtn.mousePressed(async () => {
+        saveAsBtn.attribute('disabled', ''); // ファイルダイアログが開いている間の連打防止
         try {
             if ('showSaveFilePicker' in window) {
-                const handle = await window.showSaveFilePicker({ types: [{ description: 'XML file', accept: { 'text/xml': ['.xml'] } }], suggestedName: 'magic_circle.xml' });
-                const writable = await handle.createWritable(); await writable.write(textArea.value()); await writable.close();
-                currentFileHandle = handle; alert('保存しました。'); showXMLPanel(textArea.value());
-            } else { downloadFile(textArea.value(), 'magic_circle.xml'); }
-        } catch (err) { if (err.name !== 'AbortError') alert('失敗しました: ' + err.message); }
+                const handle = await window.showSaveFilePicker({
+                    types: [{ description: 'XML file', accept: { 'text/xml': ['.xml'] } }],
+                    suggestedName: 'magic_circle.xml'
+                });
+                const writable = await handle.createWritable();
+                await writable.write(textArea.value());
+                await writable.close();
+                currentFileHandle = handle;
+                alert('保存しました。');
+                // 保存完了後、上書きボタンを表示するためにパネルを更新
+                showXMLPanel(textArea.value());
+            } else {
+                downloadFile(textArea.value(), 'magic_circle.xml');
+            }
+        } catch (err) {
+            // ユーザーによるキャンセル(AbortError)以外はアラートを表示
+            if (err.name !== 'AbortError') alert('失敗しました: ' + err.message);
+        } finally {
+            // currentModalPanelが存在する場合（ダイアログ中に消されていなければ）ボタンを戻す
+            if (saveAsBtn.elt) saveAsBtn.removeAttribute('disabled');
+        }
     });
 
     const copyBtn = createButton('コピー').parent(footer).addClass('ui-btn');
     copyBtn.mousePressed(() => {
-        textArea.elt.select(); document.execCommand('copy');
-        copyBtn.html('コピーしました！'); setTimeout(() => copyBtn.html('コピー'), 2000);
+        textArea.elt.select();
+        document.execCommand('copy');
+        copyBtn.html('コピーしました！');
+        setTimeout(() => { if (copyBtn.elt) copyBtn.html('コピー'); }, 2000);
     });
 }
 

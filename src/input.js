@@ -34,6 +34,8 @@ function mouseWheelTurned(event) {
     }
 }
 
+// input.js
+
 function MouseDownEvent() {
     lastPressedButton = null;
     if (isUIHidden) {
@@ -47,20 +49,26 @@ function MouseDownEvent() {
         const contentPanelElement = currentModalPanel.elt.querySelector('.modal-content');
         if (contentPanelElement) {
             const panelRect = contentPanelElement.getBoundingClientRect();
-            // マウスがパネル本体の内側なら、以降の処理をブロックしてモーダルを維持
-            if (mouseX >= panelRect.left && mouseX <= panelRect.right && mouseY >= panelRect.top && mouseY <= panelRect.bottom)
+
+            // モーダル表示中は、パネルの内外を問わずキャンバス操作を完全にブロックする
+            // これにより、保存ダイアログ背後での誤操作や、二重パネル生成の原因となるクリックを防ぐ
+            if (mouseX >= panelRect.left && mouseX <= panelRect.right &&
+                mouseY >= panelRect.top && mouseY <= panelRect.bottom) {
+                // パネル内でのクリック：UI側のイベント（ボタン等）に任せるため、ここでは何もしない
                 return;
+            }
+            // パネル外でのクリック：意図せぬクローズを防ぐため、敢えて何もせずreturnする
+            // （パネルを閉じるには「×」ボタンの使用を強制する）
+            return;
         }
-        // パネルの外側がクリックされたので、パネルを閉じる
-        currentModalPanel.remove();
-        currentModalPanel = null;
-        return; // パネルを閉じる操作をしたので、他の操作は行わない
     }
 
+    // 通常のUIパネル（右クリックメニューや設定パネル）の上にある場合は処理を中断
     if (isMouseOverPanel(currentUiPanel) || isMouseOverPanel(consolePanel)) {
         return;
     }
 
+    // currentUiPanelが存在する場合の領域外クリック判定（エディタ用パネルを閉じる処理）
     if (currentUiPanel) {
         const panelRect = currentUiPanel.elt.getBoundingClientRect();
         if (mouseX < panelRect.left || mouseX > panelRect.right || mouseY < panelRect.top || mouseY > panelRect.bottom) {
@@ -74,7 +82,7 @@ function MouseDownEvent() {
         }
     }
 
-
+    // メインキャンバスの操作
     if (GetMouseX() > GetScreenSize()[0]) return;
     const ClickObj = CheckMouseObject();
 
