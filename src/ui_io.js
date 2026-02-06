@@ -113,7 +113,7 @@ function createModalBase(titleText, closeCallback) {
     return panel;
 }
 
-function showXMLPanel(xmlContent) {
+async function showXMLPanel(xmlContent) {
     const panel = createModalBase('XML Output');
 
     const textArea = createElement('textarea').parent(panel).addClass('modal-textarea');
@@ -122,52 +122,121 @@ function showXMLPanel(xmlContent) {
 
     const footer = createDiv('').parent(panel).addClass('modal-footer');
 
-    // 上書き保存ボタン（既存ファイルがある場合）
-    if (currentFileHandle) {
-        const overwriteBtn = createButton('💾 上書き保存').parent(footer).addClass('ui-btn').addClass('ui-btn-primary');
-        overwriteBtn.mousePressed(async () => {
-            overwriteBtn.attribute('disabled', ''); // 連打防止
-            try {
-                const writable = await currentFileHandle.createWritable();
-                await writable.write(textArea.value());
-                await writable.close();
-                showToast('上書き保存しました。');
-            } catch (err) {
-                alert('失敗しました: ' + err.message);
-            } finally {
-                overwriteBtn.removeAttribute('disabled');
-            }
-        });
-    }
-
-    // 名前を付けて保存ボタン
-    const saveAsBtn = createButton('💾 名前を付けて保存').parent(footer).addClass('ui-btn').style('border-color', '#28a745').style('color', '#28a745');
+    const saveAsBtn = createButton('💾 成果物として保存').parent(footer).addClass('ui-btn').style('border-color', '#28a745').style('color', '#28a745');
     saveAsBtn.mousePressed(async () => {
-        saveAsBtn.attribute('disabled', ''); // ファイルダイアログが開いている間の連打防止
+        saveAsBtn.attribute('disabled', '');
+
+        // 1. エディタ側のUIを隠す
+        const wasUIHidden = isUIHidden;
+        isUIHidden = true;
+        if (currentModalPanel) currentModalPanel.style('display', 'none');
+
         try {
-            if ('showSaveFilePicker' in window) {
-                const handle = await window.showSaveFilePicker({
-                    types: [{ description: 'XML file', accept: { 'text/xml': ['.xml'] } }],
-                    suggestedName: 'magic_circle.xml'
+            if ('showDirectoryPicker' in window) {
+                const parentHandle = await window.showDirectoryPicker();
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+                const folderName = `magic_export_${timestamp}`;
+                const newDirectoryHandle = await parentHandle.getDirectoryHandle(folderName, { create: true });
+
+                // 再描画を待機（UIが消えるのを待つ）
+                await new Promise(resolve => setTimeout(resolve, 150));
+
+                const p5Canvas = document.getElementById('defaultCanvas0');
+                const unityCanvas = document.getElementById('unity-canvas');
+                const resizer = document.getElementById('resizer');
+
+                // --- 画面全体の合成処理 ---
+                // Unityのバッファがクリアされる前にキャプチャするため、requestAnimationFrameを使用
+                const combinedBlob = await new Promise((resolve) => {
+                    requestAnimationFrame(() => {
+                        const offscreen = document.createElement('canvas');
+                        const ctx = offscreen.getContext('2d');
+
+                        offscreen.width = window.innerWidth;
+                        offscreen.height = window.innerHeight;
+
+                        // 背景を白で塗る
+                        ctx.fillStyle = "#ffffff";
+                        ctx.fillRect(0, 0, offscreen.width, offscreen.height);
+
+                        // p5.js (エディタ) を描画
+                        const p5Rect = p5Canvas.getBoundingClientRect();
+                        ctx.drawImage(p5Canvas, p5Rect.left, p5Rect.top, p5Rect.width, p5Rect.height);
+
+                        // 中央のリサイズバーを描画
+                        const resizerRect = resizer.getBoundingClientRect();
+                        ctx.fillStyle = "#cccccc";
+                        ctx.fillRect(resizerRect.left, resizerRect.top, resizerRect.width, resizerRect.height);
+
+                        // Unity (実行画面) を描画
+                        const unityRect = unityCanvas.getBoundingClientRect();
+                        ctx.drawImage(unityCanvas, unityRect.left, unityRect.top, unityRect.width, unityRect.height);
+
+                        offscreen.toBlob(resolve, 'image/png');
+                    });
                 });
-                const writable = await handle.createWritable();
-                await writable.write(textArea.value());
-                await writable.close();
-                currentFileHandle = handle;
-                alert('保存しました。');
-                // 保存完了後、上書きボタンを表示するためにパネルを更新
-                showXMLPanel(textArea.value());
+
+                // --- ファイル保存 ---
+                const imgFileHandle = await newDirectoryHandle.getFileHandle('full_screenshot.png', { create: true });
+                const imgWritable = await imgFileHandle.createWritable();
+                await imgWritable.write(combinedBlob);
+                await imgWritable.close();
+
+                const xmlFileHandle = await newDirectoryHandle.getFileHandle('magic_circle.xml', { create: true });
+                const xmlWritable = await xmlFileHandle.createWritable();
+                await xmlWritable.write(textArea.value());
+                await xmlWritable.close();
+
+                const readmeContent = `Magic Circle Export\n` +
+                    `Exported at: ${new Date().toLocaleString()}\n\n` +
+                    `Contents:\n` +
+                    `- magic_circle.xml : 魔法陣のデータファイル\n` +
+                    `- full_screenshot.png : 画面全体のスクリーンショット（エディタ＋実行画面）\n\n` +
+                    `Tools:\n` +
+                    `MagicEditor: https://github.com/utomasato/MagicEditor`;
+
+                const readmeHandle = await newDirectoryHandle.getFileHandle('readme.txt', { create: true });
+                const readmeWritable = await readmeHandle.createWritable();
+                await readmeWritable.write(readmeContent);
+                await readmeWritable.close();
+
+                currentFileHandle = xmlFileHandle;
+                alert(`フォルダ 「${folderName}」 内に画面全体とデータを保存しました。`);
+
             } else {
                 downloadFile(textArea.value(), 'magic_circle.xml');
             }
         } catch (err) {
-            // ユーザーによるキャンセル(AbortError)以外はアラートを表示
-            if (err.name !== 'AbortError') alert('失敗しました: ' + err.message);
+            if (err.name !== 'AbortError') {
+                console.error(err);
+                alert('保存に失敗しました: ' + err.message);
+            }
         } finally {
-            // currentModalPanelが存在する場合（ダイアログ中に消されていなければ）ボタンを戻す
+            isUIHidden = wasUIHidden;
+            if (currentModalPanel) {
+                currentModalPanel.style('display', 'flex');
+            }
             if (saveAsBtn.elt) saveAsBtn.removeAttribute('disabled');
+            showXMLPanel(textArea.value());
         }
     });
+
+    if (currentFileHandle) {
+        const overwriteBtn = createButton('💾 XMLのみ上書き').parent(footer).addClass('ui-btn').addClass('ui-btn-primary');
+        overwriteBtn.mousePressed(async () => {
+            overwriteBtn.attribute('disabled', '');
+            try {
+                const writable = await currentFileHandle.createWritable();
+                await writable.write(textArea.value());
+                await writable.close();
+                showToast('XMLを更新しました。');
+            } catch (err) {
+                alert('失敗しました: ' + err.message);
+            } finally {
+                if (overwriteBtn.elt) overwriteBtn.removeAttribute('disabled');
+            }
+        });
+    }
 
     const copyBtn = createButton('コピー').parent(footer).addClass('ui-btn');
     copyBtn.mousePressed(() => {
