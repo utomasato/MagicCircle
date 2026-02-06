@@ -17,6 +17,73 @@ let screenshotRequest = false;
 let globalIsClockwise = false;
 let startRing = null;
 
+let infosigil = "";
+const sigilExplanations = {
+    "pop": "pop：スタックの最上位から値を1つ取り出して破棄します。",
+    "exch": "exch：スタックの最上位にある2つの値の順番を入れ替えます。",
+    "dup": "dup：スタックの最上位にある値をコピーして、スタックに積み直します。",
+    "copy": "copy：スタックの上からn個の要素をコピーして、スタックに積み増します。",
+    "index": "index：スタックの上からn番目の要素をコピーして、スタックの最上位に積みます。",
+    "roll": "roll：スタックのn個の要素を、指定した回数だけ循環的に回転させます。",
+    "add": "add：スタックから2つ値を取り出し、足し合わせたものをスタックに積みます。",
+    "sub": "sub：スタックから2つ値を取り出し、引き算した結果をスタックに積みます。",
+    "mul": "mul：スタックから2つ値を取り出し、掛け合わせた結果をスタックに積みます。",
+    "div": "div：スタックから2つ値を取り出し、割り算した結果（実数）を積みます。",
+    "idiv": "idiv：スタックから2つ値を取り出し、割り算の商（整数）を積みます。",
+    "mod": "mod：スタックから2つ値を取り出し、割り算の余りをスタックに積みます。",
+    "abs": "abs：スタックの最上位にある値の絶対値を計算して積みます。",
+    "neg": "neg：スタックの最上位にある値の符号を反転させます。",
+    "sqrt": "sqrt：スタックの最上位にある値の平方根を計算して積みます。",
+    "atan": "atan：2つの値から逆正接（アークタンジェント）を度数法で計算して積みます。",
+    "cos": "cos：角度（度数法）をスタックから取り出し、余弦（コサイン）を積みます。",
+    "sin": "sin：角度（度数法）をスタックから取り出し、正弦（サイン）を積みます。",
+    "rand": "rand：0から最大値（2147483647）までの乱数を生成して積みます。",
+    "srand": "srand：乱数のシード値を設定します（現在の実装では未処理）。",
+    "rrand": "rrand：乱数のシードを現在時刻等で初期化します（現在の実装では未処理）。",
+    "length": "length：配列、辞書、または文字列の要素数（長さ）をスタックに積みます。",
+    "get": "get：配列や辞書から、指定したインデックスやキーに対応する値を取り出します。",
+    "put": "put：配列や辞書、文字列の指定した位置に、新しい値を書き込みます。",
+    "string": "string：指定した長さの空の文字列オブジェクトを作成して積みます。",
+    "cvi": "cvi：文字列の最初の文字を、その文字コード（整数）に変換して積みます。",
+    "chr": "chr：整数（文字コード）を、対応する1文字の文字列に変換して積みます。",
+    "getinterval": "getinterval：配列や文字列から、指定範囲の部分配列・文字列を抽出します。",
+    "putinterval": "putinterval：配列や文字列の指定位置に、別の配列や文字列の内容を上書きします。",
+    "array": "array：指定した要素数を持つ、空の配列オブジェクトを作成して積みます。",
+    "forall": "forall：配列や辞書の各要素に対して、指定した手続きを繰り返し実行します。",
+    "dict": "dict：新しい空の辞書（連想配列）を作成してスタックに積みます。",
+    "begin": "begin：辞書を辞書スタックに積み、以降の変数定義や検索の対象にします。",
+    "end": "end：現在アクティブな辞書を辞書スタックから取り除きます。",
+    "def": "def：現在の辞書に、名前と値を対応付けて変数を定義します。",
+    "eq": "eq：スタックの2つの値が等しければtrue、そうでなければfalseを積みます。",
+    "ne": "ne：スタックの2つの値が等しくなければtrue、等しければfalseを積みます。",
+    "ge": "ge：1つ目の値が2つ目の値以上であればtrueをスタックに積みます。",
+    "gt": "gt：1つ目の値が2つ目の値より大きければtrueをスタックに積みます。",
+    "le": "le：1つ目の値が2つ目の値以下であればtrueをスタックに積みます。",
+    "lt": "lt：1つ目の値が2つ目の値より小さければtrueをスタックに積みます。",
+    "and": "and：2つの論理値の論理積（AND）を計算してスタックに積みます。",
+    "or": "or：2つの論理値の論理和（OR）を計算してスタックに積みます。",
+    "xor": "xor：2つの論理値の排他的論理和（XOR）を計算して積みます。",
+    "not": "not：スタック最上位の論理値を反転（真偽を逆に）させます。",
+    "true": "true：論理値の真（true）をスタックに積みます。",
+    "false": "false：論理値の偽（false）をスタックに積みます。",
+    "null": "null：null値をスタックに積みます。",
+    "exec": "exec：スタックにある手続き（プログラムの塊）を実行します。",
+    "if": "if：条件が真の場合に、指定した手続きを実行します。",
+    "ifelse": "ifelse：条件に応じて、実行する2つの手続きを切り替えます。",
+    "repeat": "repeat：指定した回数だけ、手続きを繰り返し実行します。",
+    "for": "for：開始、増分、終了値を指定して、数値を変化させながら手続きを繰り返します。",
+    "loop": "loop：exitが呼ばれるまで、手続きを無限に繰り返し実行します。",
+    "exit": "exit：実行中のloop（繰り返し）から即座に脱出します。",
+    "magicactivate": "magicactivate：指定したデータを魔法としてUnity側に送信し実行します。",
+    "spawnobj": "spawnobj：指定したパラメータでUnity上に新しいオブジェクトを生成します。",
+    "transform": "transform：Unityオブジェクトの位置、回転、スケールを変更します。",
+    "attachtoparent": "attachtoparent：Unityオブジェクトを別のオブジェクトの子要素にします。",
+    "animation": "animation：Unityオブジェクトに対して、指定したアニメーションを再生します。",
+    "print": "print：スタックの値を1つ取り出し、出力ログに表示します。",
+    "stack": "stack：現在のスタックの内容をすべて出力ログに表示します。",
+    "color": "color：R, G, Bの3つの値からカラー配列を作成してスタックに積みます。"
+};
+
 // =============================================
 // 入力と状態管理のためのグローバル変数
 // (他のファイルから参照されます)
@@ -137,7 +204,7 @@ function Start() {
         sigilLineWidth: 0.04,
         stringSideWidth: 2,
         nameObjectMinWidth: 8,
-        ringRotateHandleWidth: 20,
+        ringRotateHandleWidth: 0,
     };
 
     staticButtons = [
@@ -314,6 +381,20 @@ function Update() {
     else if (CheckMouse() || CheckTouch()) { MouseHoldEvent(); }
     else if (CheckMouseUp() || CheckTouchEnded()) { MouseUpEvent(); }
 
+    if (!isUIHidden) {
+        const cmo = CheckMouseObject();
+        if (cmo[0] == "item" && fieldItems[cmo[1]].type == "sigil") {
+            infosigil = fieldItems[cmo[1]].value;
+        }
+        else if (cmo[0] == "ring" && cmo[1][1] == "ring" && cmo[1][2].item.type == "sigil" && cmo[1][2].index != 0) {
+            //console.log(cmo[1][2]);
+            infosigil = cmo[1][2].item.value;
+        }
+        else {
+            infosigil = "";
+        }
+    }
+
     // デバッグボタン
     if (CheckKeyDown(Key.L)) { debugMode = !debugMode; } // デバッグボタン
     //if (CheckKeyDown(Key.K)) { globalIsClockwise = !globalIsClockwise; }
@@ -351,14 +432,20 @@ function Draw() {
     if (!isUIHidden) {
         FillRect(0, 0, width, config.menuHeight, config.menuBgColor);
         DrawButtons();
-        DrawText(12, "FPS: " + GetFPSText(), width - 10, height - 10, color(0, 0, 0), RIGHT);
-        DrawText(12, "Size: " + zoomSize, width - 10, height - 30, color(0, 0, 0), RIGHT);
+
         if (debugMode) {
+            DrawText(12, "FPS: " + GetFPSText(), width - 10, height - 10, color(0, 0, 0), RIGHT);
+            DrawText(12, "Size: " + zoomSize, width - 10, height - 30, color(0, 0, 0), RIGHT);
             DrawText(12, "MousePos: (" + mousePos.x.toFixed(2) + ", " + mousePos.y.toFixed(2) + ")", width - 10, height - 50, color(0, 0, 0), RIGHT);
             DrawText(12, "CameraPos: (" + cameraPos.x.toFixed(2) + ", " + cameraPos.y.toFixed(2) + ")", width - 10, height - 70, color(0, 0, 0), RIGHT);
             DrawText(12, "AddObjectMode: (" + AddObjectMode + ")", width - 10, height - 90, color(0, 0, 0), RIGHT);
             DrawText(12, "CursorMode: (" + cursormode + ")", width - 10, height - 110, color(0, 0, 0), RIGHT);
         }
+
+        textSize(20);
+        textAlign(LEFT, TOP);
+        textWrap(CHAR);
+        text(sigilExplanations[infosigil], 100, height - 50, width - 120, 80);
     }
     else if (screenshotRequest) {
         saveCanvas('MagicCircle.png'); // 画像を保存
