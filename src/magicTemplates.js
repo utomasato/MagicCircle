@@ -24,11 +24,12 @@ const templateDatas = {
             color: { type: "color", defaultValue: "1.0 0.5 0.0 1.0" },
             speed: { type: "number", defaultValue: "10" }, // startSpeed
             range: { type: "number", defaultValue: "20" }, // startSpeed * startLifetime
+            delay: { type: "number", defaultValue: "0" },
             interval: { type: "number", defaultValue: "1" }, // duration
         },
         converter:
             (prms, prmfgs) => {
-                return `{ dict begin ~root < ~shape (empty) > spawnobj ~setMagic { ~magic $preset magicactivate $magic $root attachtoparent } def ~preset < ~main < ~duration ${prms.interval} ~startLifetime ${prms.range / prms.speed} ~startSpeed ${prms.speed} ~startSize < ~x 30 ~y 30 ~z 75 > ~startColor [ ${prms.color} ] > ~emission < ~rateOverTime 0 ~burstCount 2 > ~colorOverLifetime < ~gradient < ~alphaKeys [ [ 0.0 0.0 ] [ 0.05 1.0 ] [ 0.95 1.0 ] [ 1.0 0.0 ] ] > > ~renderer < ~renderMode (Mesh) ~meshDistribution (NonUniformRandom) ~meshes (Bullet) ~material < ~texture (Glow_2) > ~alignment (Local) > > def $setMagic { $preset ~rotationOverLifetime < ~z 500 > put $preset ~renderer get ~material < ~texture (Glow_3) > put } exec $setMagic { $preset ~renderer get dup ~material < ~shader (AlphaBlended) ~texture (Glow_3) > put ~sortingFudge 10 put } exec $setMagic { $preset ~main get ~startSize < ~x 10 ~y 10 ~z 200 > put $preset ~rotationOverLifetime < ~z 800 > put $preset ~renderer get dup dup ~meshes (Cylinder_1) put ~material < ~texture (Spiral) ~shader (Additive) > put ~sortingFudge 0 put } exec $setMagic { $preset ~main get ~startSize 0.1 put $preset ~trails < ~lifetime 0.2 > put $preset ~renderer < ~material < ~texture (Glow_1) > ~trailMaterial < ~texture (Trail_1) > > put } exec $setMagic { $preset ~renderer get dup ~trailMaterial < ~shader (AlphaBlended) ~texture (Trail_1) > put ~sortingFudge 10 put } exec $setMagic $root < ~position [ ${prms.position} ] ~rotation [ ${prms.rotation} ] ~scale ${prms.scale} > transform $root end}`;
+                return `{ dict begin ~root < ~shape (empty) > spawnobj ~actualLifetime ${prms.range} ${prms.speed} div def ~setMagic { ~magic $preset magicactivate $magic $root attachtoparent } def ~preset < ~main < ~duration ${prms.interval} ~startDelay ${prms.delay} ~startLifetime $actualLifetime ~startSpeed ${prms.speed} ~startSize < ~x 30 ~y 30 ~z 75 > ~startColor [ ${prms.color} ] > ~emission < ~rateOverTime 0 ~burstCount 2 > ~colorOverLifetime < ~gradient < ~alphaKeys [ [ 0.0 0.0 ] [ 0.05 1.0 ] [ 0.95 1.0 ] [ 1.0 0.0 ] ] > > ~renderer < ~renderMode (Mesh) ~meshDistribution (NonUniformRandom) ~meshes (Bullet) ~material < ~texture (Glow_2) > ~alignment (Local) > > def $setMagic { $preset ~rotationOverLifetime < ~z 500 > put $preset ~renderer get ~material < ~texture (Glow_3) > put } exec $setMagic { $preset ~renderer get dup ~material < ~shader (AlphaBlended) ~texture (Glow_3) > put ~sortingFudge 10 put } exec $setMagic { $preset ~main get ~startSize < ~x 10 ~y 10 ~z 200 > put $preset ~rotationOverLifetime < ~z 800 > put $preset ~renderer get dup dup ~meshes (Cylinder_1) put ~material < ~texture (Spiral) ~shader (Additive) > put ~sortingFudge 0 put } exec $setMagic { $preset ~main get ~startSize 0.1 put $preset ~trails < ~lifetime 0.2 > put $preset ~renderer < ~material < ~texture (Glow_1) > ~trailMaterial < ~texture (Trail_1) > > put } exec $setMagic { $preset ~renderer get dup ~trailMaterial < ~shader (AlphaBlended) ~texture (Trail_1) > put ~sortingFudge 10 put } exec $setMagic $root < ~position [ ${prms.position} ] ~rotation [ ${prms.rotation} ] ~scale ${prms.scale} > transform $root end }`;
             },
         invalidVariableNames:
             ["root", "setMagic", "magic", "preset"],
@@ -60,15 +61,16 @@ const templateDatas = {
     },
     barrier: {
         parameters: {
-            scale: { type: "numberOrVector3", defaultValue: "2" },
+            scale: { type: "numberOrVector3", defaultValue: "1" },
             position: { type: "vector3", defaultValue: "0 0 0" },
             rotation: { type: "vector3", defaultValue: "0 0 0" },
         },
-        converter: //入力されたパラメータからコードに変換する変換器
+        converter: // 入力されたパラメータからコードに変換する変換器
             (prms, prmfgs) => {
-                return `{ dict begin ~root < ~shape (empty) > spawnobj ~setMagic { ~magic $preset magicactivate $magic $root attachtoparent } def ~preset < ~main < ~startLifetime 2 ~startSpeed 0 ~startSize 100 ~startRotation < ~x [ 0 360 ] ~y [ 0 360 ] ~z [ 0 360 ] > ~startColor [ 0.4 0.8 1 1 ] > ~emission < ~rateOverTime 2 > ~colorOverLifetime < ~gradient < ~alphaKeys [ [ 0.0 0.0 ] [ 0.3 1.0 ] [ 1.0 0.0 ] ] > > ~customData < ~x 0.2 ~y 0.2 ~z 0.85 ~w 0.35 > ~renderer < ~renderMode (Mesh) ~meshes (Sphere_1) ~material < ~texture (Smoke_4) ~shader (Aura) > ~alignment (Local) > > def $setMagic $magic < ~position [ 0 0.7 0 ] > transform { $preset ~customData < ~x 0.2 ~y 0.2 ~z 2.8 ~w 1 > put $preset ~renderer get ~material < ~shader (Aura) > put } exec $setMagic $magic < ~position [ 0 0.7 0 ] > transform { $preset ~main get ~startRotation < ~y [ 0 360 ] > put $preset ~sizeOverLifetime < ~size [ [ 0 0.5 ] [ 1 1 ] ] > put $preset ~customData < ~x -0.3 ~y [ -0.3 0.3 ] ~z 0.8 ~w 0.35 > put $preset ~renderer get dup ~meshes (Ring_1) put ~material < ~texture (Smoke_4) ~shader (Aura) > put } exec $setMagic $root < ~scale 1 > transform $root end }`;
+                // scale, position, rotationを反映するように修正
+                return `{ dict begin ~root < ~shape (empty) > spawnobj ~setMagic { ~magic $preset magicactivate $magic $root attachtoparent } def ~preset < ~main < ~startLifetime 2 ~startSpeed 0 ~startSize 100 ~startRotation < ~x [ 0 360 ] ~y [ 0 360 ] ~z [ 0 360 ] > ~startColor [ 0.4 0.8 1 1 ] > ~emission < ~rateOverTime 2 > ~colorOverLifetime < ~gradient < ~alphaKeys [ [ 0.0 0.0 ] [ 0.3 1.0 ] [ 1.0 0.0 ] ] > > ~customData < ~x 0.2 ~y 0.2 ~z 0.85 ~w 0.35 > ~renderer < ~renderMode (Mesh) ~meshes (Sphere_1) ~material < ~texture (Smoke_4) ~shader (Aura) > ~alignment (Local) > > def $setMagic $magic < ~position [ 0 0.7 0 ] > transform { $preset ~customData < ~x 0.2 ~y 0.2 ~z 2.8 ~w 1 > put $preset ~renderer get ~material < ~shader (Aura) > put } exec $setMagic $magic < ~position [ 0 0.7 0 ] > transform { $preset ~main get ~startRotation < ~y [ 0 360 ] > put $preset ~sizeOverLifetime < ~size [ [ 0 0.5 ] [ 1 1 ] ] > put $preset ~customData < ~x -0.3 ~y [ -0.3 0.3 ] ~z 0.8 ~w 0.35 > put $preset ~renderer get dup ~meshes (Ring_1) put ~material < ~texture (Smoke_4) ~shader (Aura) > put } exec $setMagic $root < ~position [ ${prms.position} ] ~rotation [ ${prms.rotation} ] ~scale ${prms.scale} > transform $root end }`;
             },
-        invalidVariableNames: // 入れてほしくない変数（例えば　scaleにrootとか入れられられると困る）
+        invalidVariableNames: // 入れてほしくない変数
             ["root", "setMagic", "magic", "preset"],
     },
 };

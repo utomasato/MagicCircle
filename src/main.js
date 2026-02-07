@@ -383,11 +383,11 @@ function Update() {
 
     if (!isUIHidden) {
         const cmo = CheckMouseObject();
+        //console.log(cmo);
         if (cmo[0] == "item" && fieldItems[cmo[1]].type == "sigil") {
             infosigil = fieldItems[cmo[1]].value;
         }
-        else if (cmo[0] == "ring" && cmo[1][1] == "ring" && cmo[1][2].item.type == "sigil" && cmo[1][2].index != 0) {
-            //console.log(cmo[1][2]);
+        else if (cmo[0] == "ring" && cmo[1][1] == "ring" && cmo[1][2].item != null && cmo[1][2].item.type == "sigil" && cmo[1][2].index != 0) {
             infosigil = cmo[1][2].item.value;
         }
         else {
