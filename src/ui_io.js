@@ -187,15 +187,24 @@ async function showXMLPanel(xmlContent) {
                 await xmlWritable.write(textArea.value());
                 await xmlWritable.close();
 
-                const readmeContent = `Magic Circle Export\n` +
-                    `Exported at: ${new Date().toLocaleString()}\n\n` +
-                    `Contents:\n` +
-                    `- magic_circle.xml : 魔法陣のデータファイル\n` +
-                    `- full_screenshot.png : 画面全体のスクリーンショット（エディタ＋実行画面）\n\n` +
-                    `Tools:\n` +
-                    `MagicEditor: https://github.com/utomasato/MagicEditor`;
+                const readmeContent =
+                    `【Magic Circle F/X Editor - 成果物パック】\n` +
+                    `------------------------------------------\n` +
+                    `ご体験いただきありがとうございました！\n\n` +
+                    `このフォルダには以下のファイルが含まれています：\n` +
+                    `1. magic_circle.png  : あなたが作成した魔法陣の画像（エディタ＋実行画面）\n` +
+                    `2. magic_circle.xml  : 魔法陣の設計データ（再編集用）\n` +
+                    `3. README           : この説明ファイル\n\n` +
+                    `■ 魔法の再現・再編集について\n` +
+                    `この魔法を再度エディタで読み込んだり、発動させたりしたい場合は、\n` +
+                    `下記のGitHubより「MagicEditor」をダウンロードしてください。\n` +
+                    `ツールを起動後、同梱の「magic_circle.xml」をインポートすることで再現が可能です。\n\n` +
+                    `■ ツールについて\n` +
+                    `MagicEditor GitHub: https://github.com/utomasato/MagicEditor\n` +
+                    `------------------------------------------\n` +
+                    `Exported at: ${new Date().toLocaleString()}`;
 
-                const readmeHandle = await newDirectoryHandle.getFileHandle('readme.txt', { create: true });
+                const readmeHandle = await newDirectoryHandle.getFileHandle('README.txt', { create: true });
                 const readmeWritable = await readmeHandle.createWritable();
                 await readmeWritable.write(readmeContent);
                 await readmeWritable.close();
