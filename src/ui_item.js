@@ -145,7 +145,7 @@ function createSigilDropdown(item) {
 
     const sigils = [
         "pop", "exch", "dup", "copy", "index", "roll", "add", "sub", "mul", "div", "idiv", "mod", "abs", "neg", "sqrt",
-        "atan", "cos", "sin", "rand", "srand", "rrand", "array", "string", "length", "get", "put", "getinterval", "putinterval", "forall",
+        "atan", "cos", "sin", "rand", /*"srand", "rrand",*/ "array", "string", "length", "get", "put", "getinterval", "putinterval", "forall",
         "dict", "begin", "end", "def", "eq", "ne", "ge", "gt", "le", "lt", "and", "not", "or", "xor", "true", "false",
         "exec", "if", "ifelse", "for", "repeat", "loop", "exit", "null",
         "magicactivate", "spawnobj", "transform", "attachtoparent", "animation",
