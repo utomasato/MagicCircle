@@ -368,7 +368,7 @@ function UpdateMarkerButtons() {
 
 function Update() {
     let [width, height] = GetScreenSize();
-
+    console.log(width - height);
     UpdateMarkerButtons();
 
     mousePos = {

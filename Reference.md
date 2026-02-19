@@ -5,7 +5,7 @@
 pop：スタックの最上位から値を1つ取り出して破棄します。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_pop.png) 
+![サンプル魔法陣画像](images/samples/sample_pop.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="sigil" value="pop" /><Item type="sigil" value="stack" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -20,7 +20,7 @@ pop：スタックの最上位から値を1つ取り出して破棄します。
 exch：スタックの最上位にある2つの値の順番を入れ替えます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_exch.png) 
+![サンプル魔法陣画像](images/samples/sample_exch.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="1" /><Item type="chars" value="2" /><Item type="sigil" value="exch" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -35,7 +35,7 @@ exch：スタックの最上位にある2つの値の順番を入れ替えます
 dup：スタックの最上位にある値をコピーして、スタックに積み直します。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_dup.png) 
+![サンプル魔法陣画像](images/samples/sample_dup.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="99" /><Item type="sigil" value="dup" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -50,7 +50,7 @@ dup：スタックの最上位にある値をコピーして、スタックに�
 copy：スタックの上からn個の要素をコピーして、スタックに積み増します。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_copy.png) 
+![サンプル魔法陣画像](images/samples/sample_copy.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="1" /><Item type="chars" value="2" /><Item type="chars" value="2" /><Item type="sigil" value="copy" /><Item type="sigil" value="stack" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -65,7 +65,7 @@ copy：スタックの上からn個の要素をコピーして、スタックに
 index：スタックの上からn番目の要素をコピーして、スタックの最上位に積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_index.png) 
+![サンプル魔法陣画像](images/samples/sample_index.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="chars" value="20" /><Item type="chars" value="1" /><Item type="sigil" value="index" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -80,7 +80,7 @@ index：スタックの上からn番目の要素をコピーして、スタッ�
 roll：スタックのn個の要素を、指定した回数だけ循環的に回転させます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_roll.png) 
+![サンプル魔法陣画像](images/samples/sample_roll.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="1" /><Item type="chars" value="2" /><Item type="chars" value="3" /><Item type="chars" value="3" /><Item type="chars" value="1" /><Item type="sigil" value="roll" /><Item type="sigil" value="stack" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -95,7 +95,7 @@ roll：スタックのn個の要素を、指定した回数だけ循環的に回
 add：スタックから2つ値を取り出し、足し合わせたものをスタックに積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_add.png) 
+![サンプル魔法陣画像](images/samples/sample_add.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="1" /><Item type="chars" value="2" /><Item type="sigil" value="add" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -110,7 +110,7 @@ add：スタックから2つ値を取り出し、足し合わせたものをス�
 sub：スタックから2つ値を取り出し、引き算した結果をスタックに積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_sub.png) 
+![サンプル魔法陣画像](images/samples/sample_sub.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="chars" value="3" /><Item type="sigil" value="sub" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -125,7 +125,7 @@ sub：スタックから2つ値を取り出し、引き算した結果をスタ�
 mul：スタックから2つ値を取り出し、掛け合わせた結果をスタックに積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_mul.png) 
+![サンプル魔法陣画像](images/samples/sample_mul.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="4" /><Item type="chars" value="5" /><Item type="sigil" value="mul" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -140,7 +140,7 @@ mul：スタックから2つ値を取り出し、掛け合わせた結果をス�
 div：スタックから2つ値を取り出し、割り算した結果（実数）を積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_div.png) 
+![サンプル魔法陣画像](images/samples/sample_div.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="chars" value="4" /><Item type="sigil" value="div" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -155,7 +155,7 @@ div：スタックから2つ値を取り出し、割り算した結果（実数�
 idiv：スタックから2つ値を取り出し、割り算の商（整数）を積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_idiv.png) 
+![サンプル魔法陣画像](images/samples/sample_idiv.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="chars" value="3" /><Item type="sigil" value="idiv" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -170,7 +170,7 @@ idiv：スタックから2つ値を取り出し、割り算の商（整数）を
 mod：スタックから2つ値を取り出し、割り算の余りをスタックに積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_mod.png) 
+![サンプル魔法陣画像](images/samples/sample_mod.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="chars" value="3" /><Item type="sigil" value="mod" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -185,7 +185,7 @@ mod：スタックから2つ値を取り出し、割り算の余りをスタッ�
 abs：スタックの最上位にある値の絶対値を計算して積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_abs.png) 
+![サンプル魔法陣画像](images/samples/sample_abs.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="-15" /><Item type="sigil" value="abs" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -200,7 +200,7 @@ abs：スタックの最上位にある値の絶対値を計算して積みま�
 neg：スタックの最上位にある値の符号を反転させます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_neg.png) 
+![サンプル魔法陣画像](images/samples/sample_neg.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="sigil" value="neg" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -215,7 +215,7 @@ neg：スタックの最上位にある値の符号を反転させます。
 sqrt：スタックの最上位にある値の平方根を計算して積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_sqrt.png) 
+![サンプル魔法陣画像](images/samples/sample_sqrt.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="16" /><Item type="sigil" value="sqrt" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -230,7 +230,7 @@ sqrt：スタックの最上位にある値の平方根を計算して積みま�
 atan：2つの値から逆正接（アークタンジェント）を度数法で計算して積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_atan.png) 
+![サンプル魔法陣画像](images/samples/sample_atan.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="1" /><Item type="chars" value="1" /><Item type="sigil" value="atan" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -245,7 +245,7 @@ atan：2つの値から逆正接（アークタンジェント）を度数法で
 cos：角度（度数法）をスタックから取り出し、余弦（コサイン）を積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_cos.png) 
+![サンプル魔法陣画像](images/samples/sample_cos.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="60" /><Item type="sigil" value="cos" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -260,7 +260,7 @@ cos：角度（度数法）をスタックから取り出し、余弦（コサ�
 sin：角度（度数法）をスタックから取り出し、正弦（サイン）を積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_sin.png) 
+![サンプル魔法陣画像](images/samples/sample_sin.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="30" /><Item type="sigil" value="sin" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -275,7 +275,7 @@ sin：角度（度数法）をスタックから取り出し、正弦（サイ�
 rand：0から最大値（2147483647）までの乱数を生成して積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_rand.png) 
+![サンプル魔法陣画像](images/samples/sample_rand.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="sigil" value="rand" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -290,7 +290,7 @@ rand print
 srand：乱数のシード値を設定します（現在の実装では未処理）。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_srand.png) 
+![サンプル魔法陣画像](images/samples/sample_srand.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="12345" /><Item type="sigil" value="srand" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -305,7 +305,7 @@ srand：乱数のシード値を設定します（現在の実装では未処理
 rrand：乱数のシードを現在時刻等で初期化します（現在の実装では未処理）。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_rrand.png) 
+![サンプル魔法陣画像](images/samples/sample_rrand.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="sigil" value="rrand" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -320,7 +320,7 @@ rrand
 length：配列、辞書、または文字列の要素数（長さ）をスタックに積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_length.png) 
+![サンプル魔法陣画像](images/samples/sample_length.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="(hello)" /><Item type="sigil" value="length" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -335,7 +335,7 @@ length：配列、辞書、または文字列の要素数（長さ）をスタ�
 get：配列や辞書から、指定したインデックスやキーに対応する値を取り出します。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_get.png) 
+![サンプル魔法陣画像](images/samples/sample_get.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="[10 20 30]" /><Item type="chars" value="1" /><Item type="sigil" value="get" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -350,7 +350,7 @@ get：配列や辞書から、指定したインデックスやキーに対応�
 put：配列や辞書、文字列の指定した位置に、新しい値を書き込みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_put.png) 
+![サンプル魔法陣画像](images/samples/sample_put.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="[10 20 30]" /><Item type="chars" value="1" /><Item type="chars" value="99" /><Item type="sigil" value="put" /><Item type="sigil" value="stack" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -365,7 +365,7 @@ put：配列や辞書、文字列の指定した位置に、新しい値を書�
 string：指定した長さの空の文字列オブジェクトを作成して積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_string.png) 
+![サンプル魔法陣画像](images/samples/sample_string.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="sigil" value="string" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -380,7 +380,7 @@ string：指定した長さの空の文字列オブジェクトを作成して�
 cvi：文字列の最初の文字を、その文字コード（整数）に変換して積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_cvi.png) 
+![サンプル魔法陣画像](images/samples/sample_cvi.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="(A)" /><Item type="sigil" value="cvi" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -395,7 +395,7 @@ cvi：文字列の最初の文字を、その文字コード（整数）に変�
 chr：整数（文字コード）を、対応する1文字の文字列に変換して積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_chr.png) 
+![サンプル魔法陣画像](images/samples/sample_chr.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="65" /><Item type="sigil" value="chr" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -410,7 +410,7 @@ chr：整数（文字コード）を、対応する1文字の文字列に変換�
 getinterval：配列や文字列から、指定範囲の部分配列・文字列を抽出します。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_getinterval.png) 
+![サンプル魔法陣画像](images/samples/sample_getinterval.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="(abcdef)" /><Item type="chars" value="1" /><Item type="chars" value="3" /><Item type="sigil" value="getinterval" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -425,7 +425,7 @@ getinterval：配列や文字列から、指定範囲の部分配列・文字列
 putinterval：配列や文字列の指定位置に、別の配列や文字列の内容を上書きします。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_putinterval.png) 
+![サンプル魔法陣画像](images/samples/sample_putinterval.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="(abcdef)" /><Item type="chars" value="1" /><Item type="chars" value="(XYZ)" /><Item type="sigil" value="putinterval" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -440,7 +440,7 @@ putinterval：配列や文字列の指定位置に、別の配列や文字列の
 array：指定した要素数を持つ、空の配列オブジェクトを作成して積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_array.png) 
+![サンプル魔法陣画像](images/samples/sample_array.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="5" /><Item type="sigil" value="array" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -455,7 +455,7 @@ array：指定した要素数を持つ、空の配列オブジェクトを作成
 forall：配列や辞書の各要素に対して、指定した手続きを繰り返し実行します。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_forall.png) 
+![サンプル魔法陣画像](images/samples/sample_forall.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="[1 2 3]" /><Item type="chars" value="{ print }" /><Item type="sigil" value="forall" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -470,7 +470,7 @@ forall：配列や辞書の各要素に対して、指定した手続きを繰�
 dict：新しい空の辞書（連想配列）を作成してスタックに積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_dict.png) 
+![サンプル魔法陣画像](images/samples/sample_dict.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="sigil" value="dict" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -485,7 +485,7 @@ dict：新しい空の辞書（連想配列）を作成してスタックに積�
 begin：辞書を辞書スタックに積み、以降の変数定義や検索の対象にします。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_begin.png) 
+![サンプル魔法陣画像](images/samples/sample_begin.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="sigil" value="dict" /><Item type="sigil" value="begin" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -500,7 +500,7 @@ begin：辞書を辞書スタックに積み、以降の変数定義や検索の
 end：現在アクティブな辞書を辞書スタックから取り除きます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_end.png) 
+![サンプル魔法陣画像](images/samples/sample_end.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="sigil" value="end" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -515,7 +515,7 @@ end
 def：現在の辞書に、名前と値を対応付けて変数を定義します。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_def.png) 
+![サンプル魔法陣画像](images/samples/sample_def.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="/x" /><Item type="chars" value="100" /><Item type="sigil" value="def" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -530,7 +530,7 @@ def：現在の辞書に、名前と値を対応付けて変数を定義しま�
 eq：スタックの2つの値が等しければtrue、そうでなければfalseを積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_eq.png) 
+![サンプル魔法陣画像](images/samples/sample_eq.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="5" /><Item type="chars" value="5" /><Item type="sigil" value="eq" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -545,7 +545,7 @@ eq：スタックの2つの値が等しければtrue、そうでなければfals
 ne：スタックの2つの値が等しくなければtrue、等しければfalseを積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_ne.png) 
+![サンプル魔法陣画像](images/samples/sample_ne.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="5" /><Item type="chars" value="10" /><Item type="sigil" value="ne" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -560,7 +560,7 @@ ne：スタックの2つの値が等しくなければtrue、等しければfals
 ge：1つ目の値が2つ目の値以上であればtrueをスタックに積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_ge.png) 
+![サンプル魔法陣画像](images/samples/sample_ge.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="chars" value="5" /><Item type="sigil" value="ge" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -575,7 +575,7 @@ ge：1つ目の値が2つ目の値以上であればtrueをスタックに積み
 gt：1つ目の値が2つ目の値より大きければtrueをスタックに積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_gt.png) 
+![サンプル魔法陣画像](images/samples/sample_gt.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="chars" value="5" /><Item type="sigil" value="gt" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -590,7 +590,7 @@ gt：1つ目の値が2つ目の値より大きければtrueをスタックに積
 le：1つ目の値が2つ目の値以下であればtrueをスタックに積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_le.png) 
+![サンプル魔法陣画像](images/samples/sample_le.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="5" /><Item type="chars" value="10" /><Item type="sigil" value="le" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -605,7 +605,7 @@ le：1つ目の値が2つ目の値以下であればtrueをスタックに積み
 lt：1つ目の値が2つ目の値より小さければtrueをスタックに積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_lt.png) 
+![サンプル魔法陣画像](images/samples/sample_lt.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="5" /><Item type="chars" value="10" /><Item type="sigil" value="lt" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -620,7 +620,7 @@ lt：1つ目の値が2つ目の値より小さければtrueをスタックに積
 and：2つの論理値の論理積（AND）を計算してスタックに積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_and.png) 
+![サンプル魔法陣画像](images/samples/sample_and.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="sigil" value="true" /><Item type="sigil" value="false" /><Item type="sigil" value="and" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -635,7 +635,7 @@ true false and print
 or：2つの論理値の論理和（OR）を計算してスタックに積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_or.png) 
+![サンプル魔法陣画像](images/samples/sample_or.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="sigil" value="true" /><Item type="sigil" value="false" /><Item type="sigil" value="or" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -650,7 +650,7 @@ true false or print
 xor：2つの論理値の排他的論理和（XOR）を計算して積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_xor.png) 
+![サンプル魔法陣画像](images/samples/sample_xor.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="sigil" value="true" /><Item type="sigil" value="false" /><Item type="sigil" value="xor" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -665,7 +665,7 @@ true false xor print
 not：スタック最上位の論理値を反転（真偽を逆に）させます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_not.png) 
+![サンプル魔法陣画像](images/samples/sample_not.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="sigil" value="true" /><Item type="sigil" value="not" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -680,7 +680,7 @@ true not print
 true：論理値の真（true）をスタックに積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_true.png) 
+![サンプル魔法陣画像](images/samples/sample_true.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="sigil" value="true" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -695,7 +695,7 @@ true print
 false：論理値の偽（false）をスタックに積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_false.png) 
+![サンプル魔法陣画像](images/samples/sample_false.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="sigil" value="false" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -710,7 +710,7 @@ false print
 null：null値をスタックに積みます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_null.png) 
+![サンプル魔法陣画像](images/samples/sample_null.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="sigil" value="null" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -725,7 +725,7 @@ null print
 exec：スタックにある手続き（プログラムの塊）を実行します。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_exec.png) 
+![サンプル魔法陣画像](images/samples/sample_exec.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="{ 1 2 add print }" /><Item type="sigil" value="exec" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -740,7 +740,7 @@ exec：スタックにある手続き（プログラムの塊）を実行しま�
 if：条件が真の場合に、指定した手続きを実行します。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_if.png) 
+![サンプル魔法陣画像](images/samples/sample_if.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="sigil" value="true" /><Item type="chars" value="{ 100 print }" /><Item type="sigil" value="if" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -755,7 +755,7 @@ true { 100 print } if
 ifelse：条件に応じて、実行する2つの手続きを切り替えます。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_ifelse.png) 
+![サンプル魔法陣画像](images/samples/sample_ifelse.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="sigil" value="true" /><Item type="chars" value="{ 1 print }" /><Item type="chars" value="{ 2 print }" /><Item type="sigil" value="ifelse" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -770,7 +770,7 @@ true { 1 print } { 2 print } ifelse
 repeat：指定した回数だけ、手続きを繰り返し実行します。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_repeat.png) 
+![サンプル魔法陣画像](images/samples/sample_repeat.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="3" /><Item type="chars" value="{ 1 print }" /><Item type="sigil" value="repeat" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -785,7 +785,7 @@ repeat：指定した回数だけ、手続きを繰り返し実行します。
 for：開始、増分、終了値を指定して、数値を変化させながら手続きを繰り返します。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_for.png) 
+![サンプル魔法陣画像](images/samples/sample_for.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="1" /><Item type="chars" value="1" /><Item type="chars" value="5" /><Item type="chars" value="{ print }" /><Item type="sigil" value="for" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -800,7 +800,7 @@ for：開始、増分、終了値を指定して、数値を変化させなが�
 loop：exitが呼ばれるまで、手続きを無限に繰り返し実行します。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_loop.png) 
+![サンプル魔法陣画像](images/samples/sample_loop.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="{ 1 print exit }" /><Item type="sigil" value="loop" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -815,7 +815,7 @@ loop：exitが呼ばれるまで、手続きを無限に繰り返し実行しま
 exit：実行中のloop（繰り返し）から即座に脱出します。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_exit.png) 
+![サンプル魔法陣画像](images/samples/sample_exit.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="{ exit }" /><Item type="sigil" value="loop" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -830,7 +830,7 @@ exit：実行中のloop（繰り返し）から即座に脱出します。
 magicactivate：指定したデータを魔法としてUnity側に送信し実行します。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_magicactivate.png) 
+![サンプル魔法陣画像](images/samples/sample_magicactivate.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="(fire)" /><Item type="sigil" value="magicactivate" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -845,7 +845,7 @@ magicactivate：指定したデータを魔法としてUnity側に送信し実�
 spawnobj：指定したパラメータでUnity上に新しいオブジェクトを生成します。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_spawnobj.png) 
+![サンプル魔法陣画像](images/samples/sample_spawnobj.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="(bullet)" /><Item type="sigil" value="spawnobj" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -860,7 +860,7 @@ spawnobj：指定したパラメータでUnity上に新しいオブジェクト�
 transform：Unityオブジェクトの位置、回転、スケールを変更します。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_transform.png) 
+![サンプル魔法陣画像](images/samples/sample_transform.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="0" /><Item type="chars" value="10" /><Item type="chars" value="0" /><Item type="sigil" value="transform" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -875,7 +875,7 @@ transform：Unityオブジェクトの位置、回転、スケールを変更し
 attachtoparent：Unityオブジェクトを別のオブジェクトの子要素にします。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_attachtoparent.png) 
+![サンプル魔法陣画像](images/samples/sample_attachtoparent.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="sigil" value="attachtoparent" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -890,7 +890,7 @@ attachtoparent
 animation：Unityオブジェクトに対して、指定したアニメーションを再生します。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_animation.png) 
+![サンプル魔法陣画像](images/samples/sample_animation.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="(play_anim)" /><Item type="sigil" value="animation" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -905,7 +905,7 @@ animation：Unityオブジェクトに対して、指定したアニメーショ
 print：スタックの値を1つ取り出し、出力ログに表示します。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_print.png) 
+![サンプル魔法陣画像](images/samples/sample_print.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="(Hello)" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
@@ -920,7 +920,7 @@ print：スタックの値を1つ取り出し、出力ログに表示します�
 stack：現在のスタックの内容をすべて出力ログに表示します。
 
 ### Code
-![サンプル魔法陣画像](images/sumples_stack.png) 
+![サンプル魔法陣画像](images/samples/sample_stack.png) 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="1" /><Item type="chars" value="2" /><Item type="chars" value="3" /><Item type="sigil" value="stack" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
