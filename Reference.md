@@ -79,11 +79,11 @@
 <img src="./images/samples/sample_copy.png" width="300" />
 
 ```text
-0 1 2 2 copy
-% FinalStack is [0 1 2 1 2]
+10 20 30 2 copy
+% FinalStack is [10 20 30 20 30]
 ```
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="0" /><Item type="chars" value="1" /><Item type="chars" value="2" /><Item type="chars" value="2" /><Item type="sigil" value="copy" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
+<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="chars" value="20" /><Item type="chars" value="30" /><Item type="chars" value="2" /><Item type="sigil" value="copy" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
 
 ## index
@@ -96,11 +96,11 @@
 <img src="./images/samples/sample_index.png" width="300" />
 
 ```text
-0 1 2 3 2 index
-% FinalStack is 0 1 2 3 1
+10 20 30 40 2 index
+% FinalStack is [10 20 30 40 20]
 ```
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="0" /><Item type="chars" value="1" /><Item type="chars" value="2" /><Item type="chars" value="3" /><Item type="chars" value="2" /><Item type="sigil" value="index" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
+<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="chars" value="20" /><Item type="chars" value="30" /><Item type="chars" value="40" /><Item type="chars" value="2" /><Item type="sigil" value="index" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
 
 ## roll
@@ -113,10 +113,11 @@
 <img src="./images/samples/sample_roll.png" width="300" />
 
 ```text
-1 2 3 3 1 roll stack
+10 20 30 40 3 1 roll
+% FInalStack is [10 40 20 30]
 ```
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="1" /><Item type="chars" value="2" /><Item type="chars" value="3" /><Item type="chars" value="3" /><Item type="chars" value="1" /><Item type="sigil" value="roll" /><Item type="sigil" value="stack" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
+<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="chars" value="20" /><Item type="chars" value="30" /><Item type="chars" value="40" /><Item type="chars" value="3" /><Item type="chars" value="1" /><Item type="sigil" value="roll" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
 
 ## add
