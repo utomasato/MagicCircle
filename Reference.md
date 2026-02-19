@@ -334,10 +334,10 @@
 <img src="./images/samples/sample_rand.png" width="300" />
 
 ```text
-rand print
+rand
 ```
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="sigil" value="rand" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
+<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="sigil" value="rand" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
 
 ## srand
@@ -346,6 +346,7 @@ rand print
 ### 説明
 乱数のシード値を設定します（現在の実装では未処理）。
 
+<!--
 ### Code
 <img src="./images/samples/sample_srand.png" width="300" />
 
@@ -355,13 +356,15 @@ rand print
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="12345" /><Item type="sigil" value="srand" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
+-->
 
 ## rrand
 ![シジル画像](images/sigils/sigil_rrand.png) 
 
 ### 説明
-乱数のシードを現在時刻等で初期化します（現在の実装では未処理）。
+現在の乱数のシード状態を取得します（現在の実装では未処理）。
 
+<!--
 ### Code
 <img src="./images/samples/sample_rrand.png" width="300" />
 
@@ -371,6 +374,7 @@ rrand
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="sigil" value="rrand" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
+-->
 
 ## length
 ![シジル画像](images/sigils/sigil_length.png) 
