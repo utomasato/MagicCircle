@@ -29,7 +29,7 @@
 
 ```text
 0 1 2 pop
-% FinalStack is [0 1]
+% FinalStack is [ 0 1 ]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="0" /><Item type="chars" value="1" /><Item type="chars" value="2" /><Item type="sigil" value="pop" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -46,7 +46,7 @@
 
 ```text
 0 1 2 exch
-% FinalStack is [0 2 1]
+% FinalStack is [ 0 2 1 ]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="0" /><Item type="chars" value="1" /><Item type="chars" value="2" /><Item type="sigil" value="exch" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -63,7 +63,7 @@
 
 ```text
 0 1 2 dup
-% FinalStack is [0 1 2 2]
+% FinalStack is [ 0 1 2 2 ]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="0" /><Item type="chars" value="1" /><Item type="chars" value="2" /><Item type="sigil" value="dup" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -80,7 +80,7 @@
 
 ```text
 10 20 30 2 copy
-% FinalStack is [10 20 30 20 30]
+% FinalStack is [ 10 20 30 20 30 ]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="chars" value="20" /><Item type="chars" value="30" /><Item type="chars" value="2" /><Item type="sigil" value="copy" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -97,7 +97,7 @@
 
 ```text
 10 20 30 40 2 index
-% FinalStack is [10 20 30 40 20]
+% FinalStack is [ 10 20 30 40 20 ]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="chars" value="20" /><Item type="chars" value="30" /><Item type="chars" value="40" /><Item type="chars" value="2" /><Item type="sigil" value="index" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -114,7 +114,7 @@
 
 ```text
 10 20 30 40 3 1 roll
-% FInalStack is [10 40 20 30]
+% FInalStack is [ 10 40 20 30 ]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="chars" value="20" /><Item type="chars" value="30" /><Item type="chars" value="40" /><Item type="chars" value="3" /><Item type="chars" value="1" /><Item type="sigil" value="roll" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -131,7 +131,7 @@
 
 ```text
 1 2 add
-% FinalStack is [3]
+% FinalStack is [ 3 ]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="1" /><Item type="chars" value="2" /><Item type="sigil" value="add" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -148,7 +148,7 @@
 
 ```text
 10 3 sub
-% FinalStack is [7]
+% FinalStack is [ 7 ]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="chars" value="3" /><Item type="sigil" value="sub" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -165,7 +165,7 @@
 
 ```text
 4 5 mul
-% FinalStack is [20]
+% FinalStack is [ 20 ]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="4" /><Item type="chars" value="5" /><Item type="sigil" value="mul" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -182,7 +182,7 @@
 
 ```text
 10 4 div
-% FinalStack is [2.5]
+% FinalStack is [ 2.5 ]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="chars" value="4" /><Item type="sigil" value="div" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -199,7 +199,7 @@
 
 ```text
 10 3 idiv
-% FinalStack is [3]
+% FinalStack is [ 3 ]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="chars" value="3" /><Item type="sigil" value="idiv" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -216,7 +216,7 @@
 
 ```text
 10 3 mod
-% FinalStack is [1]
+% FinalStack is [ 1 ]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="chars" value="3" /><Item type="sigil" value="mod" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -233,7 +233,7 @@
 
 ```text
 -15 abs
-% FinalStack is [15]
+% FinalStack is [ 15 ]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="-15" /><Item type="sigil" value="abs" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -250,7 +250,7 @@
 
 ```text
 10 neg
-% FinalStack is [-10]
+% FinalStack is [ -10 ]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="sigil" value="neg" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -267,7 +267,7 @@
 
 ```text
 16 sqrt
-% FinalStack is [4]
+% FinalStack is [ 4 ]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="16" /><Item type="sigil" value="sqrt" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -284,7 +284,7 @@
 
 ```text
 1 1 atan
-% FinalStack is [45]
+% FinalStack is [ 45 ]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="1" /><Item type="chars" value="1" /><Item type="sigil" value="atan" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -301,7 +301,7 @@
 
 ```text
 60 cos
-% FinalStack is [0.5]
+% FinalStack is [ 0.5 ]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="60" /><Item type="sigil" value="cos" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -318,7 +318,7 @@
 
 ```text
 30 sin
-% FinalStack is [0.5]
+% FinalStack is [ 0.5 ]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="30" /><Item type="sigil" value="sin" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -386,10 +386,11 @@ rrand
 <img src="./images/samples/sample_length.png" width="300" />
 
 ```text
-(hello) length print
+(Hello) length
+% FinalStack is [ 5 ]
 ```
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="(hello)" /><Item type="sigil" value="length" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
+<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="string_token" value="Hello" /><Item type="sigil" value="length" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
 
 ## get
@@ -402,10 +403,11 @@ rrand
 <img src="./images/samples/sample_get.png" width="300" />
 
 ```text
-[10 20 30] 1 get print
+[10 20 30] 1 get
+% FinalStack is [ 20 ]
 ```
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="[10 20 30]" /><Item type="chars" value="1" /><Item type="sigil" value="get" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
+<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="joint" value="1" isExecute="false" /><Item type="chars" value="1" /><Item type="sigil" value="get" /></Items></Ring><Ring id="1" type="ArrayRing" x="-177.48" y="2.79" angle="1.5551" visualEffect="-"><Comments></Comments><Items><Item type="sigil" value="COMPLETE" /><Item type="chars" value="10" /><Item type="chars" value="20" /><Item type="chars" value="30" /></Items></Ring> </Rings> <FieldItems> </FieldItems></MagicCircleLayout>
 ```
 
 ## put
@@ -418,10 +420,11 @@ rrand
 <img src="./images/samples/sample_put.png" width="300" />
 
 ```text
-[10 20 30] 1 99 put stack
+[10 20 30] dup 1 99 put
+% FInalStack is [ [10 99 30] ]
 ```
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="[10 20 30]" /><Item type="chars" value="1" /><Item type="chars" value="99" /><Item type="sigil" value="put" /><Item type="sigil" value="stack" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
+<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="joint" value="1" isExecute="false" /><Item type="sigil" value="dup" /><Item type="chars" value="1" /><Item type="chars" value="99" /><Item type="sigil" value="put" /></Items></Ring><Ring id="1" type="ArrayRing" x="-152.40" y="-90.99" angle="2.1091" visualEffect="-"><Comments></Comments><Items><Item type="sigil" value="COMPLETE" /><Item type="chars" value="10" /><Item type="chars" value="20" /><Item type="chars" value="30" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
 
 ## string
