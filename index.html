@@ -64,12 +64,14 @@
         }
 
         /* Erudaデバッグボタンを常に右下に配置 */
+        /*
         .eruda-entry-btn {
             bottom: 10px !important;
             right: 10px !important;
-            /* 他のUIに隠れないようにz-indexを高く設定 */
+            // 他のUIに隠れないようにz-indexを高く設定 
             z-index: 99999 !important;
         }
+        */
 
         /* --- レイアウトの核となる部分 --- */
 
@@ -145,34 +147,35 @@
             /* マウスイベントを通す */
         }
     </style>
-
+    <!--
     <script src="//cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script>
+    --!>
 </head>
 
 <body oncontextmenu="return false;">
     <div id="main-container">
         <!-- 左パネル -->
-        <div id="p5-container">
-            <div class="info">
-                <div>Canvas: <span id="canvas-size"></span></div>
-                <div>Device Pixel Ratio: <span id="pixel-ratio"></span></div>
+    <div id="p5-container">
+        <div class="info">
+            <div>Canvas: <span id="canvas-size"></span></div>
+            <div>Device Pixel Ratio: <span id="pixel-ratio"></span></div>
+        </div>
+    </div>
+
+    <!-- リサイズバー -->
+    <div id="resizer"></div>
+
+    <!-- 右パネル -->
+    <div id="unity-container">
+        <canvas id="unity-canvas"></canvas>
+        <div id="unity-loading-bar">
+            <div id="unity-logo"></div>
+            <div id="unity-progress-bar-empty">
+                <div id="unity-progress-bar-full"></div>
             </div>
         </div>
-
-        <!-- リサイズバー -->
-        <div id="resizer"></div>
-
-        <!-- 右パネル -->
-        <div id="unity-container">
-            <canvas id="unity-canvas"></canvas>
-            <div id="unity-loading-bar">
-                <div id="unity-logo"></div>
-                <div id="unity-progress-bar-empty">
-                    <div id="unity-progress-bar-full"></div>
-                </div>
-            </div>
-        </div>
+    </div>
     </div>
 
     <!-- 既存のスクリプト -->
@@ -294,6 +297,6 @@
         resizer.addEventListener('mousedown', handleDragStart);
         resizer.addEventListener('touchstart', handleDragStart, { passive: false });
     </script>
-</body>
+    </body>
 
 </html>

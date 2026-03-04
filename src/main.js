@@ -116,6 +116,8 @@ let isResizingConsole = false;
 let actionStack = [];
 let redoStack = [];
 
+let consoleMessages = [];
+
 /**
  * インタープリタのスタック配列をコンソール表示用にフォーマットします。
  * @param {Array} stack フォーマット対象のスタック配列
@@ -240,23 +242,14 @@ function Start() {
                 if (startRing) {
                     const data = { isActive: true, message: "Reset", name: null, value: 0, text: null };
                     sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+                    addConsoleMessage(">>")
+
                     const mpsCode = GenerateSpell(startRing);
                     console.log(mpsCode);
                     try {
-                        const result = activeInterpreter.execute(mpsCode);
-                        let consoleMessage = '';
-
-                        if (result.output) {
-                            consoleMessage += `Output:\n${result.output}\n\n`;
-                            console.log(`Output:\n${result.output}`);
-                        }
-                        console.log("==================")
-                        consoleMessage += `Final Stack:\n${formatStackForDisplay(result.stack)}`;
-                        console.log(`Final Stack:\n${formatStackForDisplay(result.stack)}`);
-                        console.log(`Final dictStack:\n${formatStackForDisplay(result.dictStack)}`)
-                        updateConsolePanel(consoleMessage);
+                        activeInterpreter.execute();
                     } catch (e) {
-                        updateConsolePanel(`Execution Error:\n${e.message}`);
+                        addConsoleMessage(`Execution Error:\n${e.message}`);
                         console.log(`Execution Error:\n${e.message}`);
                     }
                 }
@@ -368,7 +361,6 @@ function UpdateMarkerButtons() {
 
 function Update() {
     let [width, height] = GetScreenSize();
-    console.log(width - height);
     UpdateMarkerButtons();
 
     mousePos = {
@@ -491,6 +483,11 @@ function setInterpreter(name) {
     } else {
         console.error(`Interpreter not found: ${name}`);
     }
+}
+
+function addConsoleMessage(message) {
+    consoleMessages.push(message);
+    updateConsolePanel(consoleMessages.join("\n"));
 }
 
 function CommitMagicSpell() {

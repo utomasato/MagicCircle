@@ -302,6 +302,18 @@ class MagicRing {
         });
         return this.spellstart + spell + this.spellend;
     }
+
+    GetValue(mode) {
+        return { type: "magicring", value: this };
+    }
+
+    Execute(mode) {
+        if (mode == "PostScript") {
+            for (let item of this.items.slice(1)) {
+                item.Execute(mode);
+            }
+        }
+    }
 }
 
 class ArrayRing extends MagicRing {
@@ -476,7 +488,7 @@ class ArrayRing extends MagicRing {
         if (item.type === 'name') {
             return false;
         }
-        if (item.type === 'string_token' && this.visualEffect === 'color') {
+        if (item.type === 'string' && this.visualEffect === 'color') {
             return false;
         }
 
@@ -488,6 +500,14 @@ class ArrayRing extends MagicRing {
             return false;
         }
         return super.CheckPosIsOn(pos);
+    }
+
+    GetValue(mode) {
+        const array = [];
+        for (let item of this.items.slice(1)) {
+            array.push(item.GetValue(mode));
+        }
+        return { type: "array", value: array };
     }
 }
 
@@ -554,6 +574,19 @@ class DictRing extends MagicRing {
         }
         return super.CheckPosIsOn(pos);
     }
+
+    GetValue(mode) {
+        const dict = {};
+        const elements = this.items.slice(1);
+
+        for (let i = 0; i < elements.length; i += 2) {
+            const keyItem = elements[i];
+            const valueItem = elements[i + 1];
+            if (!valueItem) continue;
+            dict[keyItem.type + "-" + keyItem.value] = valueItem.GetValue(mode);
+        }
+        return { type: "dict", value: dict };
+    }
 }
 
 class TemplateRing extends MagicRing {
@@ -578,11 +611,19 @@ class TemplateRing extends MagicRing {
     }
 
     Spell() {
-        let spell = "";
-        this.items.slice(1).forEach(item => {
-            if (item) spell += item.SpellToken() + " ";
-        });
-        return magicTemplates(this.magic, spell);
+        return GetTemplateSpell();
+    }
+
+    GetValue(mode) {
+        return { type: "template", value: this };
+    }
+
+    Execute(mode) {
+        if (mode == "PostScript") {
+            const prms = [];
+            for (const item of this.items.slice(1)) prms.push(item.GetValue(mode));
+            ExecuteTemplateMagic(this.magic, prms);
+        }
     }
 }
 
@@ -607,6 +648,8 @@ class RingItem {
     SetValue(newValue) { this.value = newValue; }
     CheckPosIsOn(pos) { return false; }
     SpellToken() { return this.value; }
+    GetValue(mode) { return this.value; }
+    Execute(mode) { if (mode == "PostScript") return; else return; }
 }
 
 class Sigil extends RingItem {
@@ -662,6 +705,23 @@ class Sigil extends RingItem {
             return true;
         }
         return false;
+    }
+
+    GetValue(mode) {
+        switch (this.value) {
+            case "true": return { type: "bool", value: true };
+            case "false": return { type: "bool", value: false };
+            case "null":
+            default: return null;
+        }
+    }
+
+    Execute(mode) {
+        if (mode == "PostScript") {
+            const interp = activeInterpreter;
+            interp.commands[this.value]();
+            return;
+        }
     }
 }
 
@@ -746,12 +806,43 @@ class Chars extends RingItem {
 
         return escapedValue;
     }
+
+    GetValue(mode) {
+        if (this.value !== null && this.value.trim() !== "" && isFinite(this.value)) {
+            // 数値の場合
+            return { type: "number", value: parseFloat(this.value) };
+        }
+        else {
+            // 変数の場合
+            const val = activeInterpreter.lookupVariable(this.value);
+            return val;
+        }
+    }
+
+    Execute(mode) {
+        if (mode == "PostScript") {
+            const interp = activeInterpreter;
+            if (this.value !== null && this.value.trim() !== "" && isFinite(this.value)) {
+                // 数値の場合
+                interp.stack.push({ type: "number", value: parseFloat(this.value) });
+            }
+            else {
+                // 変数の場合
+                const val = interp.lookupVariable(this.value)
+                if (val.type == "magicring")
+                    val.value.Execute(mode);
+                else
+                    interp.stack.push(val);
+            }
+            return;
+        }
+    }
 }
 
 class StringToken extends RingItem {
     constructor(x, y, value, parentRing) {
         super(x, y, value, parentRing);
-        this.type = "string_token";
+        this.type = "string";
     }
 
     GetLength() {
@@ -842,6 +933,18 @@ class StringToken extends RingItem {
         const escapedValue = this.value.replace(/[\\()$]/g, (match) => '\\' + match);
         return "(" + escapedValue + ")";
     }
+
+    GetValue(mode) {
+        return { type: "string", value: this.value };
+    }
+
+    Execute(mode) {
+        if (mode == "PostScript") {
+            const interp = activeInterpreter;
+            interp.stack.push({ type: "string", value: this.value });
+            return;
+        }
+    }
 }
 
 class Name extends RingItem {
@@ -911,6 +1014,20 @@ class Name extends RingItem {
         // \ と PostScript構文文字 ($ も含む) をエスケープ
         const escapedValue = this.value.replace(/[\\~{}<>()\[\]$]/g, (match) => '\\' + match);
         return "~" + escapedValue;
+    }
+
+    GetValue(mode) {
+        const interp = activeInterpreter;
+        return { type: "name", value: this.value };
+    }
+
+    Execute(mode) {
+        if (mode == "PostScript") {
+            const interp = activeInterpreter;
+            interp.stack.push({ type: "name", value: this.value });
+            return;
+        }
+        return;
     }
 }
 
@@ -1051,6 +1168,35 @@ class Joint extends RingItem {
             //return spell;
         }
         return "";
+    }
+
+    GetValue(mode) {
+        return this.value.GetValue(mode);
+    }
+
+    Execute(mode, subMode = "") {
+        if (mode == "PostScript") {
+            const interp = activeInterpreter;
+            switch (this.value.constructor.name) {
+                case "MagicRing":
+                    if (this.isExecute)
+                        this.value.Execute(mode);
+                    else
+                        interp.stack.push({ type: "magicring", value: this.value });
+                    break;
+                case "ArrayRing":
+                case "DictRing":
+                    interp.stack.push(this.GetValue(mode));
+                    break;
+                case "TemplateRing":
+                    if (this.isExecute)
+                        this.value.Execute(mode);
+                    else
+                        interp.stack.push({ type: "template", value: this.value });
+                    break;
+            }
+            return;
+        }
     }
 
     Straighten(recordUndo = true) {

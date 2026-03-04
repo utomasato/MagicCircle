@@ -14,6 +14,31 @@ const templateDatas = {
             },
         invalidVariableNames: // 入れてほしくない変数（例えば　scaleにrootとか入れられられると困る）
             ["root", "setMagic", "magic", "preset"],
+        execute:
+            (prms) => {
+                const interp = activeInterpreter;
+                const idList = [];
+                for (let i = 0; i < 3; i++) idList.push(interp.generateUUID());
+                let data = { message: "CreateObject", id: idList[0], text: "< ~shape(empty) >", };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                data = { message: "MagicSpell", id: idList[1], text: `< ~main < ~startLifetime [ 0.5 2 ] ~startSpeed 0.5 ~startSize [ 0.2 0.4 ] ~startRotation [ 0 360 ] > ~emission < ~rateOverTime 50 > ~shape < ~angle 5 ~radius 0.0001 > ~colorOverLifetime < ~gradient < ~colorKeys [ [ 0.0 ${prms.color1} ] [ 0.6 ${prms.color2} ] [ 1.0 ${prms.color2} ] ] ~alphaKeys [ [ 0.0 0.0 ] [ 0.5 1.0 ] [ 1.0 0.0 ] ] > > ~rotationOverLifetime < ~z [ -45 45 ] > ~renderer < ~materialName (Smoke_1) > >`, };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                data = { message: "AttachToParent", id: idList[1], text: idList[0], };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                data = { message: "MagicSpell", id: idList[2], text: `< ~main < ~startLifetime [ 0.5 2 ] ~startSpeed 0.5 ~startSize [ 0.2 0.4 ] ~startRotation [ 0 360 ] > ~emission < ~rateOverTime 50 > ~shape < ~angle 5 ~radius 0.0001 > ~colorOverLifetime < ~gradient < ~colorKeys [ [ 0.0 ${prms.color1} ] [ 0.6 ${prms.color2} ] [ 1.0 ${prms.color2} ] ] ~alphaKeys [ [ 0.0 0.0 ] [ 0.5 1.0 ] [ 1.0 0.0 ] ] > >  ~rotationOverLifetime < ~z [ -45 45 ] > ~renderer < ~materialName (Smoke_1) ~shader (Alphablended) ~sortingFudge 10 > >`, };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                data = { message: "AttachToParent", id: idList[2], text: idList[0], };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                data = { message: "TransformObject", id: idList[0], text: `< ~position [ ${prms.position} ] ~rotation[ ${prms.rotation} ] ~scale ${prms.scale} >`, };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                interp.stack.push({ type: "unityObject", value: idList[0] });
+            },
     },
     bullet: {
         parameters:
@@ -33,6 +58,49 @@ const templateDatas = {
             },
         invalidVariableNames:
             ["root", "setMagic", "magic", "preset"],
+        execute:
+            (pram) => {
+                const interp = activeInterpreter;
+                const idList = [];
+                for (let i = 0; i < 7; i++) idList.push(interp.generateUUID());
+                data = { message: "CreateObject", id: idList[0], text: "< ~shape(empty) >", };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                data = { message: "MagicSpell", id: idList[1], text: "< ~main < ~duration 1 ~startLifetime 2 ~startSpeed 10 ~startSize < ~x 30 ~y 30 ~z 75 > ~startColor[1 0.5 0 1 ] > ~emission < ~rateOverTime 0 ~burstCount 2 > ~colorOverLifetime < ~gradient < ~alphaKeys[[0 0][0.05 1 ][0.95 1][1 0 ] ] > > ~renderer < ~renderMode(Mesh) ~meshDistribution(NonUniformRandom) ~meshes(Bullet) ~material < ~texture(Glow_2) > ~alignment(Local) > >", };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+                data = { message: "AttachToParent", id: idList[1], text: idList[0], };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                data = { message: "MagicSpell", id: idList[2], text: "< ~main < ~duration 1 ~startLifetime 2 ~startSpeed 10 ~startSize < ~x 30 ~y 30 ~z 75 > ~startColor[1 0.5 0 1 ] > ~emission < ~rateOverTime 0 ~burstCount 2 > ~colorOverLifetime < ~gradient < ~alphaKeys[[0 0][0.05 1 ][0.95 1][1 0 ] ] > > ~renderer < ~renderMode(Mesh) ~meshDistribution(NonUniformRandom) ~meshes(Bullet) ~material < ~texture(Glow_3) > ~alignment(Local) > ~rotationOverLifetime < ~z 500 > >" };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+                data = { message: "AttachToParent", id: idList[2], text: idList[0], };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                data = { message: "MagicSpell", id: idList[3], text: "< ~main < ~duration 1 ~startLifetime 2 ~startSpeed 10 ~startSize < ~x 30 ~y 30 ~z 75 > ~startColor[1 0.5 0 1 ] > ~emission < ~rateOverTime 0 ~burstCount 2 > ~colorOverLifetime < ~gradient < ~alphaKeys[[0 0][0.05 1 ][0.95 1][1 0 ] ] > > ~renderer < ~renderMode(Mesh) ~meshDistribution(NonUniformRandom) ~meshes(Bullet) ~material < ~shader(AlphaBlended) ~texture(Glow_3) > ~alignment(Local) ~sortingFudge 10 > ~rotationOverLifetime < ~z 500 > >" };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+                data = { message: "AttachToParent", id: idList[3], text: idList[0], };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                data = { message: "MagicSpell", id: idList[4], text: "< ~main < ~duration 1 ~startLifetime 2 ~startSpeed 10 ~startSize < ~x 10 ~y 10 ~z 200 > ~startColor[1 0.5 0 1 ] > ~emission < ~rateOverTime 0 ~burstCount 2 > ~colorOverLifetime < ~gradient < ~alphaKeys[[0 0][0.05 1 ][0.95 1][1 0 ] ] > > ~renderer < ~renderMode(Mesh) ~meshDistribution(NonUniformRandom) ~meshes(Cylinder_1) ~material < ~texture(Spiral) ~shader(Additive) > ~alignment(Local) ~sortingFudge 0 > ~rotationOverLifetime < ~z 800 > >" };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+                data = { message: "AttachToParent", id: idList[4], text: idList[0], };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                data = { message: "MagicSpell", id: idList[5], text: "< ~main < ~duration 1 ~startLifetime 2 ~startSpeed 10 ~startSize 0.1 ~startColor[1 0.5 0 1 ] > ~emission < ~rateOverTime 0 ~burstCount 2 > ~colorOverLifetime < ~gradient < ~alphaKeys[[0 0][0.05 1 ][0.95 1][1 0 ] ] > > ~renderer < ~material < ~texture(Glow_1) > ~trailMaterial < ~texture(Trail_1) > > ~rotationOverLifetime < ~z 800 > ~trails < ~lifetime 0.2 > >" };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+                data = { message: "AttachToParent", id: idList[5], text: idList[0], };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                data = { message: "MagicSpell", id: idList[6], text: "< ~main < ~duration 1 ~startLifetime 2 ~startSpeed 10 ~startSize 0.1 ~startColor[1 0.5 0 1 ] > ~emission < ~rateOverTime 0 ~burstCount 2 > ~colorOverLifetime < ~gradient < ~alphaKeys[[0 0][0.05 1 ][0.95 1][1 0 ] ] > > ~renderer < ~material < ~texture(Glow_1) > ~trailMaterial < ~shader(AlphaBlended) ~texture(Trail_1) > ~sortingFudge 10 > ~rotationOverLifetime < ~z 800 > ~trails < ~lifetime 0.2 > >" };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+                data = { message: "AttachToParent", id: idList[6], text: idList[0], };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                data = { message: "TransformObject", id: idList[0], text: "< ~scale[2 2 2 ] >" };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                interp.stack.push({ type: "unityObject", value: idList[0] });
+            },
     },
     charge: {
         parameters:
@@ -58,6 +126,56 @@ const templateDatas = {
             },
         invalidVariableNames:
             ["root", "setMagic", "magic", "preset"],
+        execute:
+            (pram) => {
+                const interp = activeInterpreter;
+                const idList = [];
+                for (let i = 0; i < 8; i++) idList.push(interp.generateUUID());
+                let data;
+
+                data = { message: "CreateObject", id: idList[0], text: "< ~shape (empty) >" };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                data = { message: "MagicSpell", id: idList[1], text: "< ~main < ~duration 2 ~startLifetime 1 ~startSpeed 0 ~startColor [ 1 0.5 0 1 ] > ~emission < ~rateOverTime 0 ~burstCount 20 > ~shape < ~shape (Sphere) ~radius 4 ~radiusThickness 0.2 > ~velocityOverLifetime < ~orbitalY [ [ 0 0 ] [ 1 15 ] ] ~radial -5 > ~colorOverLifetime < ~gradient < ~alphaKeys [ [ 0 0 ] [ 0.2 1 ] [ 1 1 ] ] > > ~trails < ~lifetime [ 0.1 0.2 ] ~minVertexDistance 0.1 ~sizeAffectsWidth false ~widthOverTrail [ [ 0 0.05 ] [ 1 0 ] ] > ~renderer < ~renderMode (None) ~trailMaterialName (Smoke_2) > >" };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+                data = { message: "AttachToParent", id: idList[1], text: idList[0] };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                data = { message: "MagicSpell", id: idList[2], text: "< ~main < ~duration 2 ~startLifetime 1 ~startSpeed 0 ~startColor [ 0.25 0.2 0 1 ] > ~emission < ~rateOverTime 0 ~burstCount 8 > ~shape < ~shape (Sphere) ~radius 4 ~radiusThickness 0.2 > ~velocityOverLifetime < ~orbitalY [ [ 0 0 ] [ 1 15 ] ] ~radial -5 > ~colorOverLifetime < ~gradient < ~alphaKeys [ [ 0 0 ] [ 0.2 1 ] [ 1 1 ] ] > > ~trails < ~lifetime [ 0.1 0.2 ] ~minVertexDistance 0.1 ~sizeAffectsWidth false ~widthOverTrail [ [ 0 0.15 ] [ 1 0.02 ] ] > ~renderer < ~renderMode (None) ~trailMaterialName (Smoke_2) ~shader (alphablended) > >" };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+                data = { message: "AttachToParent", id: idList[2], text: idList[0] };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                data = { message: "MagicSpell", id: idList[3], text: "< ~main < ~duration 2 ~startLifetime [ 0.7 1 ] ~startSpeed 0 ~startColor [ 1 0.8 0.6 1 ] ~startSize [ 0.2 0.3 ] > ~emission < ~rateOverTime 0 ~burstCount 20 > ~shape < ~shape (Sphere) ~radius 4 ~radiusThickness 0.2 > ~velocityOverLifetime < ~orbitalY [ [ 0 0 ] [ 1 10 ] ] ~radial [ -2 -3 ] > ~colorOverLifetime < ~gradient < ~alphaKeys [ [ 0 0 ] [ 0.2 1 ] [ 0.8 1 ] [ 1 0 ] ] > > ~trails < ~lifetime [ 0.1 0.2 ] ~minVertexDistance 0.1 ~sizeAffectsWidth false ~widthOverTrail [ [ 0 0.15 ] [ 1 0.02 ] ] ~enabled false > ~renderer < ~materialName (Cross) > >" };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+                data = { message: "AttachToParent", id: idList[3], text: idList[0] };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                data = { message: "MagicSpell", id: idList[4], text: "< ~main < ~duration 2 ~startLifetime [ 0.7 1 ] ~startSpeed 0 ~startColor [ 1 0.5 0 0.1 ] ~startSize [ 2 3 ] ~startRotation [ 0 360 ] > ~emission < ~rateOverTime 0 ~burstCount 100 > ~shape < ~shape (Sphere) ~radius 4 ~radiusThickness 0.2 > ~velocityOverLifetime < ~orbitalY [ [ 0 1 ] [ 1 20 ] ] ~radial -5 > ~colorOverLifetime < ~gradient < ~alphaKeys [ [ 0 0 ] [ 1 0.5 ] ] > > ~trails < ~lifetime [ 0.1 0.2 ] ~minVertexDistance 0.1 ~sizeAffectsWidth false ~widthOverTrail [ [ 0 0.15 ] [ 1 0.02 ] ] ~enabled false > ~renderer < ~materialName (Smoke_2) > ~sizeOverLifetime < ~size [ [ 0 1 ] [ 0.5 1 ] [ 1 0 ] ] > >" };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+                data = { message: "AttachToParent", id: idList[4], text: idList[0] };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                data = { message: "MagicSpell", id: idList[5], text: "< ~main < ~duration 2 ~startLifetime [ 0.7 1 ] ~startSpeed 0 ~startColor [ 1 0.5 0 0.05 ] ~startSize [ 2 3 ] ~startRotation [ 0 360 ] > ~emission < ~rateOverTime 0 ~burstCount 100 > ~shape < ~shape (Sphere) ~radius 4 ~radiusThickness 0.2 > ~velocityOverLifetime < ~orbitalY [ [ 0 1 ] [ 1 20 ] ] ~radial -5 > ~colorOverLifetime < ~gradient < ~alphaKeys [ [ 0 0 ] [ 1 0.5 ] ] > > ~trails < ~lifetime [ 0.1 0.2 ] ~minVertexDistance 0.1 ~sizeAffectsWidth false ~widthOverTrail [ [ 0 0.15 ] [ 1 0.02 ] ] ~enabled false > ~renderer < ~materialName (Smoke_2) ~shader (alphablended) ~sortingFudge 10 > ~sizeOverLifetime < ~size [ [ 0 1 ] [ 0.5 1 ] [ 1 0 ] ] > >" };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+                data = { message: "AttachToParent", id: idList[5], text: idList[0] };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                data = { message: "MagicSpell", id: idList[6], text: "< ~main < ~duration 2 ~startDelay 0.2 ~startLifetime 1 ~startSpeed 0 ~startSize 1.5 ~startColor [ 1 0.5 0 1 ] > ~emission < ~rateOverTime 0 ~burstCount 5 > ~sizeOverLifetime < ~size [ [ 0 0 ] [ 0.3 0.6 ] [ 0.7 1 ] [ 1 0 ] ] > ~renderer < ~materialName (Grow_1) > >" };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+                data = { message: "AttachToParent", id: idList[6], text: idList[0] };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                data = { message: "MagicSpell", id: idList[7], text: "< ~main < ~duration 2 ~startDelay 0.2 ~startLifetime 1 ~startSpeed 0 ~startSize 1.5 ~startColor [ 0.5 0.3 0 1 ] > ~emission < ~rateOverTime 0 ~burstCount 5 > ~sizeOverLifetime < ~size [ [ 0 0 ] [ 0.3 0.6 ] [ 0.7 1 ] [ 1 0 ] ] > ~renderer < ~materialName (Grow_1) ~shader (alphablended) ~sortingFudge 10 > >" };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+                data = { message: "AttachToParent", id: idList[7], text: idList[0] };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                data = { message: "TransformObject", id: idList[0], text: "< ~scale 1 >" };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                interp.stack.push({ type: "unityObject", value: idList[0] });
+            },
     },
     barrier: {
         parameters: {
@@ -72,98 +190,105 @@ const templateDatas = {
             },
         invalidVariableNames: // 入れてほしくない変数
             ["root", "setMagic", "magic", "preset"],
+        execute:
+            (prms) => {
+                const interp = activeInterpreter;
+                const idList = [];
+                for (let i = 0; i < 4; i++) idList.push(interp.generateUUID());
+                let data;
+
+                data = { message: "CreateObject", id: idList[0], text: "< ~shape (empty) >" };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                data = { message: "MagicSpell", id: idList[1], text: "< ~main < ~startLifetime 2 ~startSpeed 0 ~startSize 100 ~startRotation < ~x [ 0 360 ] ~y [ 0 360 ] ~z [ 0 360 ] > ~startColor [ 0.4 0.8 1 1 ] > ~emission < ~rateOverTime 2 > ~colorOverLifetime < ~gradient < ~alphaKeys [ [ 0 0 ] [ 0.3 1 ] [ 1 0 ] ] > > ~customData < ~x 0.2 ~y 0.2 ~z 0.85 ~w 0.35 > ~renderer < ~renderMode (Mesh) ~meshes (Sphere_1) ~material < ~texture (Smoke_4) ~shader (Aura) > ~alignment (Local) > >" };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+                data = { message: "AttachToParent", id: idList[1], text: idList[0] };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+                data = { message: "TransformObject", id: idList[1], text: "< ~position [ 0 0.7 0 ] >" };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                data = { message: "MagicSpell", id: idList[2], text: "< ~main < ~startLifetime 2 ~startSpeed 0 ~startSize 100 ~startRotation < ~x [ 0 360 ] ~y [ 0 360 ] ~z [ 0 360 ] > ~startColor [ 0.4 0.8 1 1 ] > ~emission < ~rateOverTime 2 > ~colorOverLifetime < ~gradient < ~alphaKeys [ [ 0 0 ] [ 0.3 1 ] [ 1 0 ] ] > > ~customData < ~x 0.2 ~y 0.2 ~z 2.8 ~w 1 > ~renderer < ~renderMode (Mesh) ~meshes (Sphere_1) ~material < ~shader (Aura) > ~alignment (Local) > >" };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+                data = { message: "AttachToParent", id: idList[2], text: idList[0] };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+                data = { message: "TransformObject", id: idList[2], text: "< ~position [ 0 0.7 0 ] >" };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                data = { message: "MagicSpell", id: idList[3], text: "< ~main < ~startLifetime 2 ~startSpeed 0 ~startSize 100 ~startRotation < ~y [ 0 360 ] > ~startColor [ 0.4 0.8 1 1 ] > ~emission < ~rateOverTime 2 > ~colorOverLifetime < ~gradient < ~alphaKeys [ [ 0 0 ] [ 0.3 1 ] [ 1 0 ] ] > > ~customData < ~x -0.3 ~y [ -0.3 0.3 ] ~z 0.8 ~w 0.35 > ~renderer < ~renderMode (Mesh) ~meshes (Ring_1) ~material < ~texture (Smoke_4) ~shader (Aura) > ~alignment (Local) > ~sizeOverLifetime < ~size [ [ 0 0.5 ] [ 1 1 ] ] > >" };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+                data = { message: "AttachToParent", id: idList[3], text: idList[0] };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                data = { message: "TransformObject", id: idList[0], text: "< ~scale 1 >" };
+                sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
+
+                interp.stack.push({ type: "unityObject", value: idList[0] });
+            },
     },
 };
 
 
-function magicTemplates(magic, spell) {
-    const [prms, prmfgs] = code2parameters(templateDatas[magic], spell)
-    console.log(prms);
-    const convertedSpell = templateDatas[magic].converter(prms, prmfgs);
-    return convertedSpell;
+function ExecuteTemplateMagic(magic, values) {
+    const prms = EvaluateParameters(magic, values);
+    templateDatas[magic].execute(prms);
 }
 
-function code2parameters(magicData, spell) {
-    const tokens = activeInterpreter.parse(spell);
-    console.log(tokens);
-    let lastName = null;
-    let prms = Object.fromEntries(
-        Object.entries(magicData.parameters).map(([key, value]) => [key, value.defaultValue])
-    );
-    let prmfgs = Object.fromEntries(
-        Object.entries(magicData.parameters).map(([key, value]) => [key, false])
-    );
+function GetTemplateSpell(magic) {
+    return "{aaaa}";
+}
 
-    // 配列内のトークンを文字列化するヘルパー関数
-    const tokenToString = (token) => {
-        if (typeof token === 'string') return token;
-        if (typeof token === 'object' && token.type === 'variable_name') return "$" + token.value;
-        return "";
-    };
+function EvaluateParameters(magic, values) {
+    const magicData = templateDatas[magic];
+    let prms = Object.fromEntries(Object.entries(magicData.parameters).map(([key, value]) => [key, value.defaultValue]));
+    for (let i = 0; i < values.length; i++) {
+        const key = values[i];
+        const val = values[i + 1];
+        if (val == undefined) break;
+        if (key.type != "name") continue;
+        i++;
+        let array = [];
+        console.log([key, val]);
+        switch (magicData.parameters[key.value].type) {
+            case "number":
+                if (val.type == "number")
+                    prms[key.value] = val.value;
+                break;
+            case "vector3":
+                if (val.type == "array") {
 
-    for (let i = 0; i < tokens.length; i++) {
-        const token = tokens[i];
-        if (lastName) {
-            if (prms[lastName]) {
-                if (typeof token == "object" && token.type == "variable_name") // 変数が代入されようとしている時
-                {
-                    if (!(magicData.invalidVariableNames.includes(token.value))) {
-                        prms[lastName] = "$" + token.value;
-                        prmfgs[lastName] = true;
+                    for (const item of val.value) {
+                        if (item.type == "number")
+                            array.push(item.value);
                     }
-                    lastName = null;
-                    continue;
+                    console.log(array);
+                    prms[key.value] = array.slice(0, 3).join(" ");
                 }
+                break;
+            case "numberOrVector3":
+                if (val.type == "number") {
+                    prms[key.value] = val.value;
+                    break;
+                }
+                if (val.type == "array") {
+                    for (const item of val.value) {
+                        if (item.type == "number")
+                            array.push(item.value);
+                    }
+                    prms[key.value] = "[ " + array.slice(0, 3).join(" ") + " ]";
+                }
+                break;
+            case "color":
+                if (val.type == "array") {
 
-                switch (magicData.parameters[lastName].type) {
-                    case "boolean":
-                        if (typeof token == "string" && (token in ["true", "false"])) {
-                            prms[lastName] = token;
-                            prmfgs[lastName] = true;
-                        }
-                        break;
-                    case "number":
-                        if (typeof token == "string") {
-                            prms[lastName] = token.match(/^\s*-?0+(\.0+)?\s*$/) ? "0.001" : token;
-                            prmfgs[lastName] = true;
-                        }
-                        break;
-                    case "vector3":
-                        if (typeof token == "object" && token.type == "array" && token.value.length >= 3) {
-                            // 変数オブジェクトを文字列に戻して結合
-                            prms[lastName] = token.value.slice(0, 3).map(tokenToString).join(" ");
-                            prmfgs[lastName] = true;
-                        }
-                        break;
-                    case "numberOrVector3":
-                        if (typeof token == "string") {
-                            prms[lastName] = token;
-                            prmfgs[lastName] = true;
-                        }
-                        else if (typeof token == "object" && token.type == "array" && token.value.length >= 3) {
-                            prms[lastName] = "[ " + token.value.slice(0, 3).map(tokenToString).join(" ") + " ]";
-                            prmfgs[lastName] = true;
-                        }
-                        break
-                    case "color":
-                        if (typeof token == "object" && token.type == "array" && token.value.length >= 3) {
-                            prms[lastName] = token.value.slice(0, 4).map(tokenToString).join(" ");
-                            prmfgs[lastName] = true;
-                        }
-                        else if (typeof token == "string" && token.match(/^\(.*\)$/) && colorsDict[token.slice(1, -1).toLowerCase()]) {
-                            prms[lastName] = colorsDict[token.slice(1, -1).toLowerCase()];
-                            prmfgs[lastName] = true;
-                        }
-                        break;
+                    for (const item of val.value) {
+                        if (item.type == "number")
+                            array.push(item.value);
+                    }
+                    console.log(array);
+                    prms[key.value] = array.slice(0, 4).join(" ");
                 }
-            }
-            lastName = null;
-        }
-        else {
-            if (token[0] === "~") {
-                lastName = token.slice(1).toLowerCase();
-            }
+                break;
         }
     }
-    return [prms, prmfgs];
+    return prms;
 }

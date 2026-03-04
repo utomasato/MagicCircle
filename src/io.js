@@ -238,7 +238,8 @@ function importFromXML(xmlString, mode) {
         switch (type) {
             case 'sigil': newItem = new Sigil(x, y, value, parentRing); break;
             case 'chars': newItem = new Chars(x, y, value, parentRing); break;
-            case 'string_token': newItem = new StringToken(x, y, value, parentRing); break;
+            case 'string_token':
+            case 'string': newItem = new StringToken(x, y, value, parentRing); break;
             case 'name': newItem = new Name(x, y, value, parentRing); break;
             case 'joint':
                 // Jointの接続先(value)は後のステップで解決する

@@ -8,6 +8,7 @@
 // =============================================
 class PostscriptInterpreter {
     constructor() {
+        this.type = "PostScript";
         this.stack = [];
         this.dictStack = [{}]; // 0番目はグローバル辞書
         this.commandLoopLevel = 0;
@@ -18,16 +19,16 @@ class PostscriptInterpreter {
             exch: () => { const [a, b] = [this.stack.pop(), this.stack.pop()]; this.stack.push(a, b); },
             dup: () => { const a = this.stack[this.stack.length - 1]; this.stack.push(a); },
             copy: () => {
-                const n = this.stack.pop();
+                const n = this.stack.pop().value;
                 const items = this.stack.slice(-n);
                 this.stack.push(...items);
             },
             index: () => {
-                const n = this.stack.pop();
+                const n = this.stack.pop().value;
                 this.stack.push(this.stack[this.stack.length - 1 - n]);
             },
             roll: () => {
-                let [count, n] = [this.stack.pop(), this.stack.pop()];
+                let [count, n] = [this.stack.pop().value, this.stack.pop().value];
                 if (n < 0) return;
                 const items = this.stack.splice(this.stack.length - n);
                 count = count % n;
@@ -35,19 +36,34 @@ class PostscriptInterpreter {
                 const rotated = items.slice(-count).concat(items.slice(0, -count));
                 this.stack.push(...rotated);
             },
-            add: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push(a + b); },
-            sub: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push(a - b); },
-            mul: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push(a * b); },
-            div: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push(a / b); },
-            idiv: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push(Math.trunc(a / b)); },
-            mod: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push(a % b); },
-            abs: () => { this.stack.push(Math.abs(this.stack.pop())); },
-            neg: () => { this.stack.push(-this.stack.pop()); },
-            sqrt: () => { this.stack.push(Math.sqrt(this.stack.pop())); },
-            atan: () => { const [x, y] = [this.stack.pop(), this.stack.pop()]; this.stack.push(Math.atan2(y, x) * 180 / Math.PI); },
-            cos: () => { this.stack.push(Math.cos(this.stack.pop() * Math.PI / 180)); },
-            sin: () => { this.stack.push(Math.sin(this.stack.pop() * Math.PI / 180)); },
-            rand: () => { this.stack.push(Math.floor(Math.random() * 2147483647)); },
+            add: () => {
+                const [b, a] = [this.stack.pop(), this.stack.pop()];
+                if (a === null || b === null || typeof a !== 'object' || typeof b !== 'object')
+                    throw new Error("`add`: null または不正な値は足し算できません。");
+                if (a.type === "number" && b.type === "number") {
+                    this.stack.push({ type: "number", value: a.value + b.value });
+                    return;
+                }
+                const isAValidText = a.type === "string" || a.type === "number";
+                const isBValidText = b.type === "string" || b.type === "number";
+                if (isAValidText && isBValidText) {
+                    this.stack.push({ type: "string", value: String(a.value) + String(b.value) });
+                    return;
+                }
+                throw new TypeError(`\`add\`: 不正な型です。${a.type} と ${b.type} は足し算できません。`);
+            },
+            sub: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push({ type: "number", value: a.value - b.value }); },
+            mul: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push({ type: "number", value: a.value * b.value }); },
+            div: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push({ type: "number", value: a.value / b.value }); },
+            idiv: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push({ type: "number", value: Math.trunc(a.value / b.value) }); },
+            mod: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push({ type: "number", value: a.value % b.value }); },
+            abs: () => { this.stack.push({ type: "number", value: Math.abs(this.stack.pop().value) }); },
+            neg: () => { this.stack.push({ type: "number", value: -this.stack.pop().value }); },
+            sqrt: () => { this.stack.push({ type: "number", value: Math.sqrt(this.stack.pop().value) }); },
+            atan: () => { const [x, y] = [this.stack.pop(), this.stack.pop()]; this.stack.push({ type: "number", value: Math.atan2(y.value, x.value) * 180 / Math.PI }); },
+            cos: () => { this.stack.push({ type: "number", value: Math.cos(this.stack.pop().value * Math.PI / 180) }); },
+            sin: () => { this.stack.push({ type: "number", value: Math.sin(this.stack.pop().value * Math.PI / 180) }); },
+            rand: () => { this.stack.push({ type: "number", value: Math.floor(Math.random() * 2147483647) }); },
             srand: () => { /* Not implemented */ },
             rrand: () => { /* Not implemented */ },
             length: () => {
@@ -62,86 +78,131 @@ class PostscriptInterpreter {
                 } else {
                     throw new Error("`length` requires an array, dictionary, or string.");
                 }
-                this.stack.push(len);
+                this.stack.push({ type: "number", value: len });
             },
             get: () => {
-                const indexOrKey = this.stack.pop();
+                const indexOrKeyItem = this.stack.pop();
                 const collection = this.stack.pop();
-                let val = null;
-
-                if (typeof collection === 'object' && collection !== null && collection.type === 'array' && Array.isArray(collection.value)) {
-                    val = collection.value[indexOrKey];
-                } else if (typeof collection === 'object' && collection !== null && collection.type === 'string' && Array.isArray(collection.value)) {
-                    val = collection.value[indexOrKey].charCodeAt(0);
-                } else if (typeof collection === 'object' && collection !== null && collection.type === 'dict') {
-                    // 連想配列として直接アクセス
-                    val = collection.value[String(indexOrKey)];
-                } else {
-                    throw new Error("`get` requires an array, dictionary, or string.");
+                if (indexOrKeyItem === undefined || collection === undefined) {
+                    throw new Error("`get`: スタックの要素が足りません (Stack underflow)。");
                 }
-                this.stack.push(val !== undefined ? val : null); // 見つからない場合はnullをpush
+                let val = undefined;
+                if (collection !== null && typeof collection === 'object') {
+                    if (collection.type === 'array' && Array.isArray(collection.value)) {
+                        const index = indexOrKeyItem.value !== undefined ? indexOrKeyItem.value : indexOrKeyItem;
+                        val = collection.value[index];
+                    } else if (collection.type === 'string') {
+                        const index = indexOrKeyItem.value !== undefined ? indexOrKeyItem.value : indexOrKeyItem;
+                        const str = String(collection.value);
+                        if (typeof index === 'number' && index >= 0 && index < str.length) {
+                            val = { type: "string", value: str[index] };
+                        }
+                    } else if (collection.type === 'dict' && typeof collection.value === 'object') {
+                        const keyType = indexOrKeyItem.type || typeof indexOrKeyItem;
+                        const keyValue = indexOrKeyItem.value !== undefined ? indexOrKeyItem.value : indexOrKeyItem;
+                        const keyStr = keyType + "-" + String(keyValue);
+                        val = collection.value[keyStr];
+                    } else {
+                        throw new TypeError(`\`get\`: 不正な型です。${collection.type} からは値を取得できません。`);
+                    }
+                } else {
+                    throw new TypeError("`get`: コレクションは配列、文字列、または辞書である必要があります。");
+                }
+
+                this.stack.push(val !== undefined ? val : null);
             },
             put: () => {
-                const value = this.stack.pop();
-                const indexOrKey = this.stack.pop();
+                const valueItem = this.stack.pop();
+                const indexOrKeyItem = this.stack.pop();
                 const collection = this.stack.pop();
-
-                if (typeof collection === 'object' && collection !== null && collection.type === 'array' && Array.isArray(collection.value)) {
-                    collection.value[indexOrKey] = value;
-                } else if (typeof collection === 'object' && collection !== null && collection.type === 'string' && Array.isArray(collection.value)) {
-                    collection.value[indexOrKey] = String.fromCharCode(value);
-                } else if (typeof collection === 'object' && collection !== null && collection.type === 'dict') {
-                    // 連想配列として直接値を設定
-                    collection.value[String(indexOrKey)] = value;
+                if (valueItem === undefined || indexOrKeyItem === undefined || collection === undefined) {
+                    throw new Error("`put`: スタックの要素が足りません (Stack underflow)。");
+                }
+                if (collection !== null && typeof collection === 'object') {
+                    if (collection.type === 'array' && Array.isArray(collection.value)) {
+                        const index = indexOrKeyItem.value !== undefined ? indexOrKeyItem.value : indexOrKeyItem;
+                        collection.value[index] = valueItem;
+                    } else if (collection.type === 'string') {
+                        const index = indexOrKeyItem.value !== undefined ? indexOrKeyItem.value : indexOrKeyItem;
+                        const charStr = valueItem.value !== undefined ? String(valueItem.value) : String(valueItem);
+                        const str = String(collection.value);
+                        if (typeof index === 'number' && index >= 0 && index < str.length) {
+                            // 文字列の指定インデックスを上書き
+                            collection.value = str.substring(0, index) + charStr.charAt(0) + str.substring(index + 1);
+                        }
+                    } else if (collection.type === 'dict' && typeof collection.value === 'object') {
+                        // DictRing の仕様(type-value)に合わせてキーを生成
+                        const keyType = indexOrKeyItem.type || typeof indexOrKeyItem;
+                        const keyValue = indexOrKeyItem.value !== undefined ? indexOrKeyItem.value : indexOrKeyItem;
+                        const keyStr = keyType + "-" + String(keyValue);
+                        collection.value[keyStr] = valueItem;
+                    } else {
+                        throw new TypeError(`\`put\`: 不正な型です。${collection.type} には値を設定できません。`);
+                    }
                 } else {
-                    throw new Error("`put` requires an array, dictionary, or string.");
+                    throw new TypeError("`put`: コレクションは配列、文字列、または辞書である必要があります。");
                 }
             },
             string: () => {
-                const n = this.stack.pop();
-                this.stack.push({ type: 'string', value: new Array(n).fill('\0') });
+                const nItem = this.stack.pop();
+                const n = nItem && nItem.value !== undefined ? nItem.value : nItem;
+                if (typeof n !== 'number' || n < 0) {
+                    throw new Error("`string`: 文字列の長さには正の整数を指定してください。");
+                }
+                this.stack.push({ type: 'string', value: " ".repeat(n) });
             },
             cvi: () => {
-                const str = this.stack.pop();
+                const strItem = this.stack.pop();
+                const str = strItem && strItem.value !== undefined ? String(strItem.value) : String(strItem);
                 let charCode = -1;
-                if (typeof str === 'object' && str !== null && str.type === 'string' && str.value.length > 0) {
-                    charCode = str.value[0].charCodeAt(0);
-                } else if (typeof str === 'string' && str.length > 0) {
+                if (str.length > 0) {
                     charCode = str.charCodeAt(0);
                 } else {
-                    throw new Error("`cvi` requires a string.");
+                    throw new Error("`cvi`: 空の文字列は変換できません。");
                 }
-                this.stack.push(charCode);
+                this.stack.push({ type: "number", value: charCode });
             },
             chr: () => {
-                const charCode = this.stack.pop();
+                const charCodeItem = this.stack.pop();
+                const charCode = charCodeItem && charCodeItem.value !== undefined ? charCodeItem.value : charCodeItem;
                 if (typeof charCode !== 'number') {
-                    throw new Error("`chr` requires an integer.");
+                    throw new Error("`chr`: 整数を指定してください。");
                 }
-                this.stack.push({ type: 'string', value: [String.fromCharCode(charCode)] });
+                this.stack.push({ type: 'string', value: String.fromCharCode(charCode) });
             },
             getinterval: () => {
-                const [count, index, arr] = [this.stack.pop(), this.stack.pop(), this.stack.pop()];
-
-                if (arr && arr.value && (arr.type === 'array' || arr.type === 'string')) {
-                    // 値をスライスして新しいオブジェクトとして返す（複製）
-                    const newVal = arr.value.slice(index, index + count);
-                    this.stack.push({ type: arr.type, value: newVal });
-                } else if (Array.isArray(arr)) { // 生の配列の場合
-                    this.stack.push(arr.slice(index, index + count));
+                const countItem = this.stack.pop();
+                const indexItem = this.stack.pop();
+                const arrItem = this.stack.pop();
+                const count = countItem && countItem.value !== undefined ? countItem.value : countItem;
+                const index = indexItem && indexItem.value !== undefined ? indexItem.value : indexItem;
+                if (arrItem && arrItem.value !== undefined && (arrItem.type === 'array' || arrItem.type === 'string')) {
+                    let newVal;
+                    if (arrItem.type === 'array' && Array.isArray(arrItem.value)) {
+                        newVal = arrItem.value.slice(index, index + count);
+                    } else {
+                        newVal = String(arrItem.value).substring(index, index + count);
+                    }
+                    this.stack.push({ type: arrItem.type, value: newVal });
                 } else {
-                    throw new Error("`getinterval` requires an array or string.");
+                    throw new Error("`getinterval`: コレクションは配列または文字列である必要があります。");
                 }
             },
             putinterval: () => {
-                const [subArr, index, arr] = [this.stack.pop(), this.stack.pop(), this.stack.pop()];
-
-                // 配列同士または文字列同士の互換性チェック
-                if (arr && arr.value && subArr && subArr.value && arr.type === subArr.type) {
-                    // spliceを使って要素を置換
-                    arr.value.splice(index, subArr.value.length, ...subArr.value);
+                const subArrItem = this.stack.pop();
+                const indexItem = this.stack.pop();
+                const arrItem = this.stack.pop();
+                const index = indexItem && indexItem.value !== undefined ? indexItem.value : indexItem;
+                if (arrItem && arrItem.value !== undefined && subArrItem && subArrItem.value !== undefined && arrItem.type === subArrItem.type) {
+                    if (arrItem.type === 'array' && Array.isArray(arrItem.value) && Array.isArray(subArrItem.value)) {
+                        arrItem.value.splice(index, subArrItem.value.length, ...subArrItem.value);
+                    } else if (arrItem.type === 'string') {
+                        const originalStr = String(arrItem.value);
+                        const subStr = String(subArrItem.value);
+                        arrItem.value = originalStr.substring(0, index) + subStr + originalStr.substring(index + subStr.length);
+                    }
                 } else {
-                    throw new Error("`putinterval` requires compatible arrays or strings.");
+                    throw new Error("`putinterval`: 互換性のある配列または文字列を指定してください。");
                 }
             },
             array: () => {
@@ -153,26 +214,32 @@ class PostscriptInterpreter {
                 this.stack.push({ type: 'array', value: newArr });
             },
             forall: () => {
-                const proc = this.stack.pop();
+                const proc = this.stack.pop().value;
                 const collection = this.stack.pop();
 
-                const procedure = Array.isArray(proc) ? proc : (proc.value || []);
-
-                if (typeof collection === 'object' && collection !== null && collection.type === 'array' && Array.isArray(collection.value)) {
+                if (collection.type === 'array') {
                     for (const token of collection.value) {
                         this.stack.push(token); // 配列の要素をスタックに積む
-                        this.run(procedure);
+                        proc.Execute(this.type);
                     }
-                } else if (typeof collection === 'object' && collection !== null && collection.type === 'dict') {
+                } else if (collection.type === 'dict') {
                     for (const [key, value] of Object.entries(collection.value)) {
-                        this.stack.push(key);
+                        let kType = "string";
+                        let kVal = key;
+                        const splitIdx = key.indexOf('-');
+                        if (splitIdx > 0) {
+                            kType = key.slice(0, splitIdx);
+                            kVal = key.slice(splitIdx + 1);
+                            if (kType === "number") kVal = Number(kVal);
+                        }
+                        this.stack.push({ type: kType, value: kVal });
                         this.stack.push(value);
-                        this.run(procedure);
+                        proc.Execute(this.type);
                     }
-                } else if (Array.isArray(collection)) { // 生の配列もサポート
-                    for (const item of collection) {
-                        this.stack.push(item);
-                        this.run(procedure);
+                } else if (collection.type === 'string') {
+                    for (const item of collection.value) {
+                        this.stack.push({ type: "string", value: item });
+                        proc.Execute(this.type);
                     }
                 } else {
                     throw new Error("`forall` requires an array or dictionary on the stack.");
@@ -196,77 +263,70 @@ class PostscriptInterpreter {
             def: () => {
                 const value = this.stack.pop();
                 let key = this.stack.pop();
-                if (typeof key !== 'string' || !key.startsWith('~')) {
+                if (key.type != "name") {
                     throw new Error("`def` requires a literal name (e.g., ~myVar) as a key.");
                 }
                 // 現在の辞書（dictStackの末尾）に定義
-                this.dictStack[this.dictStack.length - 1][key.substring(1)] = value;
+                this.dictStack[this.dictStack.length - 1][key.value] = value;
             },
-            eq: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push(a === b); },
-            ne: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push(a !== b); },
-            ge: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push(a >= b); },
-            gt: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push(a > b); },
-            le: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push(a <= b); },
-            lt: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push(a < b); },
-            and: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push(a && b); },
-            or: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push(a || b); },
-            xor: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push(Boolean(a) !== Boolean(b)); },
-            not: () => { this.stack.push(!this.stack.pop()); },
-            true: () => { this.stack.push(true); },
-            false: () => { this.stack.push(false); },
+            eq: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push({ type: "bool", value: a.value === b.value }); },
+            ne: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push({ type: "bool", value: a.value !== b.value }); },
+            ge: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push({ type: "bool", value: a.value >= b.value }); },
+            gt: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push({ type: "bool", value: a.value > b.value }); },
+            le: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push({ type: "bool", value: a.value <= b.value }); },
+            lt: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push({ type: "bool", value: a.value < b.value }); },
+            and: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push({ type: "bool", value: a.value && b.value }); },
+            or: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push({ type: "bool", value: a.value || b.value }); },
+            xor: () => { const [b, a] = [this.stack.pop(), this.stack.pop()]; this.stack.push({ type: "bool", value: Boolean(a.value) !== Boolean(b.value) }); },
+            not: () => { this.stack.push({ type: "bool", value: !this.stack.pop().value }); },
+            true: () => { this.stack.push({ type: "bool", value: true }); },
+            false: () => { this.stack.push({ type: "bool", value: false }); },
             null: () => { this.stack.push(null); },
             exec: () => {
                 const proc = this.stack.pop();
                 if (proc === undefined) {
                     throw new Error("`exec`: Stack underflow. Requires a procedure on the stack.");
                 }
-                if (Array.isArray(proc)) {
-                    this.run(proc);
+                if (proc.type == "magicring") {
+                    proc.value.Execute(this.type);
                     return;
-                }
-                if (typeof proc === 'string' && proc.startsWith('~')) {
-                    const value = this.lookupVariable(proc.substring(1));
-                    if (value === undefined) throw new Error(`\`exec\`: Undefined variable ${proc}`);
-                    if (Array.isArray(value)) {
-                        this.run(value);
-                        return;
-                    }
                 }
                 throw new Error(`\`exec\`: Requires a procedure but received a different type.`);
             },
             if: () => {
-                const proc = this.stack.pop();
-                const bool = this.stack.pop();
-                if (bool) this.run(proc);
+                const proc = this.stack.pop().value;
+                const bool = this.stack.pop().value;
+                if (bool) proc.Execute(this.type);
             },
             ifelse: () => {
-                const proc2 = this.stack.pop();
-                const proc1 = this.stack.pop();
-                const bool = this.stack.pop();
-                if (bool) this.run(proc1);
-                else this.run(proc2);
+                const proc2 = this.stack.pop().value;
+                const proc1 = this.stack.pop().value;
+                const bool = this.stack.pop().value;
+                if (bool) proc1.Execute(this.type);
+                else proc2.Execute(this.type);
             },
             repeat: () => {
                 const proc = this.stack.pop();
                 const n = this.stack.pop();
-                for (let i = 0; i < n; i++) this.run(proc);
+                if ((proc.type == "magicring" || proc.type == "template") && n.type == "number")
+                    for (let i = 0; i < n.value; i++) proc.value.Execute(this.type);
             },
             for: () => {
-                const proc = this.stack.pop();
-                const limit = this.stack.pop();
-                const inc = this.stack.pop();
-                let i = this.stack.pop();
+                const proc = this.stack.pop().value;
+                const limit = this.stack.pop().value;
+                const inc = this.stack.pop().value;
+                let i = this.stack.pop().value;
                 if (inc > 0) {
-                    for (; i <= limit; i += inc) { this.stack.push(i); this.run(proc); }
+                    for (; i <= limit; i += inc) { this.stack.push({ type: "number", value: i }); proc.Execute(this.type); }
                 } else {
-                    for (; i >= limit; i += inc) { this.stack.push(i); this.run(proc); }
+                    for (; i >= limit; i += inc) { this.stack.push({ type: "number", value: i }); proc.Execute(this.type); }
                 }
             },
             loop: () => {
                 const proc = this.stack.pop();
                 this.commandLoopLevel++;
                 try {
-                    while (true) { this.run(proc); }
+                    while (true) { proc.Execute(this.type); }
                 } catch (e) {
                     if (e.message === 'EXIT_LOOP' && e.level === this.commandLoopLevel) { }
                     else { throw e; }
@@ -278,54 +338,51 @@ class PostscriptInterpreter {
             magicactivate: () => {
                 const val = this.stack.pop();
                 let key = null;
-                if (this.stack.length > 0 && typeof this.stack[this.stack.length - 1] === 'string' && this.stack[this.stack.length - 1].startsWith('~')) {
+                if (this.stack.length > 0 && this.stack[this.stack.length - 1].type == "name") {
                     key = this.stack.pop();
                 }
 
                 const id = this.generateUUID();
-                const resolvedVal = this.resolveVariablesInStructure(val);
+                const resolvedVal = this.formatForMpsParser(val);
 
                 const data = {
                     isActive: true,
                     message: "MagicSpell",
                     value: 0,
                     id: id,
-                    text: this.formatForOutput(resolvedVal)
+                    text: resolvedVal,
                 };
 
                 sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
 
                 if (key) {
-                    const variableName = key.substring(1);
-                    const unityObjectRef = { type: 'unityObject', value: id };
-                    this.dictStack[this.dictStack.length - 1][variableName] = unityObjectRef;
+                    const unityObjectRef = { type: "unityObject", value: id };
+                    this.dictStack[this.dictStack.length - 1][key.value] = unityObjectRef;
                 }
             },
             spawnobj: () => {
                 const val = this.stack.pop();
                 let key = null;
-                if (this.stack.length > 0 && typeof this.stack[this.stack.length - 1] === 'string' && this.stack[this.stack.length - 1].startsWith('~')) {
+                if (this.stack.length > 0 && this.stack[this.stack.length - 1].type == "name") {
                     key = this.stack.pop();
                 }
 
-                // --- 変更点: ヘルパーメソッド generateUUID() を使用 ---
                 const id = this.generateUUID();
-                const resolvedVal = this.resolveVariablesInStructure(val);
+                const resolvedVal = this.formatForMpsParser(val);
 
                 const data = {
                     isActive: true,
                     message: "CreateObject",
                     value: 0,
                     id: id,
-                    text: this.formatForOutput(resolvedVal)
+                    text: resolvedVal,
                 };
 
                 sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
 
                 if (key) {
-                    const variableName = key.substring(1);
-                    const unityObjectRef = { type: 'unityObject', value: id };
-                    this.dictStack[this.dictStack.length - 1][variableName] = unityObjectRef;
+                    const unityObjectRef = { type: "unityObject", value: id };
+                    this.dictStack[this.dictStack.length - 1][key.value] = unityObjectRef;
                 }
             },
             transform: () => {
@@ -335,11 +392,11 @@ class PostscriptInterpreter {
                     throw new Error("`transform` requires a Unity object reference on the stack.");
                 }
 
-                const resolvedDict = this.resolveVariablesInStructure(transformDict);
+                const resolvedDict = this.formatForMpsParser(transformDict);
                 const data = {
                     message: "TransformObject",
                     id: unityObjectRef.value, // Use the ID from the object reference
-                    text: this.formatForOutput(resolvedDict)
+                    text: resolvedDict,
                 };
 
                 sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
@@ -367,30 +424,28 @@ class PostscriptInterpreter {
                     throw new Error("`transform` requires a Unity object reference on the stack.");
                 }
 
-                const resolvedDict = this.resolveVariablesInStructure(animationDict);
+                const resolvedDict = this.formatForMpsParser(animationDict);
                 const data = {
                     message: "Animation",
                     id: unityObjectRef.value, // Use the ID from the object reference
-                    text: this.formatForOutput(resolvedDict)
+                    text: resolvedDict,
                 };
 
                 sendJsonToUnity("JsReceiver", "ReceiveGeneralData", data);
             },
-
             print: () => {
                 const val = this.stack.pop();
-                if (typeof val === 'object' && val !== null && val.type === 'string') {
-                    this.output.push(val.value.join(''));
-                } else if (typeof val === 'string') {
-                    this.output.push(val);
-                } else {
-                    this.output.push(this.formatForOutput(val));
-                }
+                console.log(val.value);
+                //this.output.push(this.formatForOutput(val));
+                addConsoleMessage(this.formatForOutput(val))
             },
             stack: () => {
+                const stackview = [];
                 [...this.stack].reverse().forEach(val => {
-                    this.output.push(this.formatForOutput(val));
+                    //this.output.push(this.formatForOutput(val));
+                    stackview.push(this.formatForOutput(val));
                 });
+                addConsoleMessage(stackview);
             },
             color: () => {
                 const [b, g, r] = [this.stack.pop(), this.stack.pop(), this.stack.pop()];
@@ -415,327 +470,67 @@ class PostscriptInterpreter {
         });
     }
 
-    resolveVariablesInStructure(structure) {
-
-        // 1. { type: 'variable_name', value: 'x' } の処理
-        if (typeof structure === 'object' && structure !== null && structure.type === 'variable_name') {
-            const value = this.lookupVariable(structure.value);
-            if (value !== undefined) {
-                // 変数が見つかった (例: value = 1 や value = [1, 2, {type: 'variable_name', value: 'a'}])
-                // 返ってきた値 (value) も解決が必要な可能性があるため、再帰呼び出しする
-                return this.resolveVariablesInStructure(value);
-            } else {
-                // 変数が見つからない
-                return null; // または undefined
-            }
-        }
-
-        // 2. プリミティブ型 (string, number, boolean) はそのまま返す
-        if (typeof structure !== 'object' || structure === null) {
-            // 'add' や 1 や '~pos' など。
-            // これらは変数解決の対象外 (string 'add' は run ループでコマンドとして処理される)
-            return structure;
-        }
-
-        // 3. 生の配列 (JSの配列)
-        if (Array.isArray(structure)) {
-            // (例: { type: 'array' } の .value や、プロシージャ { ... } )
-            // 配列の各アイテムを再帰的に解決
-            return structure.map(item => this.resolveVariablesInStructure(item));
-        }
-
-        // 4. { type: 'array', ... } オブジェクト
-        if (structure.type === 'array') {
-            if (Array.isArray(structure.value)) {
-                const newStructure = { ...structure };
-                // value (トークンの配列) の各要素を解決
-                newStructure.value = structure.value.map(item => this.resolveVariablesInStructure(item));
-                return newStructure;
-            }
-            // value が配列でない場合は、そのまま返す (またはエラー)
-            return structure;
-        }
-
-        // 5. { type: 'dict', ... } オブジェクト
-        if (structure.type === 'dict') {
-            const newStructure = { ...structure, value: {} };
-            for (const key in structure.value) {
-                if (Object.hasOwnProperty.call(structure.value, key)) {
-                    // キーは解決しない
-                    // 値を解決
-                    const resolvedValue = this.resolveVariablesInStructure(structure.value[key]);
-                    newStructure.value[key] = resolvedValue;
-                }
-            }
-            return newStructure;
-        }
-
-        // 6. その他のオブジェクト (例: { type: 'unityObject', ... } )
-        //    これらは変更せずにそのまま返す
-        return structure;
-    }
-
     formatForOutput(val) {
-        if (val === null) return 'null';
-        if (val === undefined) return 'undefined';
-        const type = typeof val;
-        if (type !== 'object') {
-            return String(val);
-        }
-        if (Array.isArray(val)) {
-            return `{${val.map(item => this.formatForOutput(item)).join(' ')}}`;
-        }
-        if (!val.type) {
-            // 一般的なオブジェクトの場合
-            return JSON.stringify(val);
-        }
         switch (val.type) {
-            case 'unityObject':
-                //return "unity";
-                return `UnityObject: ${val.value}`;
-            case 'string':
-                const stringContent = Array.isArray(val.value) ? val.value.join('') : '';
-                return `(${stringContent})`;
-            case 'array':
-                const arrayContent = Array.isArray(val.value)
-                    ? val.value.map(item => this.formatForOutput(item)).join(' ')
-                    : '';
-                return `[${arrayContent}]`;
-            case 'dict':
-                const dictContent = Object.entries(val.value)
-                    .map(([key, value]) => `${key} ${this.formatForOutput(value)}`)
-                    .join(' ');
-                return `<${dictContent}>`;
-            case 'variable_name':
-                return `($${val.value})`;
+            case "name":
+                let name = val.value;
+
+                const splitIdx = val.value.indexOf('-');
+                if (splitIdx > 0) {
+                    name = val.slice(splitIdx + 1);
+                }
+                return name;
+            case "array":
+                let array = [];
+                for (const item of val.value) {
+                    array.push(this.formatForOutput(item));
+                }
+                return "[" + array.join(", ") + "]"
+            case "dict":
+                const dict = [];
+                for (const [key, value] of Object.entries(val.value)) {
+                    const splitIdx = key.indexOf('-');
+                    const Key = splitIdx > 0 ? key.slice(splitIdx + 1) : key;
+                    dict.push(Key + ": " + this.formatForOutput(value));
+                }
+                return "{" + dict.join(", ") + "}";
+            case "magicring":
+                return val.value.Spell()
+            //case "number":
+            //case "string":
+            //case "bool":
             default:
-                return `[Unknown Type: ${val.type}]`;
+                return val.value;
         }
     }
 
-    parse(code) {
-        const tokens = [];
-        let i = 0;
-        while (i < code.length) {
-            const char = code[i];
-
-            if (/\s/.test(char)) {
-                i++;
-                continue;
-            }
-
-            if (char === '{' || char === '[') {
-                const startBracket = char;
-                const endBracket = { '{': '}', '[': ']' }[startBracket];
-                let level = 1;
-                let content = '';
-                i++;
-                while (i < code.length && level > 0) {
-                    const current_char = code[i];
-
-                    if (current_char === '\\') { // エスケープ文字
-                        if (i + 1 < code.length) {
-                            content += current_char; // \ も content に含める
-                            content += code[i + 1]; // 次の文字も content に含める
-                            i += 2;
-                        } else {
-                            throw new Error("Parse error: Escape character (\\) at end of procedure/array.");
-                        }
-                        continue;
-                    }
-
-                    if (current_char === '(') {
-                        let str_level = 1;
-                        content += current_char;
-                        i++;
-                        while (i < code.length && str_level > 0) {
-                            if (code[i] === '\\') { // 文字列内のエスケープ
-                                if (i + 1 < code.length) {
-                                    content += code[i];
-                                    content += code[i + 1];
-                                    i += 2;
-                                } else {
-                                    throw new Error("Parse error: Escape character (\\) at end of string in procedure/array.");
-                                }
-                            } else if (code[i] === '(') {
-                                str_level++;
-                                content += code[i];
-                                i++;
-                            } else if (code[i] === ')') {
-                                str_level--;
-                                content += code[i];
-                                i++;
-                            } else {
-                                content += code[i];
-                                i++;
-                            }
-                        }
-                        continue;
-                    }
-                    if (current_char === startBracket) level++;
-                    if (current_char === endBracket) level--;
-                    if (level > 0) content += current_char;
-                    i++;
+    formatForMpsParser(val) {
+        switch (val.type) {
+            case "dict":
+                const dict = [];
+                for (const [key, value] of Object.entries(val.value)) {
+                    const splitIdx = key.indexOf('-');
+                    const Key = splitIdx > 0 ? key.slice(splitIdx + 1) : key;
+                    dict.push("~" + Key);
+                    dict.push(this.formatForMpsParser(value));
                 }
-                if (level !== 0) throw new Error(`Mismatched brackets. Expected '${endBracket}' but not found.`);
-
-                const innerTokens = this.parse(content);
-                if (startBracket === '{') {
-                    tokens.push(innerTokens);
-                } else { // '['
-                    tokens.push({ type: 'array', value: innerTokens });
+                return "< " + dict.join(" ") + " >";
+            case "array":
+                const array = [];
+                for (const item of val.value) {
+                    array.push(this.formatForMpsParser(item));
                 }
-                continue;
-            }
-
-            if (char === '<') {
-                let level = 1;
-                let content = '';
-                i++;
-                while (i < code.length && level > 0) {
-                    const current_char = code[i];
-                    if (current_char === '<') level++;
-                    if (current_char === '>') level--;
-                    if (level > 0) content += current_char;
-                    i++;
-                }
-                if (level !== 0) throw new Error("Mismatched angle brackets for dictionary.");
-
-                const innerTokens = this.parse(content);
-                const dictObject = {};
-                if (innerTokens.length % 2 !== 0) {
-                    throw new Error("Dictionary literal must have an even number of elements (key-value pairs).");
-                }
-                for (let j = 0; j < innerTokens.length; j += 2) {
-                    let key = innerTokens[j];
-                    if (typeof key === 'string' && key.startsWith('~')) {
-                        // dictObject[key.substring(1)] = innerTokens[j + 1]; // 旧: キーは ~ を除外
-                        dictObject[key] = innerTokens[j + 1]; // 新: キーの ~ を保持
-                    } else if (typeof key === 'object' && key.type === 'literal_name') {
-                        dictObject[key.value] = innerTokens[j + 1]; // キーは \ を除外
-                    } else {
-                        // 数値や文字列キーも許可 (PostScript準拠)
-                        dictObject[String(key)] = innerTokens[j + 1];
-                    }
-                }
-                tokens.push({ type: 'dict', value: dictObject });
-                continue;
-            }
-
-            if (char === '(') {
-                let level = 1;
-                let content = '';
-                i++;
-                while (i < code.length && level > 0) {
-                    if (code[i] === '\\') { // エスケープ文字
-                        if (i + 1 < code.length) {
-                            content += code[i]; // '\' を content に追加
-                            content += code[i + 1]; // エスケープ対象文字を content に追加
-                            i += 2;
-                        } else {
-                            throw new Error("Parse error: Escape character (\\) at end of string literal.");
-                        }
-                    } else if (code[i] === '(') {
-                        level++;
-                        content += code[i]; // '(' を content に追加
-                        i++;
-                    } else if (code[i] === ')') {
-                        level--;
-                        if (level > 0) content += code[i]; // ')' を content に追加 (最後の ')' 以外)
-                        i++;
-                    } else {
-                        content += code[i]; // 通常文字を content に追加
-                        i++;
-                    }
-                }
-                if (level !== 0) throw new Error("Mismatched parentheses in string literal.");
-                tokens.push(`(${content})`); // content にはエスケープ文字が含まれたまま
-                continue;
-            }
-
-            let currentToken = '';
-
-            if (code[i] === '\\') { // エスケープされたリテラル名
-                i++; // \ をスキップ
-                while (i < code.length && !/[\s\{\}\[\]\<\>\(\)]/.test(code[i])) {
-                    if (code[i] === '\\') { // トークン途中のエスケープ
-                        if (i + 1 < code.length) {
-                            currentToken += code[i + 1]; // \ は含めず、次の文字だけ
-                            i += 2;
-                        } else {
-                            throw new Error("Parse error: Escape character (\\) at end of code in token.");
-                        }
-                    } else {
-                        currentToken += code[i];
-                        i++;
-                    }
-                }
-                if (currentToken) tokens.push({ type: 'literal_name', value: currentToken }); // \add -> { type: 'literal_name', value: 'add' }
-
-            } else if (code[i] === '$') { // Chars由来の変数名
-                i++; // $ をスキップ
-                while (i < code.length && !/[\s\{\}\[\]\<\>\(\)]/.test(code[i])) {
-                    if (code[i] === '\\') { // トークン途中のエスケープ
-                        if (i + 1 < code.length) {
-                            currentToken += code[i + 1]; // \ は含めず、次の文字だけ
-                            i += 2;
-                        } else {
-                            throw new Error("Parse error: Escape character (\\) at end of code in token.");
-                        }
-                    } else {
-                        currentToken += code[i];
-                        i++;
-                    }
-                }
-                if (currentToken) tokens.push({ type: 'variable_name', value: currentToken }); // $add -> { type: 'variable_name', value: 'add' }
-
-            } else if (code[i] === '~') { // Name由来の変数名 (def用)
-                currentToken += code[i]; // ~ を含める
-                i++;
-                while (i < code.length && !/[\s\{\}\[\]\<\>\(\)]/.test(code[i])) {
-                    if (code[i] === '\\') { // トークン途中のエスケープ
-                        if (i + 1 < code.length) {
-                            currentToken += '\\'; // \ も含める
-                            currentToken += code[i + 1]; // 次の文字も
-                            i += 2;
-                        } else {
-                            throw new Error("Parse error: Escape character (\\) at end of code in token.");
-                        }
-                    } else {
-                        currentToken += code[i];
-                        i++;
-                    }
-                }
-
-                if (currentToken.length > 1) { // ~add や ~\\~
-                    // def で処理するために、エスケープを解決したキーを ~ につけて渡す
-                    let key = currentToken.substring(1).replace(/\\(.)/g, '$1');
-                    tokens.push("~" + key);
-                } else if (currentToken === '~') {
-                    // ~ 単体はリテラル名として扱う (\~ と同じ)
-                    tokens.push({ type: 'literal_name', value: '~' });
-                }
-
-            } else { // 通常のトークン（コマンド、数値、エスケープなしリテラル）
-                while (i < code.length && !/[\s\{\}\[\]\<\>\(\)]/.test(code[i])) {
-                    if (code[i] === '\\') { // トークン途中のエスケープ
-                        if (i + 1 < code.length) {
-                            currentToken += code[i + 1]; // \ は含めず、次の文字だけ
-                            i += 2;
-                        } else {
-                            throw new Error("Parse error: Escape character (\\) at end of code in token.");
-                        }
-                    } else {
-                        currentToken += code[i];
-                        i++;
-                    }
-                }
-                if (currentToken) tokens.push(currentToken);
-            }
+                return "[ " + array.join(" ") + " ]"
+            case "string":
+                return "(" + val.value + ")";
+            case "name":
+                return "~" + val.value;
+            //case "bool":
+            //case "number":
+            default:
+                return val.value;
         }
-        return tokens;
     }
-
 
     lookupVariable(key) {
         // dictStackの上から（最後に追加されたものから）順番に探す
@@ -747,66 +542,6 @@ class PostscriptInterpreter {
         return undefined;
     }
 
-    run(tokens) {
-        for (const token of tokens) {
-            if (token === null) {
-                this.stack.push(null);
-            } else if (typeof token === 'string' && token.startsWith('(') && token.endsWith(')')) {
-                let strContent = token.slice(1, -1);
-                // エスケープ文字 (\( \_ \) \\ など) を解決
-                strContent = strContent.replace(/\\(.)/g, '$1');
-                this.stack.push({ type: 'string', value: strContent.split('') });
-
-                // ★ literal_name (\add や \~ など)
-            } else if (typeof token === 'object' && token !== null && token.type === 'literal_name') {
-                // \ でエスケープされたものは、リテラル値 (文字列) を積む
-                this.stack.push(token.value);
-
-                // ★ variable_name (Chars由来 $add) の処理
-            } else if (typeof token === 'object' && token !== null && token.type === 'variable_name') {
-                // Chars (例: $add) は、変数としてのみ検索する
-                const value = this.lookupVariable(token.value);
-                if (value !== undefined) {
-                    // 変数が見つかった
-                    if (typeof value === 'object' && value !== null && value.type === 'unityObject') {
-                        this.stack.push(value);
-                    } else if (Array.isArray(value)) {
-                        this.run(value); // プロシージャ実行
-                    } else {
-                        this.stack.push(value); // 値を積む (例: 1)
-                    }
-                } else {
-                    // 変数が見つからない場合、コマンド検索は *せず* エラー
-                    throw new Error(`Undefined variable: ${token.value}`);
-                }
-
-            } else if (typeof token === 'string' && token.startsWith('~')) {
-                this.stack.push(token);
-            } else if (!isNaN(parseFloat(token)) && isFinite(token)) {
-                this.stack.push(parseFloat(token));
-            } else if (Array.isArray(token)) {
-                this.stack.push(token);
-            } else if (typeof token === 'object' && token !== null && token.type && (token.type === 'array' || token.type === 'dict')) {
-                const resolvedToken = this.resolveVariablesInStructure(token);
-                this.stack.push(resolvedToken);
-
-                // --- ★ Sigil (または数値以外) の処理 ---
-            } else if (typeof token === 'string') {
-                // Sigil (例: add) は、コマンドとしてのみ検索する
-                if (this.commands[token]) {
-                    this.commands[token](); // コマンド実行
-                } else {
-                    // Sigil由来のトークンがコマンドにも変数にもない場合
-                    // (※変数検索はしないのがユーザーの要望)
-                    throw new Error(`Undefined command: ${token}`);
-                }
-
-            } else {
-                this.stack.push(token);
-            }
-        }
-    }
-
     execute(code) {
         this.stack = [];
         this.dictStack = [{}];
@@ -814,8 +549,9 @@ class PostscriptInterpreter {
         this.output = [];
 
         try {
-            const tokens = this.parse(code);
-            this.run(tokens);
+            if (startRing) {
+                startRing.Execute(this.type);
+            }
         } catch (e) {
             if (e.message === 'EXIT_LOOP') {
                 throw new Error("`exit` was called outside of a `loop`.");
@@ -823,11 +559,7 @@ class PostscriptInterpreter {
             throw e;
         }
 
-        return {
-            stack: this.stack,
-            dictStack: this.dictStack,
-            output: this.output.join('\n')
-        };
+
     }
 }
 
