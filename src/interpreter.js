@@ -69,12 +69,10 @@ class PostscriptInterpreter {
             length: () => {
                 const obj = this.stack.pop();
                 let len;
-                if (typeof obj === 'object' && obj !== null && (obj.type === 'array' || obj.type === 'string') && Array.isArray(obj.value)) {
+                if (typeof obj === 'object' && obj !== null && (obj.type === 'array' || obj.type === 'string')) {
                     len = obj.value.length;
                 } else if (typeof obj === 'object' && obj !== null && obj.type === 'dict') {
                     len = Object.keys(obj.value).length;
-                } else if (typeof obj === 'string') {
-                    len = obj.length;
                 } else {
                     throw new Error("`length` requires an array, dictionary, or string.");
                 }
@@ -153,7 +151,7 @@ class PostscriptInterpreter {
             },
             cvi: () => {
                 const strItem = this.stack.pop();
-                const str = strItem && strItem.value !== undefined ? String(strItem.value) : String(strItem);
+                const str = strItem.type == "string" ? strItem.value : String(strItem.value);
                 let charCode = -1;
                 if (str.length > 0) {
                     charCode = str.charCodeAt(0);
@@ -196,10 +194,12 @@ class PostscriptInterpreter {
                 if (arrItem && arrItem.value !== undefined && subArrItem && subArrItem.value !== undefined && arrItem.type === subArrItem.type) {
                     if (arrItem.type === 'array' && Array.isArray(arrItem.value) && Array.isArray(subArrItem.value)) {
                         arrItem.value.splice(index, subArrItem.value.length, ...subArrItem.value);
+                        this.stack.push(arrItem);
                     } else if (arrItem.type === 'string') {
                         const originalStr = String(arrItem.value);
                         const subStr = String(subArrItem.value);
                         arrItem.value = originalStr.substring(0, index) + subStr + originalStr.substring(index + subStr.length);
+                        this.stack.push(arrItem);
                     }
                 } else {
                     throw new Error("`putinterval`: 互換性のある配列または文字列を指定してください。");
@@ -207,10 +207,10 @@ class PostscriptInterpreter {
             },
             array: () => {
                 const n = this.stack.pop();
-                if (typeof n !== 'number' || !Number.isInteger(n) || n < 0) {
+                if (n.type !== 'number' || n.value < 0) {
                     throw new Error("`array` requires a non-negative integer.");
                 }
-                const newArr = new Array(n).fill(null);
+                const newArr = new Array(n.value).fill(null);
                 this.stack.push({ type: 'array', value: newArr });
             },
             forall: () => {
@@ -471,37 +471,39 @@ class PostscriptInterpreter {
     }
 
     formatForOutput(val) {
-        switch (val.type) {
-            case "name":
-                let name = val.value;
+        if (val) {
+            switch (val.type) {
+                case "name":
+                    let name = val.value;
 
-                const splitIdx = val.value.indexOf('-');
-                if (splitIdx > 0) {
-                    name = val.slice(splitIdx + 1);
-                }
-                return name;
-            case "array":
-                let array = [];
-                for (const item of val.value) {
-                    array.push(this.formatForOutput(item));
-                }
-                return "[" + array.join(", ") + "]"
-            case "dict":
-                const dict = [];
-                for (const [key, value] of Object.entries(val.value)) {
-                    const splitIdx = key.indexOf('-');
-                    const Key = splitIdx > 0 ? key.slice(splitIdx + 1) : key;
-                    dict.push(Key + ": " + this.formatForOutput(value));
-                }
-                return "{" + dict.join(", ") + "}";
-            case "magicring":
-                return val.value.Spell()
-            //case "number":
-            //case "string":
-            //case "bool":
-            default:
-                return val.value;
-        }
+                    const splitIdx = val.value.indexOf('-');
+                    if (splitIdx > 0) {
+                        name = val.slice(splitIdx + 1);
+                    }
+                    return name;
+                case "array":
+                    let array = [];
+                    for (const item of val.value) {
+                        array.push(this.formatForOutput(item));
+                    }
+                    return "[" + array.join(", ") + "]"
+                case "dict":
+                    const dict = [];
+                    for (const [key, value] of Object.entries(val.value)) {
+                        const splitIdx = key.indexOf('-');
+                        const Key = splitIdx > 0 ? key.slice(splitIdx + 1) : key;
+                        dict.push(Key + ": " + this.formatForOutput(value));
+                    }
+                    return "{" + dict.join(", ") + "}";
+                case "magicring":
+                    return val.value.Spell()
+                //case "number":
+                //case "string":
+                //case "bool":
+                default:
+                    return val.value;
+            }
+        } else { return val == null ? "null" : "undefined" }
     }
 
     formatForMpsParser(val) {

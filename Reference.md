@@ -29,7 +29,7 @@
 
 ```text
 0 1 2 pop
-% FinalStack is [ 0 1 ]
+% FinalStack is [0 1]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="0" /><Item type="chars" value="1" /><Item type="chars" value="2" /><Item type="sigil" value="pop" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -46,7 +46,7 @@
 
 ```text
 0 1 2 exch
-% FinalStack is [ 0 2 1 ]
+% FinalStack is [0 2 1]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="0" /><Item type="chars" value="1" /><Item type="chars" value="2" /><Item type="sigil" value="exch" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -63,7 +63,7 @@
 
 ```text
 0 1 2 dup
-% FinalStack is [ 0 1 2 2 ]
+% FinalStack is [0 1 2 2]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="0" /><Item type="chars" value="1" /><Item type="chars" value="2" /><Item type="sigil" value="dup" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -80,7 +80,7 @@
 
 ```text
 10 20 30 2 copy
-% FinalStack is [ 10 20 30 20 30 ]
+% FinalStack is [10 20 30 20 30]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="chars" value="20" /><Item type="chars" value="30" /><Item type="chars" value="2" /><Item type="sigil" value="copy" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -97,7 +97,7 @@
 
 ```text
 10 20 30 40 2 index
-% FinalStack is [ 10 20 30 40 20 ]
+% FinalStack is [10 20 30 40 20]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="chars" value="20" /><Item type="chars" value="30" /><Item type="chars" value="40" /><Item type="chars" value="2" /><Item type="sigil" value="index" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -114,7 +114,7 @@
 
 ```text
 10 20 30 40 3 1 roll
-% FInalStack is [ 10 40 20 30 ]
+% FinalStack is [10 40 20 30]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="chars" value="20" /><Item type="chars" value="30" /><Item type="chars" value="40" /><Item type="chars" value="3" /><Item type="chars" value="1" /><Item type="sigil" value="roll" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -131,7 +131,7 @@
 
 ```text
 1 2 add
-% FinalStack is [ 3 ]
+% FinalStack is [3]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="1" /><Item type="chars" value="2" /><Item type="sigil" value="add" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -148,7 +148,7 @@
 
 ```text
 10 3 sub
-% FinalStack is [ 7 ]
+% FinalStack is [7]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="chars" value="3" /><Item type="sigil" value="sub" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -165,7 +165,7 @@
 
 ```text
 4 5 mul
-% FinalStack is [ 20 ]
+% FinalStack is [20]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="4" /><Item type="chars" value="5" /><Item type="sigil" value="mul" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -182,7 +182,7 @@
 
 ```text
 10 4 div
-% FinalStack is [ 2.5 ]
+% FinalStack is [2.5]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="chars" value="4" /><Item type="sigil" value="div" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -199,7 +199,7 @@
 
 ```text
 10 3 idiv
-% FinalStack is [ 3 ]
+% FinalStack is [3]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="chars" value="3" /><Item type="sigil" value="idiv" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -216,7 +216,7 @@
 
 ```text
 10 3 mod
-% FinalStack is [ 1 ]
+% FinalStack is [1]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="chars" value="3" /><Item type="sigil" value="mod" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -233,7 +233,7 @@
 
 ```text
 -15 abs
-% FinalStack is [ 15 ]
+% FinalStack is [15]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="-15" /><Item type="sigil" value="abs" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -250,7 +250,7 @@
 
 ```text
 10 neg
-% FinalStack is [ -10 ]
+% FinalStack is [-10]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="sigil" value="neg" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -267,7 +267,7 @@
 
 ```text
 16 sqrt
-% FinalStack is [ 4 ]
+% FinalStack is [4]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="16" /><Item type="sigil" value="sqrt" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -284,7 +284,7 @@
 
 ```text
 1 1 atan
-% FinalStack is [ 45 ]
+% FinalStack is [45]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="1" /><Item type="chars" value="1" /><Item type="sigil" value="atan" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -301,7 +301,7 @@
 
 ```text
 60 cos
-% FinalStack is [ 0.5 ]
+% FinalStack is [0.5]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="60" /><Item type="sigil" value="cos" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -318,7 +318,7 @@
 
 ```text
 30 sin
-% FinalStack is [ 0.5 ]
+% FinalStack is [0.5]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="30" /><Item type="sigil" value="sin" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -387,10 +387,10 @@ rrand
 
 ```text
 (Hello) length
-% FinalStack is [ 5 ]
+% FinalStack is [5]
 ```
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="string_token" value="Hello" /><Item type="sigil" value="length" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
+<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="string" value="Hello" /><Item type="sigil" value="length" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
 
 ## get
@@ -404,7 +404,7 @@ rrand
 
 ```text
 [10 20 30] 1 get
-% FinalStack is [ 20 ]
+% FinalStack is [20]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="joint" value="1" isExecute="false" /><Item type="chars" value="1" /><Item type="sigil" value="get" /></Items></Ring><Ring id="1" type="ArrayRing" x="-177.48" y="2.79" angle="1.5551" visualEffect="-"><Comments></Comments><Items><Item type="sigil" value="COMPLETE" /><Item type="chars" value="10" /><Item type="chars" value="20" /><Item type="chars" value="30" /></Items></Ring> </Rings> <FieldItems> </FieldItems></MagicCircleLayout>
@@ -421,7 +421,7 @@ rrand
 
 ```text
 [10 20 30] dup 1 99 put
-% FInalStack is [ [10 99 30] ]
+% FinalStack is [[10 99 30]]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="joint" value="1" isExecute="false" /><Item type="sigil" value="dup" /><Item type="chars" value="1" /><Item type="chars" value="99" /><Item type="sigil" value="put" /></Items></Ring><Ring id="1" type="ArrayRing" x="-152.40" y="-90.99" angle="2.1091" visualEffect="-"><Comments></Comments><Items><Item type="sigil" value="COMPLETE" /><Item type="chars" value="10" /><Item type="chars" value="20" /><Item type="chars" value="30" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -437,10 +437,11 @@ rrand
 <img src="./images/samples/sample_string.png" width="300" />
 
 ```text
-10 string print
+10 string
+% FinalStack is ["          "]
 ```
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="sigil" value="string" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
+<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="sigil" value="string" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
 
 ## cvi
@@ -453,10 +454,11 @@ rrand
 <img src="./images/samples/sample_cvi.png" width="300" />
 
 ```text
-(A) cvi print
+(A) cvi
+% FinalStack is [65]
 ```
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="(A)" /><Item type="sigil" value="cvi" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
+<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="string" value="A" /><Item type="sigil" value="cvi" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
 
 ## chr
@@ -469,10 +471,11 @@ rrand
 <img src="./images/samples/sample_chr.png" width="300" />
 
 ```text
-65 chr print
+65 chr
+% FinalStack is ["A"]
 ```
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="65" /><Item type="sigil" value="chr" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
+<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="65" /><Item type="sigil" value="chr" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
 
 ## getinterval
@@ -485,10 +488,11 @@ rrand
 <img src="./images/samples/sample_getinterval.png" width="300" />
 
 ```text
-(abcdef) 1 3 getinterval print
+(abcdef) 1 3 getinterval
+% FinalStack is ["bcd"]
 ```
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="(abcdef)" /><Item type="chars" value="1" /><Item type="chars" value="3" /><Item type="sigil" value="getinterval" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
+<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="string" value="abcdef" /><Item type="chars" value="1" /><Item type="chars" value="3" /><Item type="sigil" value="getinterval" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
 
 ## putinterval
@@ -502,9 +506,10 @@ rrand
 
 ```text
 (abcdef) 1 (XYZ) putinterval print
+% FinalStack is ["aXYZef"]
 ```
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="(abcdef)" /><Item type="chars" value="1" /><Item type="chars" value="(XYZ)" /><Item type="sigil" value="putinterval" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
+<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="string" value="abcdef" /><Item type="chars" value="1" /><Item type="string" value="XYZ" /><Item type="sigil" value="putinterval" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
 
 ## array
@@ -517,10 +522,11 @@ rrand
 <img src="./images/samples/sample_array.png" width="300" />
 
 ```text
-5 array print
+5 array
+% FinalStack is [[null null null null null]]
 ```
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="5" /><Item type="sigil" value="array" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
+<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="5" /><Item type="sigil" value="array" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
 
 ## forall
@@ -533,10 +539,14 @@ rrand
 <img src="./images/samples/sample_forall.png" width="300" />
 
 ```text
-[1 2 3] { print } forall
+[(apple) (banana) (orange)] { print } forall
+% Outputs
+% apple
+% banana
+% orange
 ```
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="[1 2 3]" /><Item type="chars" value="{ print }" /><Item type="sigil" value="forall" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
+<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="joint" value="2" isExecute="false" /><Item type="joint" value="1" isExecute="false" /><Item type="sigil" value="forall" /></Items></Ring><Ring id="1" type="MagicRing" x="-60.26" y="185.46" angle="0.3142"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="sigil" value="print" /></Items></Ring><Ring id="2" type="ArrayRing" x="-177.50" y="-0.00" angle="1.5708" visualEffect="-"><Comments></Comments><Items><Item type="sigil" value="COMPLETE" /><Item type="string" value="apple" /><Item type="string" value="banana" /><Item type="string" value="orange" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
 
 ## dict
@@ -549,10 +559,11 @@ rrand
 <img src="./images/samples/sample_dict.png" width="300" />
 
 ```text
-10 dict print
+dict
+% FinalStack is [{}]
 ```
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="sigil" value="dict" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
+<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="sigil" value="dict" /></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
 
 ## begin
@@ -561,16 +572,6 @@ rrand
 ### 説明
 辞書を辞書スタックに積み、以降の変数定義や検索の対象にします。
 
-### Code
-<img src="./images/samples/sample_begin.png" width="300" />
-
-```text
-10 dict begin
-```
-```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="10" /><Item type="sigil" value="dict" /><Item type="sigil" value="begin" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
-```
-
 ## end
 ![シジル画像](images/sigils/sigil_end.png) 
 
@@ -578,13 +579,16 @@ rrand
 現在アクティブな辞書を辞書スタックから取り除きます。
 
 ### Code
-<img src="./images/samples/sample_end.png" width="300" />
+<img src="./images/samples/sample_beginend.png" width="300" />
 
 ```text
-end
+\a 23 def dict begin \a 42 def a print end a print
+% 42
+% 23
 ```
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="sigil" value="end" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
+<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="name" value="a" /><Item type="chars" value="23" /><Item type="sigil" value="def" /><Item type="sigil" value="dict" /><Item type="sigil" value="begin" /><Item type="name" value="a" /><Item type="chars" value="42" /><Item type="sigil" value="def" /><Item type="chars" value="a" /><Item type="sigil" value="print" /><Item type="sigil" value="end" /><Item type="chars" value="a" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
+
 ```
 
 ## def
@@ -600,7 +604,7 @@ end
 /x 100 def
 ```
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="/x" /><Item type="chars" value="100" /><Item type="sigil" value="def" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
+<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="name" value="x" /><Item type="chars" value="100" /><Item type="sigil" value="def" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
 
 ## eq
