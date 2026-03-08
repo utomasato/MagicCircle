@@ -965,11 +965,10 @@ exitが呼ばれるまで、手続きを無限に繰り返し実行します。
 指定したパラメータでUnity上に新しいオブジェクトを生成します。
 
 ### Code
-<img src="./images/samples/sample_spawnobj.png" width="300" />
-<img src="./images/samples/sample_spawnobj2.png" width="300" />
+<img src="./images/samples/sample_spawnobj.png" width="300" /><img src="./images/samples/sample_spawnobj2.png" width="300" />
 
 ```text
-< ~shape (cube) ~color [ 1.000 0.000 0.000 1.000 ] > spawnobj 
+< \shape (cube) \color [ 1.000 0.000 0.000 1.000 ] > spawnobj 
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="joint" value="1" isExecute="false" /><Item type="sigil" value="spawnobj" /></Items></Ring><Ring id="1" type="DictRing" x="-196.76" y="87.61" angle="1.1519"><Comments></Comments><Items><Item type="sigil" value="COMPLETE" /><Item type="name" value="shape" /><Item type="string" value="cube" /><Item type="name" value="color" /><Item type="joint" value="2" isExecute="false" /></Items></Ring><Ring id="2" type="ArrayRing" x="-31.46" y="176.51" angle="-1.0774" visualEffect="color"><Comments></Comments><Items><Item type="sigil" value="COMPLETE" /><Item type="chars" value="1.000" /><Item type="chars" value="0.000" /><Item type="chars" value="0.000" /><Item type="chars" value="1.000" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -985,10 +984,10 @@ Unityオブジェクトの位置、回転、スケールを変更します。
 <img src="./images/samples/sample_transform.png" width="300" />
 
 ```text
-0 10 0 transform
-```
+ \obj < \shape (cube) > spawnobj obj < \position [ 1 2 3 ] > transform 
+ ```
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="0" /><Item type="chars" value="10" /><Item type="chars" value="0" /><Item type="sigil" value="transform" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
+<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="name" value="obj" /><Item type="joint" value="1" isExecute="false" /><Item type="sigil" value="spawnobj" /><Item type="chars" value="obj" /><Item type="joint" value="2" isExecute="false" /><Item type="sigil" value="transform" /></Items></Ring><Ring id="1" type="DictRing" x="-196.07" y="89.15" angle="1.1440"><Comments></Comments><Items><Item type="sigil" value="COMPLETE" /><Item type="name" value="shape" /><Item type="string" value="cube" /></Items></Ring><Ring id="2" type="DictRing" x="204.07" y="64.40" angle="-1.2651"><Comments></Comments><Items><Item type="sigil" value="COMPLETE" /><Item type="name" value="position" /><Item type="joint" value="3" isExecute="false" /><Item type="name" value="rotation" /><Item type="joint" value="4" isExecute="false" /><Item type="name" value="scale" /><Item type="chars" value="2" /></Items></Ring><Ring id="3" type="ArrayRing" x="270.21" y="241.56" angle="-0.3573" visualEffect="-"><Comments></Comments><Items><Item type="sigil" value="COMPLETE" /><Item type="chars" value="1" /><Item type="chars" value="2" /><Item type="chars" value="3" /></Items></Ring><Ring id="4" type="ArrayRing" x="340.45" y="-66.60" angle="3.9471" visualEffect="-"><Comments></Comments><Items><Item type="sigil" value="COMPLETE" /><Item type="chars" value="45" /><Item type="chars" value="-90" /><Item type="chars" value="180" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
 
 ## attachtoparent
