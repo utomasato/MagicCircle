@@ -1,5 +1,7 @@
 # MagicEditor: Visual Magic Programming Environment
 
+![fire magic example](images/screenshot.png)
+
 ## 📖 概要 (Overview)
 
 **MagicEditor** は、アニメやファンタジー作品に登場する「魔法陣」を構築し、実際に**実行可能なプログラム**として動作させるためのビジュアルプログラミング環境です。
