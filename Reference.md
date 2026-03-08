@@ -1000,10 +1000,10 @@ Unityオブジェクトを別のオブジェクトの子要素にします。
 <img src="./images/samples/sample_attachtoparent.png" width="300" />
 
 ```text
-attachtoparent
+\parent < \shape (empty) > spawnobj \child < \shape (cube) > spawnobj child parent attachtoparent
 ```
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="sigil" value="attachtoparent" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
+<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="name" value="parent" /><Item type="joint" value="1" isExecute="false" /><Item type="sigil" value="spawnobj" /><Item type="name" value="child" /><Item type="joint" value="2" isExecute="false" /><Item type="sigil" value="spawnobj" /><Item type="chars" value="child" /><Item type="chars" value="parent" /><Item type="sigil" value="attachtoparent" /></Items></Ring><Ring id="1" type="DictRing" x="-225.82" y="-59.79" angle="1.8296"><Comments></Comments><Items><Item type="sigil" value="COMPLETE" /><Item type="name" value="shape" /><Item type="string" value="empty" /></Items></Ring><Ring id="2" type="DictRing" x="-41.20" y="229.94" angle="0.1773"><Comments></Comments><Items><Item type="sigil" value="COMPLETE" /><Item type="name" value="shape" /><Item type="string" value="cube" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
 
 ## animation
