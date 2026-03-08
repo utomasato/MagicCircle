@@ -1033,6 +1033,7 @@ Unityオブジェクトに対して、指定したアニメーションを再生
 
 ```text
 (Hello) print
+% Hello
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="(Hello)" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
@@ -1048,7 +1049,9 @@ Unityオブジェクトに対して、指定したアニメーションを再生
 <img src="./images/samples/sample_stack.png" width="300" />
 
 ```text
-1 2 3 stack
+0 1 2 stack
+% 0, 1, 2
+% FinalStack is [0 1 2]
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="1" /><Item type="chars" value="2" /><Item type="chars" value="3" /><Item type="sigil" value="stack" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>

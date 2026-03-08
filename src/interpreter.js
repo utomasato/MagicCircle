@@ -479,7 +479,7 @@ class PostscriptInterpreter {
                     if (splitIdx > 0) {
                         name = val.slice(splitIdx + 1);
                     }
-                    return name;
+                    return "~" + name;
                 case "array":
                     let array = [];
                     for (const item of val.value) {
