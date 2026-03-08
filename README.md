@@ -1,12 +1,10 @@
 # MagicEditor: Visual Magic Programming Environment
 
-![fire magic example](images/screenshot.png)
-
 ## 📖 概要 (Overview)
 
 **MagicEditor** は、アニメやファンタジー作品に登場する「魔法陣」を構築し、実際に**実行可能なプログラム**として動作させるためのビジュアルプログラミング環境です。
 
-ユーザーはWebブラウザ上のエディタで「リング（魔法円）」と「シジル（魔法文字）」を組み合わせてロジックを記述します。その結果は独自のスタックベース言語（**MPS: Magic Particle Script**）にコンパイルされ、Unityエンジン上でリアルタイムに**パーティクルエフェクトとして生成・実行**されます。
+ユーザーはWebブラウザ上のエディタで「リング（魔法円）」と「シジル（魔法文字）」を組み合わせてロジックを記述します。その結果は内部的なオブジェクトツリーとして直接評価され、独自のスタックベース言語仕様（**MPS: Magic Particle Script**）に従ってUnityエンジン上でリアルタイムに**パーティクルエフェクトとして生成・実行**されます。
 
 「見た目だけの魔法陣」ではなく、**論理構造と視覚効果が完全にリンクした「魔法工学」の実装**を目指しています。
 
@@ -38,20 +36,19 @@ Unity標準のParticle Systemを、スクリプトから動的に構築します
 
 PostScriptに影響を受けた、独自のスタック指向言語を実装。
 
-* **JSインタプリタ**: ブラウザ上で動作し、ロジック演算や辞書操作を担当。
+* **JSインタプリタ**: ブラウザ上で動作し、魔法陣のオブジェクトツリーを直接巡回しながらロジック演算や辞書操作を担当。
 
-* **Unityパーサー**: テキストとして送られたパーティクル定義を解析し、C#のデータ構造に変換。
+* **Unityパーサー**: 描画に必要なパラメータ命令をテキストとして受信し、解析してC#のデータ構造に変換。
 
 ## 🏗 アーキテクチャ (Architecture)
 
-プロジェクトは「Webエディタ（Frontend）」と「実行エンジン（Unity）」の2層構造で動作します。
+プロジェクトは「Webエディタ（Frontend）」と「実行エンジン（Unity）」の2層構造で動作します。魔法陣のUI構造は文字列へのコンパイルを介さず、直接インタープリタによって評価（Direct Evaluation）される設計になっています。
 
 ```mermaid
 graph TD
     User[User] -->|Edit Visuals| Editor["Web Editor (p5.js)"]
-    Editor -->|Compile| MPS["MPS Code (PostScript-like)"]
-    MPS -->|Execute| JS_VM["JS Interpreter"]
-    JS_VM -->|JSON Payload| Bridge["Unity-JS Bridge"]
+    Editor -->|Direct Evaluation| JS_VM["JS Interpreter (Object Tree)"]
+    JS_VM -->|JSON Payload - MPS format| Bridge["Unity-JS Bridge"]
     Bridge -->|Parse String| Parser["MpsParser (C#)"]
     Parser -->|Generate| Engine["Particle Engine (Unity)"]
     Engine -->|Render| Screen["WebGL Canvas"]
@@ -61,15 +58,15 @@ graph TD
 
 1. **Frontend / Editor (`.js`, p5.js)**
 
-   * ユーザー入力を受け付け、リング構造データ（`MagicRing`）を管理。
+   * ユーザー入力を受け付け、リング構造データ（`MagicRing`, `DictRing`, `ArrayRing` 等）を管理。
 
-   * ビジュアルプログラミングの結果をMPSコード（文字列）に変換。
+   * 実行時は魔法陣のルートオブジェクトを直接インタープリタに渡し、ノードの巡回・評価を委譲。
 
-2. **Core Interpreter (`interpreter.js`)**
+2. **Core Interpreter (`interpreter.js` / `objects.js`)**
 
-   * カスタム実装されたスタックマシン。
+   * オブジェクトツリーを直接評価するカスタム実装のスタックマシン。
 
-   * `spawnobj`, `magicactivate` などの描画命令が呼ばれると、パラメータをJSON化してUnityへ送信。
+   * `spawnobj`, `magicactivate` などの描画命令が呼ばれると、スタック上のパラメータをJSON化（値はMPS準拠の文字列にフォーマット）してUnityへ送信。
 
 3. **Parser & Engine (`.cs`, Unity)**
 
@@ -116,6 +113,7 @@ graph TD
    ```bash
    git clone https://github.com/utomasato/MagicEditor.git
    ```
+
 2. **ローカルサーバーの起動**:
 
    * Unityビルド済みの `index.html` があるディレクトリでサーバーを立ち上げます。
