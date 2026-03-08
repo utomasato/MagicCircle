@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MagicCircleLayout startRingId="1">
+ <Rings>
+  <Ring id="0" type="TemplateRing" x="-926.39" y="424.44" angle="6.4946" magic="fire">
+    <Comments>
+    </Comments>
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="name" value="color1" />
+      <Item type="joint" value="4" isExecute="false" />
+      <Item type="name" value="color2" />
+      <Item type="joint" value="5" isExecute="false" />
+      <Item type="name" value="scale" />
+      <Item type="chars" value="1" />
+      <Item type="name" value="position" />
+      <Item type="joint" value="3" isExecute="false" />
+    </Items>
+  </Ring>
+  <Ring id="1" type="MagicRing" x="0.00" y="0.00" angle="3.1292">
+    <Comments>
+    </Comments>
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="name" value="rotate_duration" />
+      <Item type="chars" value="3000" />
+      <Item type="sigil" value="def" />
+      <Item type="name" value="fire_num" />
+      <Item type="chars" value="6" />
+      <Item type="sigil" value="def" />
+      <Item type="name" value="parent" />
+      <Item type="joint" value="6" isExecute="false" />
+      <Item type="sigil" value="spawnobj" />
+      <Item type="chars" value="parent" />
+      <Item type="joint" value="7" isExecute="false" />
+      <Item type="sigil" value="animation" />
+      <Item type="chars" value="1" />
+      <Item type="chars" value="1" />
+      <Item type="chars" value="fire_num" />
+      <Item type="joint" value="2" isExecute="false" />
+      <Item type="sigil" value="for" />
+      <Item type="joint" value="15" isExecute="true" />
+      <Item type="sigil" value="pop" />
+      <Item type="joint" value="16" isExecute="true" />
+      <Item type="sigil" value="pop" />
+    </Items>
+  </Ring>
+  <Ring id="2" type="MagicRing" x="-833.61" y="-7.85" angle="1.5802">
+    <Comments>
+    </Comments>
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="chars" value="360" />
+      <Item type="chars" value="fire_num" />
+      <Item type="sigil" value="div" />
+      <Item type="sigil" value="mul" />
+      <Item type="sigil" value="dup" />
+      <Item type="sigil" value="sin" />
+      <Item type="name" value="y" />
+      <Item type="sigil" value="exch" />
+      <Item type="sigil" value="def" />
+      <Item type="sigil" value="cos" />
+      <Item type="name" value="x" />
+      <Item type="sigil" value="exch" />
+      <Item type="sigil" value="def" />
+      <Item type="joint" value="0" isExecute="true" />
+      <Item type="sigil" value="dup" />
+      <Item type="chars" value="parent" />
+      <Item type="sigil" value="attachtoparent" />
+      <Item type="joint" value="11" isExecute="false" />
+      <Item type="sigil" value="animation" />
+    </Items>
+  </Ring>
+  <Ring id="3" type="ArrayRing" x="-787.16" y="278.49" angle="3.9035" visualEffect="-">
+    <Comments>
+    </Comments>
+    <Items>
+      <Item type="sigil" value="COMPLETE" />
+      <Item type="chars" value="x" />
+      <Item type="chars" value="y" />
+      <Item type="chars" value="0" />
+    </Items>
+  </Ring>
+  <Ring id="4" type="ArrayRing" x="-1133.37" y="379.10" angle="1.7865" visualEffect="color">
+    <Comments>
+    </Comments>
+    <Items>
+      <Item type="sigil" value="COMPLETE" />
+      <Item type="chars" value="0.630" />
+      <Item type="chars" value="0.698" />
+      <Item type="chars" value="1.000" />
+      <Item type="chars" value="1.000" />
+    </Items>
+  </Ring>
+  <Ring id="5" type="ArrayRing" x="-1015.02" y="616.90" angle="6.7148" visualEffect="color">
+    <Comments>
+    </Comments>
+    <Items>
+      <Item type="sigil" value="COMPLETE" />
+      <Item type="chars" value="0.791" />
+      <Item type="chars" value="0.000" />
+      <Item type="chars" value="1.000" />
+      <Item type="chars" value="1.000" />
+    </Items>
+  </Ring>
+  <Ring id="6" type="DictRing" x="112.85" y="-356.90" angle="3.4479">
+    <Comments>
+    </Comments>
+    <Items>
+      <Item type="sigil" value="COMPLETE" />
+      <Item type="name" value="shape" />
+      <Item type="string_token" value="empty" />
+    </Items>
+  </Ring>
+  <Ring id="7" type="DictRing" x="-185.43" y="-367.98" angle="2.6749">
+    <Comments>
+    </Comments>
+    <Items>
+      <Item type="sigil" value="COMPLETE" />
+      <Item type="name" value="rotate" />
+      <Item type="joint" value="8" isExecute="false" />
+    </Items>
+  </Ring>
+  <Ring id="8" type="DictRing" x="-468.82" y="-318.30" angle="7.6805">
+    <Comments>
+    </Comments>
+    <Items>
+      <Item type="sigil" value="COMPLETE" />
+      <Item type="name" value="from" />
+      <Item type="joint" value="9" isExecute="false" />
+      <Item type="name" value="to" />
+      <Item type="joint" value="10" isExecute="false" />
+      <Item type="name" value="duration" />
+      <Item type="chars" value="rotate_duration" />
+      <Item type="name" value="loop" />
+      <Item type="sigil" value="true" />
+    </Items>
+  </Ring>
+  <Ring id="9" type="ArrayRing" x="-398.28" y="-513.44" angle="3.4885" visualEffect="-">
+    <Comments>
+    </Comments>
+    <Items>
+      <Item type="sigil" value="COMPLETE" />
+      <Item type="chars" value="0" />
+      <Item type="chars" value="0" />
+      <Item type="chars" value="0" />
+    </Items>
+  </Ring>
+  <Ring id="10" type="ArrayRing" x="-576.28" y="-495.80" angle="2.5973" visualEffect="-">
+    <Comments>
+    </Comments>
+    <Items>
+      <Item type="sigil" value="COMPLETE" />
+      <Item type="chars" value="0" />
+      <Item type="chars" value="0" />
+      <Item type="chars" value="360" />
+    </Items>
+  </Ring>
+  <Ring id="11" type="DictRing" x="38.53" y="512.39" angle="5.2503">
+    <Comments>
+    </Comments>
+    <Items>
+      <Item type="sigil" value="COMPLETE" />
+      <Item type="name" value="rotate" />
+      <Item type="joint" value="12" isExecute="false" />
+    </Items>
+  </Ring>
+  <Ring id="12" type="DictRing" x="212.50" y="353.62" angle="3.9727">
+    <Comments>
+    </Comments>
+    <Items>
+      <Item type="sigil" value="COMPLETE" />
+      <Item type="name" value="from" />
+      <Item type="joint" value="13" isExecute="false" />
+      <Item type="name" value="to" />
+      <Item type="joint" value="14" isExecute="false" />
+      <Item type="name" value="duration" />
+      <Item type="chars" value="rotate_duration" />
+      <Item type="name" value="loop" />
+      <Item type="sigil" value="true" />
+    </Items>
+  </Ring>
+  <Ring id="13" type="ArrayRing" x="257.64" y="556.14" angle="6.0639" visualEffect="-">
+    <Comments>
+    </Comments>
+    <Items>
+      <Item type="sigil" value="COMPLETE" />
+      <Item type="chars" value="270" />
+      <Item type="chars" value="-90" />
+      <Item type="chars" value="90" />
+    </Items>
+  </Ring>
+  <Ring id="14" type="ArrayRing" x="398.41" y="445.78" angle="5.1727" visualEffect="-">
+    <Comments>
+    </Comments>
+    <Items>
+      <Item type="sigil" value="COMPLETE" />
+      <Item type="chars" value="-90" />
+      <Item type="chars" value="-90" />
+      <Item type="chars" value="90" />
+    </Items>
+  </Ring>
+  <Ring id="15" type="TemplateRing" x="-309.40" y="157.12" angle="7.3842" magic="charge">
+    <Comments>
+    </Comments>
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="name" value="scale" />
+      <Item type="chars" value="1" />
+    </Items>
+  </Ring>
+  <Ring id="16" type="TemplateRing" x="-173.96" y="287.37" angle="6.8276" magic="bullet">
+    <Comments>
+    </Comments>
+    <Items>
+      <Item type="sigil" value="RETURN" />
+      <Item type="name" value="delay" />
+      <Item type="chars" value="1" />
+      <Item type="name" value="interval" />
+      <Item type="chars" value="2" />
+    </Items>
+  </Ring>
+ </Rings>
+ <FieldItems>
+ </FieldItems>
+</MagicCircleLayout>
