@@ -933,7 +933,10 @@ exitが呼ばれるまで、手続きを無限に繰り返し実行します。
 <img src="./images/samples/sample_loopexit.png" width="300" />
 
 ```text
-\n 0 def { n print \n n 1 add def n 3 ge { exit } if } loop 
+\n 0 def { n print \n n 1 add def n 3 ge { exit } if } loop
+% 0
+% 1
+% 2
 ```
 ```xml
 <?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="name" value="n" /><Item type="chars" value="0" /><Item type="sigil" value="def" /><Item type="joint" value="1" isExecute="false" /><Item type="sigil" value="loop" /></Items></Ring><Ring id="1" type="MagicRing" x="188.10" y="130.73" angle="-0.9634"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="n" /><Item type="sigil" value="print" /><Item type="name" value="n" /><Item type="chars" value="n" /><Item type="chars" value="1" /><Item type="sigil" value="add" /><Item type="sigil" value="def" /><Item type="chars" value="n" /><Item type="chars" value="3" /><Item type="sigil" value="ge" /><Item type="joint" value="2" isExecute="false" /><Item type="sigil" value="if" /></Items></Ring><Ring id="2" type="MagicRing" x="228.37" y="-96.22" angle="3.3172"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="sigil" value="exit" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
