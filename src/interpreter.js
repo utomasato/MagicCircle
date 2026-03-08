@@ -435,7 +435,6 @@ class PostscriptInterpreter {
             },
             print: () => {
                 const val = this.stack.pop();
-                console.log(val.value);
                 //this.output.push(this.formatForOutput(val));
                 addConsoleMessage(this.formatForOutput(val))
             },
