@@ -326,7 +326,7 @@ class PostscriptInterpreter {
                 const proc = this.stack.pop();
                 this.commandLoopLevel++;
                 try {
-                    while (true) { proc.Execute(this.type); }
+                    while (true) { proc.value.Execute(this.type); }
                 } catch (e) {
                     if (e.message === 'EXIT_LOOP' && e.level === this.commandLoopLevel) { }
                     else { throw e; }
@@ -440,7 +440,7 @@ class PostscriptInterpreter {
             },
             stack: () => {
                 const stackview = [];
-                [...this.stack].reverse().forEach(val => {
+                [...this.stack]/*.reverse()*/.forEach(val => {
                     //this.output.push(this.formatForOutput(val));
                     stackview.push(this.formatForOutput(val));
                 });

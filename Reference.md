@@ -345,7 +345,6 @@ rand
 
 ### 説明
 乱数のシード値を設定します（現在の実装では未処理）。
-
 <!--
 ### Code
 <img src="./images/samples/sample_srand.png" width="300" />
@@ -363,7 +362,6 @@ rand
 
 ### 説明
 現在の乱数のシード状態を取得します（現在の実装では未処理）。
-
 <!--
 ### Code
 <img src="./images/samples/sample_rrand.png" width="300" />
@@ -891,9 +889,12 @@ true { 1 print } { 2 print } ifelse
 
 ```text
 3 { 1 print } repeat
+% 1
+% 1
+% 1
 ```
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="3" /><Item type="chars" value="{ 1 print }" /><Item type="sigil" value="repeat" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
+<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="3" /><Item type="joint" value="1" isExecute="false" /><Item type="sigil" value="repeat" /></Items></Ring><Ring id="1" type="MagicRing" x="-66.05" y="183.47" angle="0.3456"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="1" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
 
 ## for
@@ -906,10 +907,14 @@ true { 1 print } { 2 print } ifelse
 <img src="./images/samples/sample_for.png" width="300" />
 
 ```text
-1 1 5 { print } for
+0 1 3 { print } for
+% 0
+% 1
+% 2
+% 3
 ```
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="1" /><Item type="chars" value="1" /><Item type="chars" value="5" /><Item type="chars" value="{ print }" /><Item type="sigil" value="for" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
+<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="0" /><Item type="chars" value="1" /><Item type="chars" value="3" /><Item type="joint" value="1" isExecute="false" /><Item type="sigil" value="for" /></Items></Ring><Ring id="1" type="MagicRing" x="86.70" y="174.66" angle="-0.4608"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="sigil" value="print" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
 
 ## loop
@@ -918,16 +923,6 @@ true { 1 print } { 2 print } ifelse
 ### 説明
 exitが呼ばれるまで、手続きを無限に繰り返し実行します。
 
-### Code
-<img src="./images/samples/sample_loop.png" width="300" />
-
-```text
-{ 1 print exit } loop
-```
-```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="{ 1 print exit }" /><Item type="sigil" value="loop" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
-```
-
 ## exit
 ![シジル画像](images/sigils/sigil_exit.png) 
 
@@ -935,13 +930,13 @@ exitが呼ばれるまで、手続きを無限に繰り返し実行します。
 実行中のloop（繰り返し）から即座に脱出します。
 
 ### Code
-<img src="./images/samples/sample_exit.png" width="300" />
+<img src="./images/samples/sample_loopexit.png" width="300" />
 
 ```text
-{ exit } loop
+\n 0 def { n print \n n 1 add def n 3 ge { exit } if } loop 
 ```
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="{ exit }" /><Item type="sigil" value="loop" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
+<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="name" value="n" /><Item type="chars" value="0" /><Item type="sigil" value="def" /><Item type="joint" value="1" isExecute="false" /><Item type="sigil" value="loop" /></Items></Ring><Ring id="1" type="MagicRing" x="188.10" y="130.73" angle="-0.9634"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="n" /><Item type="sigil" value="print" /><Item type="name" value="n" /><Item type="chars" value="n" /><Item type="chars" value="1" /><Item type="sigil" value="add" /><Item type="sigil" value="def" /><Item type="chars" value="n" /><Item type="chars" value="3" /><Item type="sigil" value="ge" /><Item type="joint" value="2" isExecute="false" /><Item type="sigil" value="if" /></Items></Ring><Ring id="2" type="MagicRing" x="228.37" y="-96.22" angle="3.3172"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="sigil" value="exit" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
 
 ## magicactivate
