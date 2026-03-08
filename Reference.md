@@ -966,12 +966,13 @@ exitが呼ばれるまで、手続きを無限に繰り返し実行します。
 
 ### Code
 <img src="./images/samples/sample_spawnobj.png" width="300" />
+<img src="./images/samples/sample_spawnobj2.png" width="300" />
 
 ```text
-(bullet) spawnobj
+< ~shape (cube) ~color [ 1.000 0.000 0.000 1.000 ] > spawnobj 
 ```
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="(bullet)" /><Item type="sigil" value="spawnobj" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
+<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="joint" value="1" isExecute="false" /><Item type="sigil" value="spawnobj" /></Items></Ring><Ring id="1" type="DictRing" x="-196.76" y="87.61" angle="1.1519"><Comments></Comments><Items><Item type="sigil" value="COMPLETE" /><Item type="name" value="shape" /><Item type="string" value="cube" /><Item type="name" value="color" /><Item type="joint" value="2" isExecute="false" /></Items></Ring><Ring id="2" type="ArrayRing" x="-31.46" y="176.51" angle="-1.0774" visualEffect="color"><Comments></Comments><Items><Item type="sigil" value="COMPLETE" /><Item type="chars" value="1.000" /><Item type="chars" value="0.000" /><Item type="chars" value="0.000" /><Item type="chars" value="1.000" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
 
 ## transform
@@ -1054,5 +1055,5 @@ Unityオブジェクトに対して、指定したアニメーションを再生
 % FinalStack is [0 1 2]
 ```
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="1" /><Item type="chars" value="2" /><Item type="chars" value="3" /><Item type="sigil" value="stack" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
+<?xml version="1.0" encoding="UTF-8"?><MagicCircleLayout startRingId="0"><Rings><Ring id="0" type="MagicRing" x="0.00" y="0.00" angle="0.0000"><Comments></Comments><Items><Item type="sigil" value="RETURN" /><Item type="chars" value="0" /><Item type="chars" value="1" /><Item type="chars" value="2" /><Item type="sigil" value="stack" /></Items></Ring></Rings><FieldItems></FieldItems></MagicCircleLayout>
 ```
